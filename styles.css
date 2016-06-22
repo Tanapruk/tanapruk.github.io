@@ -11,7 +11,11 @@ p {
 }
 
 h2 {
-	font-family: verdana;
+    font-family: verdana;
+}
+
+h2.center {
+    text-align: center;
 }
 
 h1.bigbluecen {
@@ -21,9 +25,11 @@ h1.bigbluecen {
     font-family: verdana;
     text-align: center
 }
+
 img {
-    width:100%;
+    width: 100%;
 }
+
 a:link {
     color: green;
     background-color: transparent;
@@ -46,4 +52,42 @@ a:active {
     color: yellow;
     background-color: transparent;
     text-decoration: underline
+}
+
+table.center {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+table,
+th,
+td {
+    border-bottom: 1px solid #ddd;
+    border-collapse: collapse;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+tr:nth-child(odd) {
+    background-color: #f1f1f1;
+}
+
+
+th,
+td {
+    padding: 15px;
+}
+
+tr:hover {
+    background-color: grey;
+}
+
+th {
+    background-color: green;
+    color: white;
+    text-align: left;
+    font-family: verdana;
+    font-style: normal;
+    font-weight: normal;
 }

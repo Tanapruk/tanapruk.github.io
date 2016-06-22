@@ -88,16 +88,74 @@
     <a href="#heading1">
         <img src="images/pic_mountain.jpg" alt="HTML tutorial" style="float:right;width:42px;height:42px;border:0;">
     </a>
-
     <hr>
     <h2>Interactive map</h2>
     <img src="images/solarsystem/planets.gif" alt="Planets" usemap="#planetmap" style="width:145px;height:126px;">
-
-<map name="planetmap">
-  <area shape="rect" coords="0,0,82,126" alt="Sun" href="solarsystem/sun.htm">
-  <area shape="circle" coords="90,58,3" alt="Mercury" href="solarsystem/mercur.htm">
-  <area shape="circle" coords="124,58,8" alt="Venus" href="solarsystem/venus.htm">
-</map>
+    <map name="planetmap">
+        <area shape="rect" coords="0,0,82,126" alt="Sun" href="solarsystem/sun.htm">
+        <area shape="circle" coords="90,58,3" alt="Mercury" href="solarsystem/mercur.htm">
+        <area shape="circle" coords="124,58,8" alt="Venus" href="solarsystem/venus.htm">
+    </map>
+    <h2 class="center"> Table things</h2>
+    <table class="center" style="width:30%">
+        <tr>
+            <th>Firstname</th>
+            <th>Lastname</th>
+            <th>Points</th>
+        </tr>
+        <tr>
+            <td>Jill</td>
+            <td>Smith</td>
+            <td>50</td>
+        </tr>
+        <tr>
+            <td>Eve</td>
+            <td>Jackson</td>
+            <td>94</td>
+        </tr>
+    </table>
+    <h2 class="center">table with column span to two columns</h2>
+    <table class="center" style="width:50%;margin-top:5px;" >
+        <tr>
+            <th>Name</th>
+            <th colspan="2">Telephone</th>
+        </tr>
+        <tr>
+            <td>Bill Gates</td>
+            <td>555 77 854</td>
+            <td>555 77 855</td>
+        </tr>
+    </table>
+    <h2 class="center">table cells than span many rows</h2>
+    <table class="center" style="width:50%">
+        <tr>
+            <th>Name:</th>
+            <td>Bill Gates</td>
+        </tr>
+        <tr>
+            <th rowspan="2">Telephone:</th>
+            <td>555 77 854</td>
+        </tr>
+        <tr>
+            <td>555 77 855</td>
+        </tr>
+    </table>
+    <h2 class="center">table that has caption</h2>
+    <table class="center" style="width:40%">
+        <caption>Monthly savings</caption>
+        <tr>
+            <th>Month</th>
+            <th>Savings</th>
+        </tr>
+        <tr>
+            <td>January</td>
+            <td>$100</td>
+        </tr>
+        <tr>
+            <td>February</td>
+            <td>$50</td>
+        </tr>
+    </table>
 </body>
 
 </html>
