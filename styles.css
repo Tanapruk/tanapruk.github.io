@@ -78,6 +78,10 @@ a:active {
     text-decoration: underline
 }
 
+iframe {
+	border: none;
+}
+
 table.lamp {
     width: 100%;
     border: 1px solid #d4d4d4;
