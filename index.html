@@ -89,10 +89,7 @@
         <img src="images/pic_mountain.jpg" alt="HTML tutorial" style="float:right;width:42px;height:42px;border:0;">
     </a>
     <hr>
-    
     <iframe width="100%" height="200px" src="solarsystem/solar.htm" name="iframe_a"></iframe>
-    
-    
     <h2 class="center"> Table things</h2>
     <table class="center" style="width:30%">
         <tr>
@@ -263,6 +260,13 @@
             <p>It is the center of the Greater Tokyo Area, and the most populous metropolitan area in the world.</p>
         </div>
     </div>
+    <button type="button" onclick="myFunction()">Click Me!</button>
+    <p id="demo">This is a demonstration.</p>
+    <script>
+    function myFunction() {
+        document.getElementById("demo").innerHTML = "Hello JavaScript!";
+    }
+    </script>
 </body>
 
 </html>
