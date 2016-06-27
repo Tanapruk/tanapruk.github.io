@@ -266,7 +266,50 @@
     function myFunction() {
         document.getElementById("demo").innerHTML = "Hello JavaScript!";
     }
+
+    function light(sw) {
+        var pic;
+        if (sw == 0) {
+            pic = "images/pic_bulboff.gif"
+        } else {
+            pic = "images/pic_bulbon.gif"
+        }
+        document.getElementById('myImage').src = pic;
+    }
     </script>
+    <img id="myImage" src="images/pic_bulboff.gif" style="width:100px;height:180px;">
+    <p>
+        <button type="button" onclick="light(1)">Light On</button>
+        <button type="button" onclick="light(0)">Light Off</button>
+    </p>
+    <form>
+        First name:
+        <br>
+        <input type="text" name="firstname">
+        <br> Last name:
+        <br>
+        <input type="text" name="lastname">
+    </form>
+    <form>
+        <input type="radio" name="gender" value="male" checked> Male
+        <br>
+        <input type="radio" name="gender" value="female"> Female
+        <br>
+        <input type="radio" name="gender" value="other"> Other
+    </form>
+    <form>
+        <select name="cars">
+            <option value="volvo">Volvo</option>
+            <option value="saab">Saab</option>
+            <option value="fiat">Fiat</option>
+            <option value="audi">Audi</option>
+        </select>
+        <br>
+        <br>
+        <input type="color">
+        <input type="range">
+    </form>
+    <button type="button" onclick="alert('Hello World!')">Click Me!</button>
 </body>
 
 </html>
