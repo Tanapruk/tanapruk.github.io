@@ -57,6 +57,7 @@ img {
 a:link {
     color: green;
     background-color: transparent;
+    font-size: 300%;
     text-decoration: none
 }
 
