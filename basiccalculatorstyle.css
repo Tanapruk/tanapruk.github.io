@@ -1,0 +1,56 @@
+/*Basic reset */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* properties of class="calculator" */
+#calculator {
+    width: : 325px;
+    height: auto;
+
+    margin: 100px auto;
+    padding: 20px 20px 9px;
+
+    background: linear-gradient(#9dd2ea, #8bceec);
+    border-radius: 3px;
+
+    /*
+		Better text styling
+    */
+    font: bold 14px Arial, sans-serif;
+}
+
+/*Top portion */
+.top .clear {
+
+}
+/*Clear floats */
+.keys {
+    overflow: hidden;
+}
+
+/*properties of each span */
+.keys span, .top span.clear {
+    float: left;
+
+	width: 66px;
+	height: 40px;
+
+	background: white;
+	border-radius: 3px;
+
+	margin: 0 7px 11px 0;
+
+	color: #888;
+
+	line-height: 40px;
+	text-align: center;
+}
+
+/* Remove right margins from operator keys */
+span.operator {
+	margin-right: 0;
+}
