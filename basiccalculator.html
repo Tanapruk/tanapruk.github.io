@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <title>Calculator</title>
     <style>
-        /* Basic reset */
+
+        /* Basic reset | css for all elements */
         * {
             margin: 0;
             padding: 0;
@@ -17,7 +18,7 @@
 
         /* Finally adding some IE9 fallbacks for gradients to finish things up */
 
-        /* A nice BG gradient */
+        /* A nice BG gradient | css for the html tag | try changing it and the whole background is changed accordingly*/
         html {
             height: 100%;
             background: white;
@@ -25,7 +26,32 @@
             background-size: cover;
         }
 
-        /* Using box shadows to create 3D effects */
+        /* Using box shadows to create 3D effects |
+        id="calculator"
+        margin
+         100px for top and bottom
+         auto for right and left
+         padding
+         20px for top
+         20px for right and left
+         9px for bottom
+
+
+        box shadow
+        0 is for horizontal shadow
+        4px is for vertical shadow
+        #009de4 is for color
+
+        comma is for shadow stacking. You can have several shadows stacking on top of each other.
+
+        0px is for horizontal shadow
+        10px is for vertical shadow
+        15px is for blur radius (optional)
+        rgba(0, 0, 0, 0.2) is for color
+
+
+
+         */
         #calculator {
             width: 325px;
             height: auto;
@@ -39,12 +65,44 @@
             box-shadow: 0px 4px #009de4, 0px 10px 15px rgba(0, 0, 0, 0.2);
         }
 
-        /* Top portion */
+        /* Top portion |
+
+        . denotes class.
+        span that has class="clear" inside class="top"
+        the C button beside display
+        */
         .top span.clear {
             float: left;
         }
 
-        /* Inset shadow on the screen to create indent */
+        /* Inset shadow on the screen to create indent
+
+        class="screen" inside class="top"
+
+        the fucking screen beside C
+
+        padding
+        0 is for top and bottom
+        10 is for right and left
+
+        box-shadow
+        inset type
+        horizontal shadow offset
+        vertical shadow offset
+
+        shadow color  = rgba(0, 0, 0, 0.2); red green blue alpha
+
+        line-height = space between line
+        text-shadow
+        horizontal shadow offset
+        vertical shadow offset
+        blur radius
+
+        letter-spacing - space between character
+        */
+
+
+
         .top .screen {
             height: 40px;
             width: 212px;
@@ -66,12 +124,21 @@
             letter-spacing: 1px;
         }
 
-        /* Clear floats */
+        /* Clear floats
+        class="keys" and class="top"
+
+        when content overflows element's box
+        */
         .keys, .top {
             overflow: hidden;
         }
 
-        /* Applying same to the keys */
+        /* Applying same to the keys
+        element span that has class="keys" AND
+        element span that has class="clear" inside class="top"
+
+        position: relative
+         */
         .keys span, .top span.clear {
             float: left;
             position: relative;
@@ -186,7 +253,7 @@
 </div>
 <!-- PrefixFree -->
 <script src="http://thecodeplayer.com/uploads/js/prefixfree-1.0.7.js" type="text/javascript"
-        type="text/javascript"></script>
+></script>
 <script type="text/javascript">
 
     // Get all the keys from document
@@ -201,6 +268,7 @@
             var input = document.querySelector('.screen');
             var inputVal = input.innerHTML;
             var btnVal = this.innerHTML;
+
 
             // Now, just append the key values (btnValue) to the input string and finally use javascript's eval function to get the result
             // If clear key is pressed, erase everything
@@ -221,8 +289,9 @@
                 if (operators.indexOf(lastChar) > -1 || lastChar == '.')
                     equation = equation.replace(/.$/, '');
 
-                if (equation)
+                if (equation) {
                     input.innerHTML = eval(equation);
+                }
 
                 decimalAdded = false;
             }
