@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AJAX example</title>
+    <style>
+
+        * {
+            box-sizing: border-box;
+            font-family: sans-serif;
+        }
+
+        html {
+            font-size: 1em;
+        }
+
+        body {
+            background: #fdfdfd;
+            line-height: 1.625;
+        }
+
+        h3, p, div {
+            text-align: center;
+        }
+
+        h3 {
+            text-transform: capitalize;
+        }
+
+        h3 span {
+            text-transform: none;
+        }
+
+        button {
+            display: block;
+            margin: 15px auto;
+        }
+
+        #bio {
+            max-width: 70%;
+            margin: 15px auto;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+<h3>An AJAX Example <span>with jQuery's <code>load</code></span> method</h3>
+<p>Data retrieved from <a href="https://en.wikipedia.org/wiki/Albert_Einstein" target="_blank">Wikipedia</a></p>
+<div>
+    <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/162656/Einstein.jpg" alt="Einstein">
+    <button id="request">Learn more about Einstein</button>
+    <div id="bio"></div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+
+<script type="text/javascript">
+    // without jquery
+    //    var btn = document.getElementById('request');
+    //    var bio = document.getElementById('bio');
+    //
+    //    var request = new XMLHttpRequest();
+    //
+    //    request.onreadystatechange = function () {
+    //        console.log('request', request);
+    //        if (request.readyState === 4) {
+    //            bio.style.border = '1px solid #e8e8e8';
+    //            if (request.status === 200) {
+    //                bio.innerHTML = request.responseText;
+    //            } else {
+    //                bio.innerHTML = 'An error occurred during your request: ' + request.status + ' ' + request.statusText;
+    //            }
+    //        }
+    //    };
+    //
+    //    request.open('Get', 'Bio.txt');
+    //
+    //    btn.addEventListener('click', function () {
+    //        this.style.display = 'none';
+    //        request.send();
+    //    })
+
+    //with jQuery
+
+
+    (function ($) {
+
+        // $(document).ready(function() {
+
+        'use strict';
+
+        // find the desired selectors
+        var $btn = $('#request');
+        var $bio = $('#bio');
+
+        // register an event
+        $btn.on('click', function () {
+            // hide the button
+            $(this).hide();
+            console.log('the dollar sign', $);
+            // send the request and get the response
+            $bio.load('https://s3-us-west-2.amazonaws.com/s.cdpn.io/162656/Bio.txt', completeFunction);
+        });
+
+
+        // complete function
+        function completeFunction(responseText, textStatus, request) {
+            // add a border
+            $bio.css('border', '1px solid #e8e8e8');
+            // uncomment the line below to see the request
+            console.log(request);
+            // check if there are any errors
+            if (textStatus == 'error') {
+                // show a relevant message
+                $bio.text('An error occurred during your request: ' + request.status + ' ' + request.statusText);
+            }
+        }
+
+        // });
+
+    })(jQuery);
+
+
+</script>
+</body>
+</html>
