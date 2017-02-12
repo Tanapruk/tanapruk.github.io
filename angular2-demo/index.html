@@ -16,8 +16,8 @@
             //if false, it will generate lots of unused meta data and slow the app down
             typescriptOptions: {emitDecoratorMetadata: true},
             //will look into app/ with the .ts extension
-            packages: {'app': {defaultExtension: 'ts'}},
-            map: {'app': './angular2/src/app'}
+            packages: {'app': {defaultExtension: 'ts'}}
+//            , map: {'app': './angular2/src/app'}
         });
         //if there is no component it will display error
         System.import('app/hello_world_main.ts')
