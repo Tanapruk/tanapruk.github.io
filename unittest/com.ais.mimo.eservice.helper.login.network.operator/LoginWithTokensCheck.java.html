@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginWithTokensCheck.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.helper.login.network.operator</a> &gt; <span class="el_source">LoginWithTokensCheck.java</span></div><h1>LoginWithTokensCheck.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.helper.login.network.operator;
+
+import com.ais.mimo.eservice.helper.login.network.response.LoginWithTokensResult;
+import com.nextzy.myais.common.network.tool.ResultHasDataCheck;
+import com.nextzy.myais.common.passcode.network.exception.LoginWithTokensException;
+
+import rx.Single;
+
+import static com.nextzy.myais.common.passcode.network.PasscodeManager.ERROR_TOUCH_ID_EXPIRED;
+import static com.nextzy.myais.common.passcode.network.PasscodeManager.ERROR_TOUCH_ID_FAIL;
+
+/**
+ * Created by TheKhaeng on 9/30/2016.
+ */
+
+<span class="nc" id="L16">public class LoginWithTokensCheck extends ResultHasDataCheck&lt;LoginWithTokensResult, LoginWithTokensException&gt;{</span>
+    @Override
+    protected LoginWithTokensException getThrowable(String message) {
+<span class="nc" id="L19">        return new LoginWithTokensException(message);</span>
+    }
+
+    @Override
+    public Single&lt;LoginWithTokensResult&gt; call(LoginWithTokensResult result) {
+<span class="nc bnc" id="L24" title="All 2 branches missed.">        if (ERROR_TOUCH_ID_EXPIRED.equals(result.getResultCode())</span>
+<span class="nc bnc" id="L25" title="All 2 branches missed.">                || ERROR_TOUCH_ID_FAIL.equals(result.getResultCode())) {</span>
+<span class="nc" id="L26">            LoginWithTokensException exception = new LoginWithTokensException(result.getResultDescription());</span>
+<span class="nc" id="L27">            exception.setDuplicateOrExpire(true);</span>
+<span class="nc" id="L28">            return Single.error(exception);</span>
+        }
+
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        if (isNot20000HasNoData(result)) {</span>
+<span class="nc" id="L32">            return Single.error(getThrowable(result.getResultDescription()));</span>
+        }
+<span class="nc" id="L34">        return Single.just(result);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MyAccountActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.myaccount.activity</a> &gt; <span class="el_source">MyAccountActivity.java</span></div><h1>MyAccountActivity.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.myaccount.activity;
+
+
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.Toolbar;
+
+import com.ais.mimo.eservice.module.login.activity.LoginActivity;
+import com.ais.mimo.eservice.module.myaccount.fragment.account.MyAccountEditAccountFragment;
+import com.ais.mimo.eservice.module.myaccount.fragment.email.MyAccountEditEmailFragment;
+import com.ais.mimo.eservice.module.myaccount.fragment.main.MyAccountMainFragment;
+import com.ais.mimo.eservice.module.myaccount.fragment.password.MyAccountEditPasswordFragment;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.delegate.FragmentHelperDelegate;
+import com.nextzy.myais.common.mvp.NextzyMvpActivity;
+import com.nextzy.myais.common.network.tool.NextzyWebkitCookieJar;
+import com.nextzy.myais.common.utility.DataUpdatePreference;
+import com.nextzy.myais.myais.R;
+
+<span class="nc" id="L20">public class MyAccountActivity extends NextzyMvpActivity&lt;MyAccountContractor.Presenter&gt; implements MyAccountContractor.View {</span>
+<span class="nc" id="L21">    private final static String TAG = MyAccountActivity.class.getSimpleName();</span>
+    private Toolbar tbHeader;
+<span class="nc" id="L23">    private FragmentHelperDelegate fragmentHelperDelegate = new FragmentHelperDelegate(this);</span>
+
+    /*************************/
+    /** Activity life cycle **/
+    /*************************/
+    //&lt;editor-fold desc=&quot;Activity life cycle folding&quot;&gt;
+    @Override
+    public int getLayoutView() {
+<span class="nc" id="L31">        return R.layout.my_ais_activity_my_ais_account;</span>
+    }
+
+    @Override
+    protected void createPresenter() {
+<span class="nc" id="L36">        MyAccountPresenter.createPresenter(this);</span>
+<span class="nc" id="L37">    }</span>
+
+    @Override
+    public void bindView() {
+<span class="nc" id="L41">        fragmentHelperDelegate.bind(R.id.contentContainer);</span>
+<span class="nc" id="L42">        tbHeader = (Toolbar) findViewById(R.id.my_ais_library_simple_toolbar_tb_header);</span>
+<span class="nc" id="L43">    }</span>
+
+    @Override
+    public void setupView() {
+<span class="nc" id="L47">        tbHeader.setNavigationOnClickListener(v -&gt; {</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">            if (v == tbHeader) {</span>
+<span class="nc" id="L49">                onBackPressed();</span>
+            }
+<span class="nc" id="L51">        });</span>
+<span class="nc" id="L52">        tbHeader.setTitle(R.string.my_ais_account_title);</span>
+<span class="nc" id="L53">        Mobile.getInstance().logEvent(&quot;APP_VIEW_MYAIS_ACCOUNT&quot;, &quot;5012&quot;, &quot;5124&quot;);</span>
+<span class="nc" id="L54">    }</span>
+
+    @Override
+    public void restoreArgument(Bundle bundle) {
+
+<span class="nc" id="L59">    }</span>
+
+    @Override
+    public void initialize() {
+<span class="nc" id="L63">        getSupportFragmentManager().beginTransaction()</span>
+<span class="nc" id="L64">                .add(R.id.contentContainer,</span>
+<span class="nc" id="L65">                        MyAccountMainFragment.newInstance(),</span>
+                        MyAccountMainFragment.TAG)
+<span class="nc" id="L67">                .commit();</span>
+<span class="nc" id="L68">    }</span>
+
+    @Override
+    public void restoreInstanceState(Bundle savedInstanceState) {
+<span class="nc" id="L72">    }</span>
+
+    @Override
+    public void restoreView() {
+
+<span class="nc" id="L77">    }</span>
+
+    @Override
+    public void saveInstanceState(Bundle outState) {
+<span class="nc" id="L81">    }</span>
+
+    @Override
+    public void onBackPressed() {
+<span class="nc" id="L85">        Fragment fragment = fragmentHelperDelegate.getCurrentFragment();</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        if (fragment instanceof MyAccountEditEmailFragment</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">                &amp;&amp; fragment.isVisible()</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">                &amp;&amp; !((MyAccountEditEmailFragment) fragment).isCanBackPressed()) {</span>
+<span class="nc" id="L89">            ((MyAccountEditEmailFragment) fragment).backStep();</span>
+        } else {
+<span class="nc" id="L91">            super.onBackPressed();</span>
+        }
+<span class="nc" id="L93">    }</span>
+
+    @Override
+    public void openEditAccountFragment() {
+<span class="nc" id="L97">        fragmentHelperDelegate.openFragmentSlideInOut(</span>
+<span class="nc" id="L98">                MyAccountEditAccountFragment.newInstance(),</span>
+                MyAccountEditAccountFragment.TAG);
+<span class="nc" id="L100">    }</span>
+
+    @Override
+    public void openEditEmailFragment() {
+<span class="nc" id="L104">        fragmentHelperDelegate.openFragmentSlideInOut(</span>
+<span class="nc" id="L105">                MyAccountEditEmailFragment.newInstance(),</span>
+                MyAccountEditEmailFragment.TAG);
+<span class="nc" id="L107">    }</span>
+
+    @Override
+    public void openEditPasswordFragment() {
+<span class="nc" id="L111">        fragmentHelperDelegate.openFragmentSlideInOut(</span>
+<span class="nc" id="L112">                MyAccountEditPasswordFragment.newInstance(),</span>
+                MyAccountEditPasswordFragment.TAG);
+<span class="nc" id="L114">    }</span>
+
+    @Override
+    public void openLoginPage() {
+<span class="nc" id="L118">        DataUpdatePreference.getInstance().clear(this);</span>
+<span class="nc" id="L119">        NextzyWebkitCookieJar.getInstance().clearCookie(this);</span>
+<span class="nc" id="L120">        Bundle bundle = new Bundle();</span>
+<span class="nc" id="L121">        bundle.putBoolean(LoginActivity.SHOULD_BYPASS, false);</span>
+<span class="nc" id="L122">        openActivity(LoginActivity.class, bundle, true, true);</span>
+<span class="nc" id="L123">    }</span>
+
+    //&lt;/editor-fold&gt;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

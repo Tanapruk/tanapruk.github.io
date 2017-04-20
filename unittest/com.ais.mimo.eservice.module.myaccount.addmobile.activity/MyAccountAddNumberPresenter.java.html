@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MyAccountAddNumberPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.myaccount.addmobile.activity</a> &gt; <span class="el_source">MyAccountAddNumberPresenter.java</span></div><h1>MyAccountAddNumberPresenter.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.myaccount.addmobile.activity;
+
+import com.ais.mimo.eservice.module.myaccount.event.ChangeToolbarTitleEvent;
+import com.ais.mimo.eservice.module.myaccount.event.GoToEditAccountWithMobileNumberEvent;
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.mvp.NextzyActivityPresenter;
+
+/**
+ * Created by TheKhaeng on 9/20/2016.
+ */
+
+public class MyAccountAddNumberPresenter extends NextzyActivityPresenter&lt;MyAccountAddNumberContractor.View&gt; implements MyAccountAddNumberContractor.Presenter {
+
+    protected MyAccountAddNumberPresenter(MyAccountAddNumberContractor.View view) {
+<span class="nc" id="L16">        super(view);</span>
+<span class="nc" id="L17">    }</span>
+
+    public static MyAccountAddNumberPresenter createPresenter(MyAccountAddNumberContractor.View view) {
+<span class="nc" id="L20">        return new MyAccountAddNumberPresenter(view);</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L25">        RxBus.get().register(this);</span>
+<span class="nc" id="L26">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L30">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L31">    }</span>
+
+    @Override
+    public void onViewStart() {
+        // for handle network error
+<span class="nc" id="L36">        super.onViewStart();</span>
+<span class="nc" id="L37">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L41">        super.onViewStop();</span>
+<span class="nc" id="L42">    }</span>
+    //&lt;/editor-fold&gt;
+
+    @Subscribe
+    public void onGoToEditAccountWithMobileNumberEvent(GoToEditAccountWithMobileNumberEvent event) {
+<span class="nc" id="L47">        getView().openEditAccountFragment(event.getMobileNumber());</span>
+<span class="nc" id="L48">    }</span>
+
+    @Subscribe
+    public void onChangeToolbarTitleEvent(ChangeToolbarTitleEvent event) {
+<span class="nc" id="L52">        getView().setTitle(event.getTitle());</span>
+<span class="nc" id="L53">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

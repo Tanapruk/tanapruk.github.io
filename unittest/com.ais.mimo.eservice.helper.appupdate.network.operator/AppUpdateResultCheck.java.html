@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AppUpdateResultCheck.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.helper.appupdate.network.operator</a> &gt; <span class="el_source">AppUpdateResultCheck.java</span></div><h1>AppUpdateResultCheck.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.helper.appupdate.network.operator;
+
+import com.ais.mimo.eservice.helper.appupdate.network.exception.AppUpdateFailureException;
+import com.ais.mimo.eservice.helper.appupdate.network.response.AppUpdateResult;
+import com.nextzy.myais.common.network.tool.ResultHasDataCheck;
+
+import rx.Single;
+
+/**
+ * Created by trusttanapruk on 8/25/2016.
+ */
+<span class="fc" id="L12">public class AppUpdateResultCheck extends ResultHasDataCheck&lt;AppUpdateResult, AppUpdateFailureException&gt; {</span>
+    @Override
+    protected AppUpdateFailureException getThrowable(String message) {
+<span class="nc" id="L15">        return new AppUpdateFailureException();</span>
+    }
+
+    @Override
+    public Single&lt;AppUpdateResult&gt; call(AppUpdateResult result) {
+        //when data is valid it will have a message
+<span class="pc bpc" id="L21" title="2 of 4 branches missed.">        if (result != null &amp;&amp; result.getMessage() != null) {</span>
+<span class="fc" id="L22">            return Single.just(result);</span>
+        }
+
+<span class="nc" id="L25">        return super.call(result);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

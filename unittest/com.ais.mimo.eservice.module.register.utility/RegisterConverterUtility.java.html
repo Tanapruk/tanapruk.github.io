@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegisterConverterUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.register.utility</a> &gt; <span class="el_source">RegisterConverterUtility.java</span></div><h1>RegisterConverterUtility.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.register.utility;
+
+import com.ais.mimo.eservice.helper.login.network.response.MobileData;
+import com.ais.mimo.eservice.module.register.utility.model.MobileTypeGroup;
+import com.nextzy.myais.common.config.mobile.MobileType;
+import com.nextzy.myais.common.config.mobile.MobileUtility;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by TheKhaeng on 10/15/2016.
+ */
+
+<span class="fc" id="L15">public class RegisterConverterUtility {</span>
+    private static RegisterConverterUtility util;
+
+    public static RegisterConverterUtility getInstance() {
+<span class="fc bfc" id="L19" title="All 2 branches covered.">        if (util == null) {</span>
+<span class="fc" id="L20">            util = new RegisterConverterUtility();</span>
+        }
+<span class="fc" id="L22">        return util;</span>
+    }
+
+    public MobileTypeGroup groupMobileNumberByType(List&lt;MobileData&gt; array) {
+<span class="fc" id="L26">        MobileTypeGroup model = new MobileTypeGroup();</span>
+
+<span class="fc bfc" id="L28" title="All 2 branches covered.">        for (MobileData mobile : array) {</span>
+<span class="fc" id="L29">            MobileType type = MobileUtility.getInstance().getMobileTypeByMobileData(</span>
+<span class="fc" id="L30">                    mobile.getChargeType(), mobile.getMobileType());</span>
+
+<span class="fc bfc" id="L32" title="All 2 branches covered.">            if (MobileType.FBB.equals(type)) {</span>
+<span class="fc" id="L33">                model.addFbbMobile(mobile);</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">            } else if (MobileType.PREPAID.equals(type)) {</span>
+<span class="fc" id="L35">                model.addPrepaidMobile(mobile);</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">            } else if (MobileType.POSTPAID.equals(type)) {</span>
+<span class="fc" id="L37">                model.addPostpaidMobile(mobile);</span>
+            }
+<span class="fc" id="L39">        }</span>
+
+<span class="fc" id="L41">        return model;</span>
+    }
+    public ArrayList&lt;MobileData&gt; getPostpaidGroup(List&lt;MobileData&gt; array) {
+<span class="fc" id="L44">        return groupMobileNumberByType(array).getPostpaidList();</span>
+    }
+
+    public ArrayList&lt;MobileData&gt; getPrepaidGroup(List&lt;MobileData&gt; array) {
+<span class="fc" id="L48">        return groupMobileNumberByType(array).getPrepaidList();</span>
+    }
+
+    public ArrayList&lt;MobileData&gt; getFbbGroup(List&lt;MobileData&gt; array) {
+<span class="fc" id="L52">        return groupMobileNumberByType(array).getFbbList();</span>
+    }
+
+    public ArrayList&lt;String&gt; conventMyNumberToStringArray(ArrayList&lt;MobileData&gt; myNumber) {
+<span class="fc" id="L56">        ArrayList&lt;String&gt; mobiles = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        for (MobileData MobileData : myNumber) {</span>
+<span class="fc" id="L58">            mobiles.add(MobileData.getNumber());</span>
+<span class="fc" id="L59">        }</span>
+<span class="fc" id="L60">        return mobiles;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

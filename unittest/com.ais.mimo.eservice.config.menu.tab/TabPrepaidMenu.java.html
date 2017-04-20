@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TabPrepaidMenu.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.config.menu.tab</a> &gt; <span class="el_source">TabPrepaidMenu.java</span></div><h1>TabPrepaidMenu.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.config.menu.tab;
+
+import com.nextzy.myais.balanceusage.config.TabBalanceUsageKey;
+import com.nextzy.myais.common.menu.MyAisMenu;
+import com.nextzy.myais.home.config.TabHomeMenuKey;
+import com.nextzy.myais.myais.R;
+import com.nextzy.myais.payment.config.TabTopUpKey;
+import com.nextzy.myais.promotion.config.TabPromotionMenuKey;
+import com.nextzy.myais.service.config.TabServiceMenuKey;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by Akexorcist on 8/23/16 AD.
+ */
+<span class="nc" id="L17">public class TabPrepaidMenu {</span>
+    private static TabPrepaidMenu menu;
+
+    public static TabPrepaidMenu getInstance() {
+<span class="nc bnc" id="L21" title="All 2 branches missed.">        if (menu == null) {</span>
+<span class="nc" id="L22">            menu = new TabPrepaidMenu();</span>
+        }
+<span class="nc" id="L24">        return menu;</span>
+    }
+
+    public List&lt;MyAisMenu.Menu&gt; getMenu() {
+<span class="nc" id="L28">        List&lt;MyAisMenu.Menu&gt; menuList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L29">        menuList.add(new MyAisMenu.Menu()</span>
+<span class="nc" id="L30">                .setNameEn(&quot;Home&quot;)</span>
+<span class="nc" id="L31">                .setNameTh(&quot;หน้าหลัก&quot;)</span>
+<span class="nc" id="L32">                .setImage(R.drawable.my_ais_main_photo_home_banner)</span>
+<span class="nc" id="L33">                .setKey(TabHomeMenuKey.KEY_HOME.toString()));</span>
+
+        //Package
+<span class="nc" id="L36">        menuList.add(new MyAisMenu.Menu()</span>
+<span class="nc" id="L37">                .setNameEn(&quot;Package&quot;)</span>
+<span class="nc" id="L38">                .setNameTh(&quot;แพ็กเกจ&quot;)</span>
+<span class="nc" id="L39">                .setImage(R.drawable.my_ais_main_photo_promotion_banner)</span>
+<span class="nc" id="L40">                .setUrlScheme(&quot;Package&quot;)</span>
+<span class="nc" id="L41">                .setKey(TabPromotionMenuKey.KEY_PROMOTION.toString())</span>
+<span class="nc" id="L42">                .addSectionMenuList(new MyAisMenu.SectionMenu()</span>
+<span class="nc" id="L43">                        .setNameEn(&quot;Package&quot;)</span>
+<span class="nc" id="L44">                        .setNameTh(&quot;แพ็กเกจในประเทศ&quot;)</span>
+<span class="nc" id="L45">                        .setColor(&quot;#fb817f&quot;)</span>
+<span class="nc" id="L46">                        .setImage(R.drawable.my_ais_tab_promotion_section_menu_ic_voice_and_data)</span>
+<span class="nc" id="L47">                        .setKey(TabPromotionMenuKey.KEY_VOICE_AND_DATA.toString())</span>
+<span class="nc" id="L48">                        .addSubMenuList(new MyAisMenu.SubMenu()</span>
+<span class="nc" id="L49">                                .setNameEn(&quot;Your Current Package&quot;)</span>
+<span class="nc" id="L50">                                .setNameTh(&quot;แพ็กเกจปัจจุบันของคุณ&quot;)</span>
+<span class="nc" id="L51">                                .setColor(&quot;#fb817f&quot;)</span>
+<span class="nc" id="L52">                                .setUrlScheme(&quot;CurrentPackage&quot;)</span>
+<span class="nc" id="L53">                                .setKey(TabPromotionMenuKey.KEY_CURRENT_PACKAGE_AND_SERVICE.toString()))</span>
+<span class="nc" id="L54">                        .addSubMenuList(new MyAisMenu.SubMenu()</span>
+<span class="nc" id="L55">                                .setNameEn(&quot;Apply Internet On-Top Package&quot;)</span>
+<span class="nc" id="L56">                                .setNameTh(&quot;สมัครแพ็กเกจเสริมอินเทอร์เน็ต&quot;)</span>
+<span class="nc" id="L57">                                .setColor(&quot;#fb817f&quot;)</span>
+<span class="nc" id="L58">                                .setUrlScheme(&quot;ExtraPack&quot;)</span>
+<span class="nc" id="L59">                                .setKey(TabPromotionMenuKey.KEY_EXTRA_VALUE_PACKAGE.toString()))</span>
+<span class="nc" id="L60">                        .addSubMenuList(new MyAisMenu.SubMenu()</span>
+<span class="nc" id="L61">                                .setNameEn(&quot;Apply Other On-Top Package&quot;)</span>
+<span class="nc" id="L62">                                .setNameTh(&quot;สมัครแพ็กเกจเสริมอื่นๆ&quot;)</span>
+<span class="nc" id="L63">                                .setColor(&quot;#fb817f&quot;)</span>
+<span class="nc" id="L64">                                .setUrlScheme(&quot;OnTopPack&quot;)</span>
+<span class="nc" id="L65">                                .setKey(TabPromotionMenuKey.KEY_APPLY_ON_TOP_PACKAGE.toString()))</span>
+<span class="nc" id="L66">                        .addSubMenuList(new MyAisMenu.SubMenu()</span>
+<span class="nc" id="L67">                                .setNameEn(&quot;Change Price Plan&quot;)</span>
+<span class="nc" id="L68">                                .setNameTh(&quot;เปลี่ยนแพ็กเกจหลัก&quot;)</span>
+<span class="nc" id="L69">                                .setColor(&quot;#fb817f&quot;)</span>
+<span class="nc" id="L70">                                .setUrlScheme(&quot;MainPack&quot;)</span>
+<span class="nc" id="L71">                                .setKey(TabPromotionMenuKey.KEY_CHANGE_MAIN_PACKAGE.toString()))</span>
+                )
+<span class="nc" id="L73">                .addSectionMenuList(new MyAisMenu.SectionMenu()</span>
+<span class="nc" id="L74">                        .setNameEn(&quot;Roaming Package&quot;)</span>
+<span class="nc" id="L75">                        .setNameTh(&quot;แพ็กเกจโรมมิ่ง&quot;)</span>
+<span class="nc" id="L76">                        .setColor(&quot;#3dcdb0&quot;)</span>
+<span class="nc" id="L77">                        .setImage(R.drawable.my_ais_tab_promotion_section_menu_ic_roaming)</span>
+<span class="nc" id="L78">                        .setKey(TabPromotionMenuKey.KEY_ROAMING.toString())</span>
+<span class="nc" id="L79">                        .addSubMenuList(new MyAisMenu.SubMenu()</span>
+<span class="nc" id="L80">                                .setNameEn(&quot;Current Package &amp; Remaining&quot;)</span>
+<span class="nc" id="L81">                                .setNameTh(&quot;แพ็กเกจปัจจุบัน/ยอดคงเหลือ&quot;)</span>
+<span class="nc" id="L82">                                .setColor(&quot;#3dcdb0&quot;)</span>
+<span class="nc" id="L83">                                .setUrlScheme(&quot;CurrentPackageIR&quot;)</span>
+<span class="nc" id="L84">                                .setKey(TabPromotionMenuKey.KEY_ROAMING_MY_SUBSCRIPTION.toString()))</span>
+<span class="nc" id="L85">                        .addSubMenuList(new MyAisMenu.SubMenu()</span>
+<span class="nc" id="L86">                                .setNameEn(&quot;Apply Roaming Package&quot;)</span>
+<span class="nc" id="L87">                                .setNameTh(&quot;สมัครแพ็กเกจโรมมิ่ง&quot;)</span>
+<span class="nc" id="L88">                                .setColor(&quot;#3dcdb0&quot;)</span>
+<span class="nc" id="L89">                                .setUrlScheme(&quot;ApplyIR&quot;)</span>
+<span class="nc" id="L90">                                .setKey(TabPromotionMenuKey.KEY_APPLY_ROAMING_PACKAGE.toString()))</span>
+<span class="nc" id="L91">                        .addSubMenuList(new MyAisMenu.SubMenu()</span>
+<span class="nc" id="L92">                                .setNameEn(&quot;Roaming Service Rates&quot;)</span>
+<span class="nc" id="L93">                                .setNameTh(&quot;อัตราค่าบริการโรมมิ่ง&quot;)</span>
+<span class="nc" id="L94">                                .setColor(&quot;#3dcdb0&quot;)</span>
+<span class="nc" id="L95">                                .setUrlScheme(&quot;IRServiceRate&quot;)</span>
+<span class="nc" id="L96">                                .setKey(TabPromotionMenuKey.KEY_ROAMING_SERVICE_RATES.toString())))</span>
+        );
+
+        //Usage Details
+<span class="nc" id="L100">        menuList.add(new MyAisMenu.Menu()</span>
+<span class="nc" id="L101">                .setNameEn(&quot;Usage Detail History&quot;)</span>
+<span class="nc" id="L102">                .setNameTh(&quot;ข้อมูลการใช้งาน&quot;)</span>
+<span class="nc" id="L103">                .setImage(R.drawable.my_ais_main_photo_balance_banner)</span>
+<span class="nc" id="L104">                .setUrlScheme(&quot;UsageDetail&quot;)</span>
+<span class="nc" id="L105">                .setKey(TabBalanceUsageKey.KEY_BALANCE.toString())</span>
+<span class="nc" id="L106">                .addSectionMenuList(new MyAisMenu.SectionMenu()</span>
+<span class="nc" id="L107">                        .setNameEn(&quot;Usage Detail History&quot;)</span>
+<span class="nc" id="L108">                        .setNameTh(&quot;ข้อมูลการใช้งาน&quot;)</span>
+<span class="nc" id="L109">                        .setColor(&quot;#ff9f50&quot;)</span>
+<span class="nc" id="L110">                        .setImage(R.drawable.my_ais_tab_balance_usage_ic_menu_prepaid_usage_detail_history)</span>
+<span class="nc" id="L111">                        .setKey(TabBalanceUsageKey.KEY_USAGE_DETAIL.toString())</span>
+<span class="nc" id="L112">                        .addSubMenuList(new MyAisMenu.SubMenu()</span>
+<span class="nc" id="L113">                                .setNameEn(&quot;Voice Call&quot;)</span>
+<span class="nc" id="L114">                                .setNameTh(&quot;การโทร&quot;)</span>
+<span class="nc" id="L115">                                .setColor(&quot;#ff9f50&quot;)</span>
+<span class="nc" id="L116">                                .setUrlScheme(&quot;UsageVoice&quot;)</span>
+<span class="nc" id="L117">                                .setKey(TabBalanceUsageKey.KEY_CDR_PREPAID_VOICE.toString()))</span>
+<span class="nc" id="L118">                        .addSubMenuList(new MyAisMenu.SubMenu()</span>
+<span class="nc" id="L119">                                .setNameEn(&quot;Internet/Value Added Service&quot;)</span>
+<span class="nc" id="L120">                                .setNameTh(&quot;Internet / บริการเสริม&quot;)</span>
+<span class="nc" id="L121">                                .setColor(&quot;#ff9f50&quot;)</span>
+<span class="nc" id="L122">                                .setUrlScheme(&quot;UsageVAS&quot;)</span>
+<span class="nc" id="L123">                                .setKey(TabBalanceUsageKey.KEY_CDR_PREPAID_VAS.toString()))</span>
+<span class="nc" id="L124">                        .addSubMenuList(new MyAisMenu.SubMenu()</span>
+<span class="nc" id="L125">                                .setNameEn(&quot;Top Up&quot;)</span>
+<span class="nc" id="L126">                                .setNameTh(&quot;เติมเงิน&quot;)</span>
+<span class="nc" id="L127">                                .setColor(&quot;#ff9f50&quot;)</span>
+<span class="nc" id="L128">                                .setUrlScheme(&quot;UsageTopUp&quot;)</span>
+<span class="nc" id="L129">                                .setKey(TabBalanceUsageKey.KEY_CDR_PREPAID_TOP_UP.toString()))</span>
+<span class="nc" id="L130">                        .addSubMenuList(new MyAisMenu.SubMenu()</span>
+<span class="nc" id="L131">                                .setNameEn(&quot;Balance Transfer&quot;)</span>
+<span class="nc" id="L132">                                .setNameTh(&quot;โอนเงิน&quot;)</span>
+<span class="nc" id="L133">                                .setColor(&quot;#ff9f50&quot;)</span>
+<span class="nc" id="L134">                                .setUrlScheme(&quot;UsageBalanceTransfer&quot;)</span>
+<span class="nc" id="L135">                                .setKey(TabBalanceUsageKey.KEY_CDR_PREPAID_BALANCE_TRANSFER.toString()))</span>
+<span class="nc" id="L136">                        .addSubMenuList(new MyAisMenu.SubMenu()</span>
+<span class="nc" id="L137">                                .setNameEn(&quot;Validity Transfer&quot;)</span>
+<span class="nc" id="L138">                                .setNameTh(&quot;โอนวัน&quot;)</span>
+<span class="nc" id="L139">                                .setColor(&quot;#ff9f50&quot;)</span>
+<span class="nc" id="L140">                                .setUrlScheme(&quot;UsageValidityTransfer&quot;)</span>
+<span class="nc" id="L141">                                .setKey(TabBalanceUsageKey.KEY_CDR_PREPAID_VALIDITY_TRANSFER.toString()))</span>
+<span class="nc" id="L142">                        .addSubMenuList(new MyAisMenu.SubMenu()</span>
+<span class="nc" id="L143">                                .setNameEn(&quot;Fee&quot;)</span>
+<span class="nc" id="L144">                                .setNameTh(&quot;ค่าธรรมเนียม&quot;)</span>
+<span class="nc" id="L145">                                .setColor(&quot;#ff9f50&quot;)</span>
+<span class="nc" id="L146">                                .setUrlScheme(&quot;UsageFees&quot;)</span>
+<span class="nc" id="L147">                                .setKey(TabBalanceUsageKey.KEY_CDR_PREPAID_FEE.toString()))</span>
+                ));
+
+        //Top Up
+<span class="nc" id="L151">        menuList.add(new MyAisMenu.Menu()</span>
+<span class="nc" id="L152">                .setNameEn(&quot;Top Up&quot;)</span>
+<span class="nc" id="L153">                .setNameTh(&quot;เติมเงิน&quot;)</span>
+<span class="nc" id="L154">                .setImage(R.drawable.my_ais_main_photo_payment_banner)</span>
+<span class="nc" id="L155">                .setUrlScheme(&quot;TopUp&quot;)</span>
+<span class="nc" id="L156">                .setKey(TabTopUpKey.KEY_TOPUP.toString())</span>
+        );
+        //Service
+<span class="nc" id="L159">        menuList.add(new MyAisMenu.Menu()</span>
+<span class="nc" id="L160">                        .setNameEn(&quot;Service&quot;)</span>
+<span class="nc" id="L161">                        .setNameTh(&quot;บริการ&quot;)</span>
+<span class="nc" id="L162">                        .setImage(R.drawable.my_ais_main_photo_service_banner)</span>
+<span class="nc" id="L163">                        .setUrlScheme(&quot;Services&quot;)</span>
+<span class="nc" id="L164">                        .setKey(TabServiceMenuKey.KEY_SERVICE.toString())</span>
+<span class="nc" id="L165">                        .addSectionMenuList(new MyAisMenu.SectionMenu()</span>
+<span class="nc" id="L166">                                        .setNameEn(&quot;Service&quot;)</span>
+<span class="nc" id="L167">                                        .setNameTh(&quot;บริการ&quot;)</span>
+<span class="nc" id="L168">                                        .setColor(&quot;#A9A9F7&quot;)</span>
+<span class="nc" id="L169">                                        .setImage(R.drawable.my_ais_tab_service_section_menu_ic_service)</span>
+<span class="nc" id="L170">                                        .setKey(TabServiceMenuKey.KEY_SECTION_ONE_NUMBER_OF_SERVICE.toString())</span>
+<span class="nc" id="L171">                                        .addSubMenuList(new MyAisMenu.SubMenu()</span>
+<span class="nc" id="L172">                                                .setNameEn(&quot;Balance Transfer&quot;)</span>
+<span class="nc" id="L173">                                                .setNameTh(&quot;โอนเงิน&quot;)</span>
+<span class="nc" id="L174">                                                .setColor(&quot;#A9A9F7&quot;)</span>
+<span class="nc" id="L175">                                                .setUrlScheme(&quot;BalanceTransfer&quot;)</span>
+<span class="nc" id="L176">                                                .setKey(TabServiceMenuKey.KEY_TRANSFER_BALANCE.toString()))</span>
+<span class="nc" id="L177">                                        .addSubMenuList(new MyAisMenu.SubMenu()</span>
+<span class="nc" id="L178">                                                .setNameEn(&quot;Validity Transfer&quot;)</span>
+<span class="nc" id="L179">                                                .setNameTh(&quot;โอนวัน&quot;)</span>
+<span class="nc" id="L180">                                                .setColor(&quot;#A9A9F7&quot;)</span>
+<span class="nc" id="L181">                                                .setUrlScheme(&quot;ValidityTransfer&quot;)</span>
+<span class="nc" id="L182">                                                .setKey(TabServiceMenuKey.KEY_TRANSFER_VALIDITY.toString()))</span>
+//                        .addSubMenuList(new MyAisMenu.SubMenu()
+//                                .setNameEn(&quot;Mao Mao SWOP&quot;)
+//                                .setNameTh(&quot;เหมา เหมา SWOP&quot;)
+//                                .setColor(&quot;#A9A9F7&quot;)
+//                                .setKey(TabServiceMenuKey.KEY_MAO_MAO_SWOP.toString()))
+<span class="nc" id="L188">                                        .addSubMenuList(new MyAisMenu.SubMenu()</span>
+<span class="nc" id="L189">                                                .setNameEn(&quot;Register AIS Fibre/Coverage Checking&quot;)</span>
+<span class="nc" id="L190">                                                .setNameTh(&quot;สมัคร AIS Fibre / เช็กพื้นที่ให้บริการ&quot;)</span>
+<span class="nc" id="L191">                                                .setColor(&quot;#A9A9F7&quot;)</span>
+<span class="nc" id="L192">                                                .setUrlScheme(&quot;RegisFBB&quot;)</span>
+<span class="nc" id="L193">                                                .setKey(TabServiceMenuKey.KEY_SUBSCRIBE_COVERAGE_CHECKING.toString()))</span>
+<span class="nc" id="L194">                                        .addSubMenuList(new MyAisMenu.SubMenu()</span>
+<span class="nc" id="L195">                                                .setNameEn(&quot;Request/Change WiFi Password&quot;)</span>
+<span class="nc" id="L196">                                                .setNameTh(&quot;ขอรับ/เปลี่ยนรหัส WiFi&quot;)</span>
+<span class="nc" id="L197">                                                .setColor(&quot;#A9A9F7&quot;)</span>
+<span class="nc" id="L198">                                                .setUrlScheme(&quot;AISWiFi&quot;)</span>
+<span class="nc" id="L199">                                                .setKey(TabServiceMenuKey.KEY_REQUEST_WIFI.toString()))</span>
+<span class="nc" id="L200">                                        .addSubMenuList(new MyAisMenu.SubMenu()</span>
+<span class="nc" id="L201">                                                .setNameEn(&quot;Calling Melody&quot;)</span>
+<span class="nc" id="L202">                                                .setNameTh(&quot;เพลงรอสาย&quot;)</span>
+<span class="nc" id="L203">                                                .setColor(&quot;#A9A9F7&quot;)</span>
+<span class="nc" id="L204">                                                .setKey(TabServiceMenuKey.KEY_CALLING_MELODY.toString()))</span>
+                        )
+
+        );
+//        menuList.add(new MyAisMenu.Menu()
+//                .setNameEn(&quot;Points &amp; Privileges&quot;)
+//                .setNameTh(&quot;พอยท์ &amp; สิทธิพิเศษ&quot;)
+//                .setUrlScheme(&quot;Live360&quot;)
+//                .setImage(R.drawable.my_ais_main_photo_privilege_banner)
+//                .setKey(TabLive360MenuKey.KEY_LIVE360.toString()));
+//        menuList.add(TabHelpMenu.getInstance());
+<span class="nc" id="L215">        return menuList;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

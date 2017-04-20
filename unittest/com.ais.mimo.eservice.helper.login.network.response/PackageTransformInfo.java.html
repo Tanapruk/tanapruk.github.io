@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PackageTransformInfo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.helper.login.network.response</a> &gt; <span class="el_source">PackageTransformInfo.java</span></div><h1>PackageTransformInfo.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.helper.login.network.response;
+
+import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
+
+/**
+ * Created by Akexorcist on 9/25/15 AD.
+ */
+
+
+<span class="nc" id="L12">public class PackageTransformInfo {</span>
+    boolean success;
+    String status;
+    String msisdn;
+    String sid;
+    String portalId;
+
+    @SerializedName(&quot;returnData&quot;)
+    Data data;
+
+    @SerializedName(&quot;detailEN&quot;)
+    String detailEn;
+
+    @SerializedName(&quot;detailTH&quot;)
+    String detailTh;
+
+    @SerializedName(&quot;nwtype&quot;)
+    String networkType;
+
+    public boolean isSuccess() {
+<span class="nc" id="L32">        return success;</span>
+    }
+
+    public PackageTransformInfo setSuccess(boolean success) {
+<span class="nc" id="L36">        this.success = success;</span>
+<span class="nc" id="L37">        return this;</span>
+    }
+
+    public String getMsisdn() {
+<span class="nc" id="L41">        return msisdn;</span>
+    }
+
+    public String getSid() {
+<span class="nc" id="L45">        return sid;</span>
+    }
+
+    public String getStatus() {
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        if(data != null &amp;&amp;</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">                data.getStatus() != null) {</span>
+<span class="nc" id="L51">            return data.getStatus();</span>
+        }
+<span class="nc" id="L53">        return null;</span>
+    }
+
+    public String getDetailEn() {
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if(data != null &amp;&amp;</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">                data.getDetailEn() != null) {</span>
+<span class="nc" id="L59">            return data.getDetailEn();</span>
+        }
+<span class="nc" id="L61">        return null;</span>
+    }
+
+    public String getDetailTh() {
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        if(data != null &amp;&amp;</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">                data.getDetailTh() != null) {</span>
+<span class="nc" id="L67">            return data.getDetailTh();</span>
+        }
+<span class="nc" id="L69">        return null;</span>
+    }
+
+    public Remark getRemark() {
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        if(data != null &amp;&amp;</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">                data.getPackageTransform() != null &amp;&amp;</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">                data.getPackageTransform().getRemark() != null) {</span>
+<span class="nc" id="L76">            return data.getPackageTransform().getRemark();</span>
+        }
+<span class="nc" id="L78">        return null;</span>
+    }
+
+    public String getRemarkHeaderEn() {
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        if(data != null &amp;&amp;</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">                data.getPackageTransform() != null &amp;&amp;</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">                data.getPackageTransform().getRemark() != null &amp;&amp;</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">                data.getPackageTransform().getRemark().getRemarkHeaderEn() != null) {</span>
+<span class="nc" id="L86">            return data.getPackageTransform().getRemark().getRemarkHeaderEn();</span>
+        }
+<span class="nc" id="L88">        return null;</span>
+    }
+
+    public String getRemarkHeaderTh() {
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        if(data != null &amp;&amp;</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">                data.getPackageTransform() != null &amp;&amp;</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">                data.getPackageTransform().getRemark() != null &amp;&amp;</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">                data.getPackageTransform().getRemark().getRemarkHeaderTh() != null) {</span>
+<span class="nc" id="L96">            return data.getPackageTransform().getRemark().getRemarkHeaderTh();</span>
+        }
+<span class="nc" id="L98">        return null;</span>
+    }
+
+    public String getRemarkDisplayEn() {
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        if(data != null &amp;&amp;</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">                data.getPackageTransform() != null &amp;&amp;</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">                data.getPackageTransform().getRemark() != null &amp;&amp;</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">                data.getPackageTransform().getRemark().getRemarkDisplayEn() != null) {</span>
+<span class="nc" id="L106">            return data.getPackageTransform().getRemark().getRemarkDisplayEn();</span>
+        }
+<span class="nc" id="L108">        return null;</span>
+    }
+
+    public String getRemarkDisplayTh() {
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        if(data != null &amp;&amp;</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">                data.getPackageTransform() != null &amp;&amp;</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">                data.getPackageTransform().getRemark() != null &amp;&amp;</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">                data.getPackageTransform().getRemark().getRemarkDisplayTh() != null) {</span>
+<span class="nc" id="L116">            return data.getPackageTransform().getRemark().getRemarkDisplayTh();</span>
+        }
+<span class="nc" id="L118">        return null;</span>
+    }
+
+    public List&lt;Package&gt; getPackageList() {
+<span class="nc bnc" id="L122" title="All 2 branches missed.">        if(data != null &amp;&amp;</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">                data.getPackageTransform() != null &amp;&amp;</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">                data.getPackageTransform().getPackageList() != null) {</span>
+<span class="nc" id="L125">            return data.getPackageTransform().getPackageList();</span>
+        }
+<span class="nc" id="L127">        return null;</span>
+    }
+
+    public String getConfigNet2Voice() {
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        if(data != null &amp;&amp;</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">                data.getPackageTransform() != null &amp;&amp;</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">                data.getPackageTransform().getConfigN2V() != null) {</span>
+<span class="nc" id="L134">            return data.getPackageTransform().getConfigN2V();</span>
+        }
+<span class="nc" id="L136">        return null;</span>
+    }
+
+    public String getConfigVoice2Net() {
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        if(data != null &amp;&amp;</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">                data.getPackageTransform() != null &amp;&amp;</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">                data.getPackageTransform().getConfigV2N() != null) {</span>
+<span class="nc" id="L143">            return data.getPackageTransform().getConfigV2N();</span>
+        }
+<span class="nc" id="L145">        return null;</span>
+    }
+
+    public String getMaxNet2Voice() {
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        if(data != null &amp;&amp;</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">                data.getPackageTransform() != null &amp;&amp;</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">                data.getPackageTransform().getMaxN2V() != null) {</span>
+<span class="nc" id="L152">            return data.getPackageTransform().getMaxN2V();</span>
+        }
+<span class="nc" id="L154">        return null;</span>
+    }
+
+    public double getSummaryInternet() {
+<span class="nc bnc" id="L158" title="All 2 branches missed.">        if(data != null &amp;&amp;</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">                data.getPackageTransform() != null) {</span>
+<span class="nc" id="L160">            return data.getPackageTransform().getSummaryInternet();</span>
+        }
+<span class="nc" id="L162">        return 0;</span>
+    }
+
+    public int getSummaryVoice() {
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        if(data != null &amp;&amp;</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">                data.getPackageTransform() != null) {</span>
+<span class="nc" id="L168">            return data.getPackageTransform().getSummaryVoice();</span>
+        }
+<span class="nc" id="L170">        return 0;</span>
+    }
+
+
+<span class="nc" id="L174">    public static class Data {</span>
+        String status;
+
+        @SerializedName(&quot;detailEN&quot;)
+        String detailEn;
+
+        @SerializedName(&quot;detailTH&quot;)
+        String detailTh;
+
+        PackageTransform packageTransform;
+
+        public String getStatus() {
+<span class="nc" id="L186">            return status;</span>
+        }
+
+        public String getDetailEn() {
+<span class="nc" id="L190">            return detailEn;</span>
+        }
+
+        public String getDetailTh() {
+<span class="nc" id="L194">            return detailTh;</span>
+        }
+
+        public PackageTransform getPackageTransform() {
+<span class="nc" id="L198">            return packageTransform;</span>
+        }
+    }
+
+
+<span class="nc" id="L203">    public static class PackageTransform {</span>
+        String configN2V;
+        String configV2N;
+        String maxN2V;
+
+        @SerializedName(&quot;sumInternet&quot;)
+        double summaryInternet;
+
+        @SerializedName(&quot;sumVoice&quot;)
+        int summaryVoice;
+
+        Remark remark;
+        List&lt;Package&gt; packageList;
+
+        public String getConfigN2V() {
+<span class="nc" id="L218">            return configN2V;</span>
+        }
+
+        public String getConfigV2N() {
+<span class="nc" id="L222">            return configV2N;</span>
+        }
+
+        public String getMaxN2V() {
+<span class="nc" id="L226">            return maxN2V;</span>
+        }
+
+        public double getSummaryInternet() {
+<span class="nc" id="L230">            return summaryInternet;</span>
+        }
+
+        public int getSummaryVoice() {
+<span class="nc" id="L234">            return summaryVoice;</span>
+        }
+
+        public Remark getRemark() {
+<span class="nc" id="L238">            return remark;</span>
+        }
+
+        public List&lt;Package&gt; getPackageList() {
+<span class="nc" id="L242">            return packageList;</span>
+        }
+    }
+
+
+<span class="nc" id="L247">    public static class Remark {</span>
+        String remarkHeaderEn;
+        String remarkHeaderTh;
+        String remarkDisplayEn;
+        String remarkDisplayTh;
+
+        public String getRemarkHeaderEn() {
+<span class="nc" id="L254">            return remarkHeaderEn;</span>
+        }
+
+        public String getRemarkHeaderTh() {
+<span class="nc" id="L258">            return remarkHeaderTh;</span>
+        }
+
+        public String getRemarkDisplayEn() {
+<span class="nc" id="L262">            return remarkDisplayEn;</span>
+        }
+
+        public String getRemarkDisplayTh() {
+<span class="nc" id="L266">            return remarkDisplayTh;</span>
+        }
+    }
+
+
+<span class="nc" id="L271">    public static class Package {</span>
+        String productId;
+        String resourceGroupId;
+        String productNameTh;
+        String productNameEn;
+        String internet;
+        String voice;
+        String productSequenceId;
+        String expireDateEn;
+        String expireDateTh;
+
+        public String getProductId() {
+<span class="nc" id="L283">            return productId;</span>
+        }
+
+        public String getResourceGroupId() {
+<span class="nc" id="L287">            return resourceGroupId;</span>
+        }
+
+        public String getProductNameTh() {
+<span class="nc" id="L291">            return productNameTh;</span>
+        }
+
+        public String getProductNameEn() {
+<span class="nc" id="L295">            return productNameEn;</span>
+        }
+
+        public String getInternet() {
+<span class="nc" id="L299">            return internet;</span>
+        }
+
+        public String getVoice() {
+<span class="nc" id="L303">            return voice;</span>
+        }
+
+        public String getProductSequenceId() {
+<span class="nc" id="L307">            return productSequenceId;</span>
+        }
+
+        public String getExpireDateEn() {
+<span class="nc" id="L311">            return expireDateEn;</span>
+        }
+
+        public String getExpireDateTh() {
+<span class="nc" id="L315">            return expireDateTh;</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

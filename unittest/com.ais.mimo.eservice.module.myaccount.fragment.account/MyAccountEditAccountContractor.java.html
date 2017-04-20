@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MyAccountEditAccountContractor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.myaccount.fragment.account</a> &gt; <span class="el_source">MyAccountEditAccountContractor.java</span></div><h1>MyAccountEditAccountContractor.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.myaccount.fragment.account;
+
+import android.support.annotation.StringRes;
+
+import com.ais.mimo.eservice.helper.myaccount.network.response.MyNumberResult;
+import com.ais.mimo.eservice.widget.MyNumberDropDownDialog;
+import com.nextzy.myais.common.config.mobile.MobileType;
+import com.nextzy.myais.common.mvp.NextzyContractorPresenter;
+import com.nextzy.myais.common.mvp.NextzyContractorView;
+
+import java.util.List;
+
+/**
+ * Created by TheKhaeng on 11/16/2016.
+ * Update Change Master by Royle on 01/03/2017.
+ */
+
+<span class="nc" id="L18">public class MyAccountEditAccountContractor {</span>
+    public interface Presenter extends NextzyContractorPresenter {
+
+        void updateMyAccountUi();
+
+        void requestMyNumber();
+
+        void validateMobileNumber(String mobileNumber);
+
+        void requestVerifyIdentity(String mobileNumber, boolean isFibre);
+
+        void setMyNumber(MyNumberResult myNumberResult);
+
+        MyNumberResult getMyNumberResult();
+
+        void setMobileNumber(String mobileNumber);
+
+        List&lt;MyNumberDropDownDialog.ContentItem&gt; getMyNumberDropDownList();
+
+        void verifyOtp(String otp);
+
+        void callLogout();
+
+        void gotoLoginPage();
+
+        void setMobileNumberDefaultDropDown(List&lt;MyNumberDropDownDialog.ContentItem&gt; contentItemList);
+
+        void verifyPriority();
+
+        void goToEditEmailFragment();
+
+        String getMobileNumber();
+
+        MobileType getMobileType();
+
+        void setMobileType(MobileType mobileType);
+
+        String getReferenceId();
+
+        void setReferenceId(String referenceId);
+
+        String getEmail();
+
+        void setEmail(String email);
+
+        String getNtype();
+
+        void setNtype(String ntype);
+
+    }
+
+    public interface View extends NextzyContractorView&lt;Presenter&gt; {
+        void updateUi(String mobileNumber);
+
+        void updateUiByResult(MyNumberResult myNumberResult);
+
+        void showResponseException(String resultDescription);
+
+        void showDialogWithRes(@StringRes int resId);
+
+        void showDialogDuplicateMaster();
+
+        void showDialog(String s);
+
+        void showLoadingDialog();
+
+        void dismissAllDialogs();
+
+        void dismissDialog();
+
+        void dismissDialog(int delay);
+
+        void showOtpView();
+
+        void showChangeLoginSuccessDialog(String mobileNumber);
+
+        void showDialogSetNewPasscode(boolean isFibre);
+
+        void showMobileNumberDefaultDropDown(String mobileNumber);
+
+        void showUpdateEmailDialog();
+
+        void showOtpError();
+
+        void showDefaultOtpEdt();
+
+        void showEmail(String email);
+
+        void popBack();
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

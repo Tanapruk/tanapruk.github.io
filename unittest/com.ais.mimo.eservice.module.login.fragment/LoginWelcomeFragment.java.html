@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginWelcomeFragment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.login.fragment</a> &gt; <span class="el_source">LoginWelcomeFragment.java</span></div><h1>LoginWelcomeFragment.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.login.fragment;
+
+import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+
+import com.ais.mimo.eservice.helper.devtool.NextzyInjector;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.myais.R;
+
+/**
+ * Created by trusttanapruk on 8/17/2016.
+ */
+<span class="nc" id="L16">public class LoginWelcomeFragment extends LoginBaseFragment implements NextzyInjector {</span>
+    private EditText etAccount;
+    private Button btnLoginNext;
+    private ViewGroup viewGroupContainer;
+
+    public static LoginWelcomeFragment newInstance() {
+<span class="nc" id="L22">        return new LoginWelcomeFragment();</span>
+    }
+
+    @Override
+    public int getLayoutView() {
+<span class="nc" id="L27">        return R.layout.my_ais_login_fragment_welcome;</span>
+    }
+
+    @Override
+    public void bindView(View view) {
+<span class="nc" id="L32">        viewGroupContainer = (ViewGroup) view.findViewById(R.id.my_ais_login_layout_mobile_number);</span>
+<span class="nc" id="L33">        etAccount = (EditText) view.findViewById(R.id.my_ais_login_welcome_et_account);</span>
+<span class="nc" id="L34">        btnLoginNext = (Button) view.findViewById(R.id.my_ais_login_welcome_btn_ok);</span>
+<span class="nc" id="L35">        bindTermForgotPasswordLanguageBar(view);</span>
+<span class="nc" id="L36">    }</span>
+
+    @Override
+    protected int idTermAndConditionView() {
+<span class="nc" id="L40">        return R.id.my_ais_login_tv_login_term_and_condition;</span>
+    }
+
+    @Override
+    protected int idTvLanguageBar() {
+<span class="nc" id="L45">        return R.id.my_ais_login_welcome_view_change_language;</span>
+    }
+
+    @Override
+    public void setupView() {
+<span class="nc" id="L50">        btnLoginNext.setOnClickListener(v -&gt; getPresenter().onLoginWelcomeOkButtonClick(etAccount.getText().toString()));</span>
+<span class="nc" id="L51">    }</span>
+
+    @Override
+    public void restoreArgument(Bundle bundle) {
+
+<span class="nc" id="L56">    }</span>
+
+    @Override
+    public void initialize() {
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        if (Mobile.getInstance().getMobileNumber() != null) {</span>
+<span class="nc" id="L61">            etAccount.setText(Mobile.getInstance().getMobileNumber());</span>
+        }
+
+<span class="nc" id="L64">    }</span>
+
+    @Override
+    public void restoreInstanceState(Bundle savedInstanceState) {
+
+<span class="nc" id="L69">    }</span>
+
+    @Override
+    public void restoreView() {
+
+<span class="nc" id="L74">    }</span>
+
+    @Override
+    public void saveInstanceState(Bundle outState) {
+
+<span class="nc" id="L79">    }</span>
+
+    @Override
+    public void showEmptyMobileNumberInvalid() {
+<span class="nc" id="L83">        showAlertDialogDismissOnClick(getString(R.string.my_ais_login_empty_phone_number));</span>
+<span class="nc" id="L84">    }</span>
+
+    @Override
+    public void showMobileNumberInvalid() {
+<span class="nc" id="L88">        showAlertDialogDismissOnClick(getString(R.string.my_ais_login_incorrect_phone_number));</span>
+<span class="nc" id="L89">    }</span>
+
+    @Override
+    public void showNotAisMobileNumber(String message) {
+<span class="nc" id="L93">        showAlertDialogDismissOnClick(message);</span>
+<span class="nc" id="L94">    }</span>
+
+
+    @Override
+    public EditText getInjectEditText() {
+<span class="nc" id="L99">        return etAccount;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MainPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.main.activity</a> &gt; <span class="el_source">MainPresenter.java</span></div><h1>MainPresenter.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.main.activity;
+
+import com.ais.mimo.eservice.helper.adobeanalytics.network.UserIdentifierManager;
+import com.ais.mimo.eservice.helper.adobeanalytics.network.response.UserIdentifierResult;
+import com.ais.mimo.eservice.helper.login.network.LoginManager;
+import com.ais.mimo.eservice.helper.login.network.response.ChangeMobileData;
+import com.ais.mimo.eservice.helper.login.network.response.UserProfileData;
+import com.ais.mimo.eservice.module.main.event.SideMenuUpdateEvent;
+import com.ais.mimo.eservice.utility.TabMenuUtility;
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.database.NextzyDatabaseKey;
+import com.nextzy.myais.common.database.RealmUtility;
+import com.nextzy.myais.common.database.model.NextzyRealmObject;
+import com.nextzy.myais.common.event.GoToFirstTabEvent;
+import com.nextzy.myais.common.event.GoToUrlSchemeTabEvent;
+import com.nextzy.myais.common.menu.MyAisMenu;
+import com.nextzy.myais.common.mvp.NextzyActivityPresenter;
+import com.nextzy.myais.common.network.event.ErrorEvent;
+import com.nextzy.myais.common.utility.UrlSchemeUtils;
+import com.nextzy.myais.payment.helper.topup.event.GotoTopUpConfirmPrepaidEvent;
+
+import java.util.List;
+
+/**
+ * Created by Akexorcist on 8/9/16 AD.
+ */
+public class MainPresenter extends NextzyActivityPresenter&lt;MainContractor.View&gt; implements MainContractor.Presenter {
+    private List&lt;MyAisMenu.Menu&gt; menuList;
+
+    public static MainPresenter createPresenter(MainContractor.View view) {
+<span class="nc" id="L33">        return new MainPresenter(view);</span>
+    }
+
+    public MainPresenter(MainContractor.View view) {
+<span class="fc" id="L37">        super(view);</span>
+<span class="fc" id="L38">    }</span>
+
+    @Override
+    public void onViewCreate() {
+
+<span class="nc" id="L43">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+
+<span class="nc" id="L48">    }</span>
+
+    @Override
+    public void onViewStart() {
+<span class="nc" id="L52">        super.onViewStart();</span>
+<span class="nc" id="L53">        RxBus.get().register(this);</span>
+<span class="nc" id="L54">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L58">        super.onViewStop();</span>
+<span class="nc" id="L59">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L60">    }</span>
+
+    @Override
+    public void getUserProfile() {
+<span class="fc" id="L64">        LoginManager.getInstance().getUserProfile();</span>
+<span class="fc" id="L65">    }</span>
+
+    private void createUserAccountGeneric(boolean shouldReload) {
+<span class="fc" id="L68">        getView().setUsername(Mobile.getInstance().getWelcomeName());</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (shouldReload) {</span>
+<span class="fc" id="L70">            getView().updateUserAccount(Mobile.getInstance().getMobileContactList());</span>
+        } else {
+<span class="fc" id="L72">            getView().updateUserAccountWithoutReloading(Mobile.getInstance().getMobileContactList());</span>
+        }
+<span class="fc" id="L74">    }</span>
+
+    @Override
+    public void createUserAccount() {
+<span class="fc" id="L78">        createUserAccountGeneric(true);</span>
+<span class="fc" id="L79">    }</span>
+
+    @Override
+    public void updateUserAccount() {
+<span class="fc" id="L83">        createUserAccountGeneric(false);</span>
+<span class="fc" id="L84">    }</span>
+
+    @Override
+    public void getKeyForAdobe() {
+<span class="fc" id="L88">        UserIdentifierManager.getInstance().getUserIdentifier();</span>
+<span class="fc" id="L89">    }</span>
+
+    @Override
+    public void setupMenu() {
+<span class="fc" id="L93">        setupTabMenu();</span>
+<span class="fc" id="L94">        setupSideMenu();</span>
+<span class="fc" id="L95">    }</span>
+
+    @Override
+    public void onSideMenuUpdate() {
+<span class="nc" id="L99">        RxBus.get().post(new SideMenuUpdateEvent());</span>
+<span class="nc" id="L100">    }</span>
+
+    @Override
+    public void onUserAccountSelected(String userAccountNumber, int index) {
+<span class="fc" id="L104">        getView().showLoadingDialog();</span>
+<span class="fc" id="L105">        LoginManager.getInstance().changeMobileData(userAccountNumber);</span>
+<span class="fc" id="L106">    }</span>
+
+    @Subscribe
+    public void onChangeMobileData(ChangeMobileData result) {
+<span class="fc" id="L110">        getView().setUserAccountNumber(result.getMobileNumber());</span>
+<span class="fc" id="L111">        getView().clearAllDatabase();</span>
+<span class="fc" id="L112">        Mobile.getInstance().setNetworkType(result.getnType());</span>
+<span class="fc" id="L113">        Mobile.getInstance().setMobileNumber(result.getMobileNumber());</span>
+<span class="fc" id="L114">        getUserProfile();</span>
+<span class="fc" id="L115">        getKeyForAdobe();</span>
+<span class="fc" id="L116">    }</span>
+
+    @Subscribe
+    public void onUserIdentifierResult(UserIdentifierResult data) {
+<span class="nc bnc" id="L120" title="All 6 branches missed.">        if (data == null || data.getData() == null || data.getData().getSecret() == null) {</span>
+<span class="nc" id="L121">            return;</span>
+        }
+<span class="nc" id="L123">        getView().trackUserIdentifier(data.getData().getSecret());</span>
+<span class="nc" id="L124">    }</span>
+
+    @Subscribe
+    public void onUserProfile(UserProfileData userProfileData) {
+<span class="fc" id="L128">        getView().dismissDialog();</span>
+<span class="fc" id="L129">        setUserProfile(userProfileData);</span>
+<span class="fc" id="L130">    }</span>
+
+    private void setUserProfile(UserProfileData userProfileData) {
+<span class="fc" id="L133">        Mobile.getInstance().setUserProfile(</span>
+<span class="fc" id="L134">                userProfileData.getWelcomeName(),</span>
+<span class="fc" id="L135">                userProfileData.getNumberData().getPrivilegeType(),</span>
+<span class="fc" id="L136">                userProfileData.getNumberData().getRegisteredOn(),</span>
+<span class="fc" id="L137">                userProfileData.getNumberData().getMobileServiceYear(),</span>
+<span class="fc" id="L138">                userProfileData.getNumberData().getEmailAddress());</span>
+<span class="fc" id="L139">        setupMenu();</span>
+<span class="fc" id="L140">    }</span>
+
+    @Subscribe
+    public void onErrorEvent(ErrorEvent errorEvent) {
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">        if (errorEvent.isMatch(LoginManager.SERVICE_NAME_USER_PROFILE) ||</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">                errorEvent.isMatch(LoginManager.SERVICE_NAME_CHANGE_MOBILE)) {</span>
+<span class="fc" id="L146">            getView().dismissDialog();</span>
+<span class="fc" id="L147">            getView().showAlertDialogDismissOnClick(&quot;Switch mobile account is failed.&quot;);</span>
+        }
+<span class="fc" id="L149">    }</span>
+
+    @SuppressWarnings(&quot;unused&quot;)
+    @Subscribe
+    public void onGotoBillConfirmActivity(GotoTopUpConfirmPrepaidEvent gotoTopUpConfirmPrepaidEvent) {
+<span class="fc" id="L154">        getView().gotoTopUpConfirmEvent();</span>
+<span class="fc" id="L155">    }</span>
+
+    @SuppressWarnings(&quot;unused&quot;)
+    @Subscribe
+    public void onGoToFirstTabEvent(GoToFirstTabEvent event) {
+<span class="fc" id="L160">        getView().setCurrentTab(0);</span>
+<span class="fc" id="L161">    }</span>
+
+
+    public void setupTabMenu() {
+<span class="fc" id="L165">        menuList = TabMenuUtility.getInstance().getTabMenus();</span>
+
+<span class="fc bfc" id="L167" title="All 2 branches covered.">        if (menuList == null) {</span>
+<span class="fc" id="L168">            getView().showUnknownBusinessType();</span>
+<span class="fc" id="L169">            return;</span>
+        }
+
+<span class="fc" id="L172">        getView().saveTabMenuToRealm(menuList);</span>
+<span class="fc" id="L173">        getView().createTabMenu(menuList);</span>
+<span class="fc" id="L174">        setupUrlScheme(menuList);</span>
+<span class="fc" id="L175">    }</span>
+
+    //launch url scheme when receiving event
+    @SuppressWarnings(&quot;unused&quot;)
+    @Subscribe
+    public void onGoToUrlSchemeTabEvent(GoToUrlSchemeTabEvent event) {
+<span class="nc" id="L181">        openUrlScheme();</span>
+<span class="nc" id="L182">    }</span>
+
+    @Override
+    public void openUrlScheme() {
+<span class="nc" id="L186">        loopMenuListAndGotoUrlScheme(TabMenuUtility.getInstance().getTabMenus());</span>
+<span class="nc" id="L187">    }</span>
+
+    @Override
+    public void checkDiffMobileContractList(int oldListSize) {
+<span class="fc bfc" id="L191" title="All 2 branches covered.">        if (oldListSize == Mobile.getInstance().getMobileContactList().size()) {</span>
+<span class="fc" id="L192">            return;</span>
+        }
+<span class="fc" id="L194">        updateUserAccount();</span>
+<span class="fc" id="L195">    }</span>
+
+    protected void loopMenuListAndGotoUrlScheme(List&lt;MyAisMenu.Menu&gt; menuList) {
+<span class="nc bnc" id="L198" title="All 2 branches missed.">        for (int tabIndex = 0; tabIndex &lt; menuList.size(); tabIndex++) {</span>
+<span class="nc" id="L199">            MyAisMenu.Menu menu = menuList.get(tabIndex);</span>
+            //outside
+<span class="nc bnc" id="L201" title="All 2 branches missed.">            if (matchUrlSchemeCurrentTab(tabIndex, menu)) {</span>
+<span class="nc" id="L202">                break;</span>
+            }
+            //lvl2
+<span class="nc bnc" id="L205" title="All 2 branches missed.">            for (MyAisMenu.SectionMenu sectionMenu : menu.getSectionMenuList()) {</span>
+                //lvl3
+<span class="nc bnc" id="L207" title="All 2 branches missed.">                for (MyAisMenu.SubMenu subMenu : sectionMenu.getSubMenuList()) {</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">                    if (matchUrlSchemeCurrentSubMenu(tabIndex, subMenu)) {</span>
+<span class="nc" id="L209">                        break;</span>
+                    }
+<span class="nc" id="L211">                }</span>
+<span class="nc" id="L212">            }</span>
+        }
+<span class="nc" id="L214">    }</span>
+
+    private boolean matchUrlSchemeCurrentTab(int tabIndex, MyAisMenu.Menu menu) {
+<span class="nc bnc" id="L217" title="All 2 branches missed.">        if (matchUrlSchemeMenu(menu.getUrlScheme())) {</span>
+<span class="nc" id="L218">            getView().setCurrentTab(tabIndex);</span>
+<span class="nc" id="L219">            UrlSchemeUtils.getInstance().clearUrlScheme();</span>
+<span class="nc" id="L220">            return true;</span>
+        }
+<span class="nc" id="L222">        return false;</span>
+    }
+
+    private boolean matchUrlSchemeCurrentSubMenu(int tabIndex, MyAisMenu.SubMenu subMenu) {
+<span class="nc bnc" id="L226" title="All 2 branches missed.">        if (matchUrlSchemeMenu(subMenu.getUrlScheme())) {</span>
+<span class="nc" id="L227">            getView().gotoUrlScheme(tabIndex, subMenu);</span>
+<span class="nc" id="L228">            UrlSchemeUtils.getInstance().clearUrlScheme();</span>
+<span class="nc" id="L229">            return true;</span>
+        }
+<span class="nc" id="L231">        return false;</span>
+    }
+
+    private boolean matchUrlSchemeMenu(String urlScheme) {
+<span class="nc" id="L235">        return UrlSchemeUtils.getInstance().isHostMatch(urlScheme);</span>
+    }
+
+    public void setupSideMenu() {
+<span class="fc" id="L239">        RxBus.get().post(new SideMenuUpdateEvent());</span>
+<span class="fc" id="L240">    }</span>
+
+    //launch url scheme when coming from login
+    public void setupUrlScheme(List&lt;MyAisMenu.Menu&gt; menuList) {
+<span class="fc bfc" id="L244" title="All 2 branches covered.">        if (!UrlSchemeUtils.getInstance().isUrlScheme()) {</span>
+<span class="fc" id="L245">            return;</span>
+        }
+<span class="fc" id="L247">        loopMenuListAndGotoUrlScheme(menuList);</span>
+<span class="fc" id="L248">    }</span>
+
+    @Override
+    public NextzyRealmObject convertTabMenuToRealmObject(List&lt;MyAisMenu.Menu&gt; menuList) {
+<span class="nc" id="L252">        return RealmUtility.getInstance().createRealmObject(NextzyDatabaseKey.CONFIG_TAB_MENU, new MyAisMenu.Container(menuList));</span>
+    }
+
+    @Override
+    public void onCameraMenuClick() {
+<span class="nc" id="L257">        getView().requestCameraPermission();</span>
+<span class="nc" id="L258">    }</span>
+
+    @Override
+    public void onNotificationMenuClick() {
+<span class="nc" id="L262">        getView().launchNotificationActivity();</span>
+<span class="nc" id="L263">    }</span>
+
+    public List&lt;MyAisMenu.Menu&gt; getMenuList() {
+<span class="nc" id="L266">        return menuList;</span>
+    }
+
+    public void setMenuList(List&lt;MyAisMenu.Menu&gt; menuList) {
+<span class="nc" id="L270">        this.menuList = menuList;</span>
+<span class="nc" id="L271">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

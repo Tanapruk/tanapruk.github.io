@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginWithOtpResultCheck.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.helper.login.network.operator</a> &gt; <span class="el_source">LoginWithOtpResultCheck.java</span></div><h1>LoginWithOtpResultCheck.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.helper.login.network.operator;
+
+import com.ais.mimo.eservice.helper.login.network.exception.LoginWithOtpWrong3Exception;
+import com.ais.mimo.eservice.helper.login.network.exception.LoginWithOtpWrongException;
+import com.ais.mimo.eservice.helper.login.network.response.LoginWithOtpSecretResult;
+import com.nextzy.myais.common.network.tool.ResultHasDataCheck;
+
+import rx.Single;
+
+/**
+ * Created by trusttanapruk on 8/18/2016.
+ */
+<span class="fc" id="L13">public class LoginWithOtpResultCheck extends ResultHasDataCheck&lt;LoginWithOtpSecretResult, LoginWithOtpWrongException&gt; {</span>
+    @Override
+    protected LoginWithOtpWrongException getThrowable(String message) {
+<span class="nc" id="L16">        return new LoginWithOtpWrongException(message);</span>
+    }
+
+    @Override
+    public Single&lt;LoginWithOtpSecretResult&gt; call(LoginWithOtpSecretResult result) {
+
+<span class="fc bfc" id="L22" title="All 2 branches covered.">        if (result.getDeveloperMessage().equalsIgnoreCase(&quot;HACK_TIME value more than 3&quot;)) {</span>
+<span class="fc" id="L23">            return Single.error(new LoginWithOtpWrong3Exception(result.getResultDescription()));</span>
+        }
+
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        if (isNot20000HasNoData(result)) {</span>
+<span class="fc" id="L27">            return Single.error(new LoginWithOtpWrongException(result.getResultDescription()));</span>
+        }
+<span class="fc" id="L29">        return Single.just(result);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MyAccountValidateUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.myaccount.utility</a> &gt; <span class="el_source">MyAccountValidateUtility.java</span></div><h1>MyAccountValidateUtility.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.myaccount.utility;
+
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.utility.NextzyUtility;
+
+/**
+ * Created by TheKhaeng on 12/1/2016.
+ */
+
+public class MyAccountValidateUtility {
+    public static final int VALIDATE = 1;
+
+    public static final int INVALIDATE_EMAIL_FORMAT = 20;
+    public static final int INVALIDATE_EMAIL_ALREADY_USED = 21;
+
+    public static final int INVALIDATE_PASSWORD_FORMAT = 30;
+    public static final int INVALIDATE_PASSWORD_NOT_MATCH = 31;
+    public static final int INVALIDATE_PASSWORD_ALREADY_USED = 32;
+
+    public static final int INVALIDATE_OTP_FORMAT = 50;
+
+    private static MyAccountValidateUtility util;
+    private final NextzyUtility nextzyUtil;
+
+    public static MyAccountValidateUtility getInstance() {
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        if (util == null) {</span>
+<span class="fc" id="L27">            util = new MyAccountValidateUtility();</span>
+        }
+<span class="fc" id="L29">        return util;</span>
+    }
+
+<span class="fc" id="L32">    private MyAccountValidateUtility() {</span>
+<span class="fc" id="L33">        nextzyUtil = NextzyUtility.getInstance();</span>
+<span class="fc" id="L34">    }</span>
+
+    public int validateEmail(String email) {
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if (!nextzyUtil.isEmail(email)) {</span>
+<span class="fc" id="L38">            return INVALIDATE_EMAIL_FORMAT;</span>
+        }
+
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        if (nextzyUtil.isStringEqual(Mobile.getInstance().getEmailMyAccount(), email)) {</span>
+<span class="fc" id="L42">            return INVALIDATE_EMAIL_ALREADY_USED;</span>
+        }
+
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">        if (nextzyUtil.isStringEqual(Mobile.getInstance().getEmailProfile(), email)) {</span>
+<span class="nc" id="L46">            return INVALIDATE_EMAIL_ALREADY_USED;</span>
+        }
+<span class="fc" id="L48">        return VALIDATE;</span>
+    }
+
+    public int validateOtp(String otp) {
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        if (!nextzyUtil.isOTP(otp)) {</span>
+<span class="fc" id="L53">            return INVALIDATE_OTP_FORMAT;</span>
+        }
+<span class="fc" id="L55">        return VALIDATE;</span>
+    }
+
+    public int validatePassword(String password) {
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        if (!nextzyUtil.isPassword(password)){</span>
+<span class="fc" id="L60">            return INVALIDATE_PASSWORD_FORMAT;</span>
+        }
+<span class="fc" id="L62">        return VALIDATE;</span>
+    }
+
+    public int validatePassword(String newPassword, String reNewPassword, String oldPassword) {
+<span class="pc bpc" id="L66" title="1 of 4 branches missed.">        if (!nextzyUtil.isPassword(newPassword) || !nextzyUtil.isPassword(reNewPassword)){</span>
+<span class="fc" id="L67">            return INVALIDATE_PASSWORD_FORMAT;</span>
+        }
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if( !newPassword.equals(reNewPassword)){</span>
+<span class="fc" id="L70">           return INVALIDATE_PASSWORD_NOT_MATCH;</span>
+        }
+
+<span class="pc bpc" id="L73" title="2 of 4 branches missed.">        if( newPassword.equals(oldPassword) || reNewPassword.equals(oldPassword)){</span>
+<span class="nc" id="L74">            return INVALIDATE_PASSWORD_ALREADY_USED;</span>
+        }
+
+<span class="fc" id="L77">        return VALIDATE;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

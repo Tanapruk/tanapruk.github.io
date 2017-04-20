@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SocialPortalActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.social</a> &gt; <span class="el_source">SocialPortalActivity.java</span></div><h1>SocialPortalActivity.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.social;
+
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.mvp.NextzyMvpActivity;
+import com.nextzy.myais.common.utility.NextzyAndroidUtility;
+
+/**
+ * Created by Akexorcist on 10/31/2016 AD.
+ */
+
+/**
+ * Deprecated For now
+ * Users seems to like webview Approach.
+ */
+
+@Deprecated
+<span class="nc" id="L21">public class SocialPortalActivity extends NextzyMvpActivity&lt;SocialPortalContractor.Presenter&gt; implements SocialPortalContractor.View {</span>
+    public static final String KEY_VALUE = &quot;key_value&quot;;
+    private static final String FACEBOOK_PACKAGE_NAME = &quot;com.facebook.katana&quot;;
+    private static final String TWITTER_PACKAGE_NAME = &quot;com.twitter.android&quot;;
+    private static final String LINE_PACKAGE_NAME = &quot;jp.naver.line.android&quot;;
+
+    private static final String FACEBOOK_PREPAID_URL_SCHEME = &quot;fb://page/251069560456&quot;;
+    private static final String FACEBOOK_POSTPAID_URL_SCHEME = &quot;fb://page/127434041553&quot;;
+    private static final String TWITTER_PREPAID_URL_SCHEME = &quot;twitter://user?user_id=59416157&quot;;
+    private static final String TWITTER_POSTPAID_URL_SCHEME = &quot;twitter://user?user_id=59028840&quot;;
+    private static final String LINE_URL = &quot;http://line.me/ti/p/@aisofficialline&quot;;
+
+    @Override
+    public int getLayoutView() {
+<span class="nc" id="L35">        return 0;</span>
+    }
+
+    @Override
+    protected void createPresenter() {
+<span class="nc" id="L40">        SocialPortalPresenter.createPresenter(this);</span>
+<span class="nc" id="L41">    }</span>
+
+    @Override
+    public void bindView() {
+
+<span class="nc" id="L46">    }</span>
+
+    @Override
+    public void setupView() {
+
+<span class="nc" id="L51">    }</span>
+
+    @Override
+    public void restoreArgument(Bundle bundle) {
+<span class="nc" id="L55">        getPresenter().setKeyType(bundle.getString(KEY_VALUE));</span>
+<span class="nc" id="L56">    }</span>
+
+    @Override
+    public void initialize() {
+
+<span class="nc" id="L61">    }</span>
+
+    @Override
+    public void restoreInstanceState(Bundle savedInstanceState) {
+<span class="nc" id="L65">        getPresenter().setKeyType(savedInstanceState.getString(KEY_VALUE));</span>
+<span class="nc" id="L66">    }</span>
+
+    @Override
+    public void restoreView() {
+
+<span class="nc" id="L71">    }</span>
+
+    @Override
+    public void saveInstanceState(Bundle outState) {
+
+<span class="nc" id="L76">    }</span>
+
+
+    @Override
+    public void openAisFacebook() {
+<span class="nc" id="L81">        Mobile.getInstance().logEvent(&quot;APP_VIEW_AIS FACEBOOK&quot;, &quot;5012&quot;, &quot;5127&quot;);</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        if (NextzyAndroidUtility.getInstance().isAppInstalled(this, FACEBOOK_PACKAGE_NAME)) {</span>
+<span class="nc" id="L83">            openAisFacebookPage();</span>
+        } else {
+<span class="nc" id="L85">            NextzyAndroidUtility.getInstance().openAppInPlayStore(this, FACEBOOK_PACKAGE_NAME);</span>
+        }
+<span class="nc" id="L87">        finish();</span>
+<span class="nc" id="L88">    }</span>
+
+    @Override
+    public void openAisTwitter() {
+<span class="nc" id="L92">        Mobile.getInstance().logEvent(&quot;APP_VIEW_AIS_TWITTER&quot;, &quot;5012&quot;, &quot;5128&quot;);</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        if (NextzyAndroidUtility.getInstance().isAppInstalled(this, TWITTER_PACKAGE_NAME)) {</span>
+<span class="nc" id="L94">            openAisTwitterPage();</span>
+        } else {
+<span class="nc" id="L96">            NextzyAndroidUtility.getInstance().openAppInPlayStore(this, TWITTER_PACKAGE_NAME);</span>
+        }
+<span class="nc" id="L98">        finish();</span>
+<span class="nc" id="L99">    }</span>
+
+    @Override
+    public void openAisLine() {
+<span class="nc" id="L103">        Mobile.getInstance().logEvent(&quot;APP_VIEW_AIS LINE&quot;, &quot;5012&quot;, &quot;5129&quot;);</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">        if (NextzyAndroidUtility.getInstance().isAppInstalled(this, LINE_PACKAGE_NAME)) {</span>
+<span class="nc" id="L105">            openAisLineOfficialAccount();</span>
+        } else {
+<span class="nc" id="L107">            NextzyAndroidUtility.getInstance().openAppInPlayStore(this, LINE_PACKAGE_NAME);</span>
+        }
+<span class="nc" id="L109">        finish();</span>
+<span class="nc" id="L110">    }</span>
+
+    @Override
+    public void closeActivityWithNothingHappened() {
+<span class="nc" id="L114">        finish();</span>
+<span class="nc" id="L115">    }</span>
+
+    private void openAisFacebookPage() {
+<span class="nc bnc" id="L118" title="All 2 branches missed.">        if (Mobile.getInstance().isPrepaid()) {</span>
+<span class="nc" id="L119">            Uri uri = Uri.parse(FACEBOOK_PREPAID_URL_SCHEME);</span>
+<span class="nc" id="L120">            startActivity(new Intent(Intent.ACTION_VIEW, uri));</span>
+<span class="nc" id="L121">        } else {</span>
+<span class="nc" id="L122">            Uri uri = Uri.parse(FACEBOOK_POSTPAID_URL_SCHEME);</span>
+<span class="nc" id="L123">            startActivity(new Intent(Intent.ACTION_VIEW, uri));</span>
+        }
+<span class="nc" id="L125">    }</span>
+
+    private void openAisTwitterPage() {
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        if (Mobile.getInstance().isPrepaid()) {</span>
+<span class="nc" id="L129">            Uri uri = Uri.parse(TWITTER_PREPAID_URL_SCHEME);</span>
+<span class="nc" id="L130">            startActivity(new Intent(Intent.ACTION_VIEW, uri));</span>
+<span class="nc" id="L131">        } else {</span>
+<span class="nc" id="L132">            Uri uri = Uri.parse(TWITTER_POSTPAID_URL_SCHEME);</span>
+<span class="nc" id="L133">            startActivity(new Intent(Intent.ACTION_VIEW, uri));</span>
+        }
+<span class="nc" id="L135">    }</span>
+
+    private void openAisLineOfficialAccount() {
+<span class="nc" id="L138">        Uri uri = Uri.parse(LINE_URL);</span>
+<span class="nc" id="L139">        startActivity(new Intent(Intent.ACTION_VIEW, uri));</span>
+<span class="nc" id="L140">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

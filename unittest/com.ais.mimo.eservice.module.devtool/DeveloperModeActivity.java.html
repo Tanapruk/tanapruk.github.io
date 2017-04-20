@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeveloperModeActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.devtool</a> &gt; <span class="el_source">DeveloperModeActivity.java</span></div><h1>DeveloperModeActivity.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.devtool;
+
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.transition.TransitionManager;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.Spinner;
+import android.widget.TextView;
+
+import com.ais.mimo.eservice.module.main.activity.MainActivity;
+import com.ais.mimo.eservice.module.notification.NotificationActivity;
+import com.ais.mimo.eservice.module.passcode.ValidatePasscodeActivity;
+import com.ais.mimo.eservice.module.register.main.RegisterActivity;
+import com.ais.mimo.eservice.module.setting.activity.SettingActivity;
+import com.ais.mimo.eservice.module.tutorial.TutorialActivity;
+import com.ais.mimo.eservice.widget.MenuSettingLanguageView;
+import com.ais.mimo.eservice.widget.MenuSettingSwitchView;
+import com.nextzy.myais.balanceusage.module.yourbalance.YourBalanceActivity;
+import com.nextzy.myais.common.config.mobile.MobileType;
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.mvp.NextzyMvpActivity;
+import com.nextzy.myais.common.utility.NextzyLanguage;
+import com.nextzy.myais.common.widget.MyAisSpinnerAdapter;
+import com.nextzy.myais.myais.R;
+import com.nextzy.myais.payment.module.payment.activity.PaymentActivity;
+import com.nextzy.myais.payment.module.topup.activity.TopupActivity;
+import com.nextzy.myais.promotion.module.currentpackage.activity.PackageInfoActivity;
+import com.nextzy.myais.promotion.module.roaming.activity.RoamingApplyPackageActivity;
+import com.nextzy.myais.promotion.module.roaming.activity.RoamingCheckSubscriptionActivity;
+import com.nextzy.myais.promotion.module.roaming.activity.RoamingServiceRateActivity;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+<span class="nc" id="L42">public class DeveloperModeActivity extends NextzyMvpActivity&lt;DeveloperModeContractor.Presenter&gt; implements DeveloperModeContractor.View, MenuSettingLanguageView.OnCheckedChangeListener, MenuSettingSwitchView.OnCheckedChangeListener, AdapterView.OnItemSelectedListener, RadioGroup.OnCheckedChangeListener {</span>
+    private MenuSettingLanguageView msLanguage;
+    private MenuSettingSwitchView msAisDevServer, msMockServer, msCorpMode, msRotate;
+    private ViewGroup layoutContainer;
+    private RadioGroup rgMobileMockMode;
+    private RadioButton rbPostpaid;
+    private RadioButton rbPrepaid;
+    private RadioButton rbFibre;
+    private TextView tvUrl;
+    private Toolbar tbHeader;
+    private boolean booleanIsMock;
+    private Spinner spnActivityList;
+    public static final String KEY_IS_AIS_DEV = &quot;IS_AIS_DEV&quot;;
+    public static final String KEY_ROTABLE_SCREEN = &quot;ROTABLE_SCREEN&quot;;
+    public static final String KEY_IS_URL_MOCK = &quot;IS_URL_MOCK&quot;;
+    public static final String KEY_IS_CORP = &quot;IS_CORP&quot;;
+    public static final String KEY_SKIP_ACTIVITY_NAME = &quot;SKIP_ACTIVITY_NAME&quot;;
+    public static final String KEY_MOCK_MOBILE_MODE = &quot;MOCK_MOBILE_MODE&quot;;
+    SharedPreferences sharedPreferences;
+    MyAisSpinnerAdapter spinnerListAdapter;
+<span class="nc" id="L62">    List&lt;Class&gt; activityClassList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L63">    List&lt;String&gt; activityList = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L65">    Class[] classArray = {</span>
+            MainActivity.class,
+            NotificationActivity.class,
+            RoamingApplyPackageActivity.class,
+            RoamingServiceRateActivity.class,
+            RoamingCheckSubscriptionActivity.class,
+            RegisterActivity.class,
+            PaymentActivity.class,
+            TopupActivity.class,
+            YourBalanceActivity.class,
+            PackageInfoActivity.class,
+            TutorialActivity.class,
+            SettingActivity.class,
+            ValidatePasscodeActivity.class
+    };
+
+    @Override
+    public int getLayoutView() {
+<span class="nc" id="L83">        return R.layout.my_ais_activity_developer_mode;</span>
+    }
+
+    @Override
+    protected void createPresenter() {
+<span class="nc" id="L88">        DeveloperModePresenter.createPresenter(this);</span>
+<span class="nc" id="L89">    }</span>
+
+    @Override
+    protected boolean showStateLog() {
+<span class="nc" id="L93">        return true;</span>
+    }
+
+    @Override
+    public void bindView() {
+
+<span class="nc" id="L99">        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);</span>
+<span class="nc" id="L100">        layoutContainer = (ViewGroup) findViewById(R.id.my_ais_layout_developer_item_container);</span>
+<span class="nc" id="L101">        msAisDevServer = (MenuSettingSwitchView) findViewById(R.id.my_ais_developer_mode_ms_ais_dev);</span>
+<span class="nc" id="L102">        msLanguage = (MenuSettingLanguageView) findViewById(R.id.my_ais_developer_mode_ms_language);</span>
+<span class="nc" id="L103">        msMockServer = (MenuSettingSwitchView) findViewById(R.id.my_ais_developer_mode_ms_url);</span>
+<span class="nc" id="L104">        tvUrl = (TextView) findViewById(R.id.my_ais_developer_mode_tv_url);</span>
+<span class="nc" id="L105">        tbHeader = (Toolbar) findViewById(R.id.my_ais_library_simple_toolbar_tb_header);</span>
+<span class="nc" id="L106">        spnActivityList = (Spinner) findViewById(R.id.my_ais_developer_mode_spn_skip_activity);</span>
+<span class="nc" id="L107">        rgMobileMockMode = (RadioGroup) findViewById(R.id.my_ais_rg_developer_mode_mock_mobile);</span>
+<span class="nc" id="L108">        rbPostpaid = (RadioButton) findViewById(R.id.my_ais_rb_developer_mode_postpaid);</span>
+<span class="nc" id="L109">        rbPrepaid = (RadioButton) findViewById(R.id.my_ais_rb_developer_mode_prepaid);</span>
+<span class="nc" id="L110">        rbFibre = (RadioButton) findViewById(R.id.my_ais_rb_developer_mode_fibre);</span>
+<span class="nc" id="L111">        msCorpMode = (MenuSettingSwitchView) findViewById(R.id.my_ais_developer_mode_ms_corp_mode);</span>
+<span class="nc" id="L112">        msRotate = (MenuSettingSwitchView) findViewById(R.id.my_ais_setting_ms_rotate_screen);</span>
+<span class="nc" id="L113">    }</span>
+
+    @Override
+    public void setupView() {
+<span class="nc" id="L117">        tbHeader.setTitle(&quot;Developer Mode&quot;);</span>
+<span class="nc" id="L118">        tbHeader.setNavigationOnClickListener(v -&gt; onBackPressed());</span>
+<span class="nc" id="L119">        msLanguage.setOnCheckedChangeListener(this);</span>
+<span class="nc" id="L120">        msAisDevServer.setOnCheckedChangeListener(onAisDevServerChange());</span>
+<span class="nc" id="L121">        msMockServer.setOnCheckedChangeListener(onMockServerChange());</span>
+<span class="nc" id="L122">        msCorpMode.setOnCheckedChangeListener(onCorpModeChange());</span>
+<span class="nc" id="L123">        msRotate.setOnCheckedChangeListener(onRotateSwitchChange());</span>
+
+<span class="nc" id="L125">        initActivityList();</span>
+<span class="nc" id="L126">        spinnerListAdapter = new MyAisSpinnerAdapter(getApplicationContext(), activityList, false);</span>
+<span class="nc" id="L127">        spnActivityList.setAdapter(spinnerListAdapter);</span>
+<span class="nc" id="L128">        spnActivityList.setOnItemSelectedListener(this);</span>
+<span class="nc" id="L129">        rgMobileMockMode.setOnCheckedChangeListener(this);</span>
+<span class="nc" id="L130">    }</span>
+
+    @Override
+    public void restoreArgument(Bundle bundle) {
+<span class="nc" id="L134">    }</span>
+
+
+    @Override
+    public void onAfterLocaleChanged() {
+<span class="nc" id="L139">        super.onAfterLocaleChanged();</span>
+<span class="nc" id="L140">    }</span>
+
+    @Override
+    public void initialize() {
+<span class="nc" id="L144">        updateState();</span>
+<span class="nc" id="L145">    }</span>
+
+    @Override
+    public void restoreInstanceState(Bundle savedInstanceState) {
+<span class="nc" id="L149">        updateState();</span>
+
+<span class="nc" id="L151">    }</span>
+
+    @Override
+    public void restoreView() {
+<span class="nc" id="L155">        updateState();</span>
+<span class="nc" id="L156">    }</span>
+
+    @Override
+    public void saveInstanceState(Bundle outState) {
+<span class="nc" id="L160">        saveMockToPreference(booleanIsMock);</span>
+<span class="nc" id="L161">    }</span>
+
+
+    @Override
+    public void onItemSelected(AdapterView&lt;?&gt; adapterView, View view, int i, long l) {
+<span class="nc" id="L166">        sharedPreferences.edit().putString(KEY_SKIP_ACTIVITY_NAME, activityClassList.get(i).getName()).apply();</span>
+<span class="nc" id="L167">    }</span>
+
+    @Override
+    public void onNothingSelected(AdapterView&lt;?&gt; adapterView) {
+
+<span class="nc" id="L172">    }</span>
+
+    //&lt;editor-fold desc=&quot;Init Methods&quot;&gt;
+    private void initActivityList() {
+<span class="nc" id="L176">        activityClassList = Arrays.asList(classArray);</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">        for (Class aClass : activityClassList) {</span>
+<span class="nc" id="L178">            activityList.add(aClass.getSimpleName());</span>
+<span class="nc" id="L179">        }</span>
+<span class="nc" id="L180">    }</span>
+
+    private String getActivityNameList(String activityName) {
+<span class="nc" id="L183">        return activityName.substring(activityName.lastIndexOf('.') + 1).trim();</span>
+    }
+    //&lt;/editor-fold&gt;
+
+    //&lt;editor-fold desc=&quot;update switch&quot;&gt;
+    private void updateState() {
+<span class="nc" id="L189">        preselectSpinnerFromPreference();</span>
+<span class="nc" id="L190">        preselectAisDevServerFromPreference();</span>
+<span class="nc" id="L191">        preselectLanguageButtonFromPreference();</span>
+<span class="nc" id="L192">        preselectMockServerFromPreference();</span>
+<span class="nc" id="L193">        preselectMockMobileModeFromPreference();</span>
+<span class="nc" id="L194">        preselectCorpModeFromPreference();</span>
+<span class="nc" id="L195">        preselectRotableFromPreference();</span>
+<span class="nc" id="L196">        updateUrl();</span>
+<span class="nc" id="L197">    }</span>
+
+    private void updateUrl() {
+<span class="nc" id="L200">        addSimpleAnimation();</span>
+<span class="nc" id="L201">        tvUrl.setText(URL.getSSB());</span>
+<span class="nc" id="L202">    }</span>
+
+    private void preselectCorpModeFromPreference() {
+<span class="nc" id="L205">        msCorpMode.setChecked(getIsCorpFromPreference());</span>
+<span class="nc" id="L206">    }</span>
+
+    private void preselectAisDevServerFromPreference() {
+<span class="nc" id="L209">        boolean isAisDevFromPreference = getIsAisDevFromPreference();</span>
+<span class="nc" id="L210">        msAisDevServer.setChecked(isAisDevFromPreference);</span>
+<span class="nc" id="L211">        updateAisDevCheckedButton(isAisDevFromPreference);</span>
+<span class="nc" id="L212">    }</span>
+
+    private void preselectRotableFromPreference() {
+<span class="nc" id="L215">        msRotate.setChecked(getRotateSwitchFromPreference());</span>
+<span class="nc" id="L216">    }</span>
+
+
+    private void preselectMockServerFromPreference() {
+<span class="nc" id="L220">        booleanIsMock = getIsMockFromPreference();</span>
+<span class="nc" id="L221">        URL.isMock = booleanIsMock;</span>
+<span class="nc" id="L222">        msMockServer.setChecked(booleanIsMock);</span>
+<span class="nc" id="L223">    }</span>
+
+    private void preselectMockMobileModeFromPreference() {
+<span class="nc" id="L226">        String mobileType = sharedPreferences.getString(KEY_MOCK_MOBILE_MODE, MobileType.POSTPAID.toString());</span>
+
+<span class="nc bnc" id="L228" title="All 2 branches missed.">        if (MobileType.POSTPAID.toString().equalsIgnoreCase(mobileType)) {</span>
+<span class="nc" id="L229">            rgMobileMockMode.check(R.id.my_ais_rb_developer_mode_postpaid);</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">        } else if (MobileType.PREPAID.toString().equalsIgnoreCase(mobileType)) {</span>
+<span class="nc" id="L231">            rgMobileMockMode.check(R.id.my_ais_rb_developer_mode_prepaid);</span>
+        } else {
+<span class="nc" id="L233">            rgMobileMockMode.check(R.id.my_ais_rb_developer_mode_fibre);</span>
+        }
+<span class="nc" id="L235">    }</span>
+
+    private void preselectLanguageButtonFromPreference() {
+<span class="nc" id="L238">        msLanguage.setChecked(NextzyLanguage.getInstance().isEnglish());</span>
+<span class="nc" id="L239">    }</span>
+
+    private void preselectSpinnerFromPreference() {
+<span class="nc" id="L242">        String currentSpinnerItem = sharedPreferences.getString(KEY_SKIP_ACTIVITY_NAME, &quot;&quot;);</span>
+<span class="nc" id="L243">        int selection = spinnerListAdapter.getPosition(getActivityNameList(currentSpinnerItem));</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">        if (selection == -1) {</span>
+<span class="nc" id="L245">            spnActivityList.setSelection(0);</span>
+<span class="nc" id="L246">            return;</span>
+        }
+<span class="nc" id="L248">        spnActivityList.setSelection(selection);</span>
+<span class="nc" id="L249">    }</span>
+
+    private void updateAisDevCheckedButton(boolean isChecked) {
+<span class="nc" id="L252">        addSimpleAnimation();</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        msMockServer.setVisibility(isChecked ? View.INVISIBLE : View.VISIBLE);</span>
+<span class="nc" id="L254">    }</span>
+
+    private void addSimpleAnimation() {
+<span class="nc" id="L257">        TransitionManager.beginDelayedTransition(layoutContainer);</span>
+<span class="nc" id="L258">    }</span>
+    //&lt;/editor-fold&gt;
+
+    //&lt;editor-fold desc=&quot;onChange&quot;&gt;
+
+    private MenuSettingSwitchView.OnCheckedChangeListener onAisDevServerChange() {
+<span class="nc" id="L264">        return (view, isChecked) -&gt; {</span>
+<span class="nc" id="L265">            URL.isAisDevServer = isChecked;</span>
+<span class="nc" id="L266">            updateUrl();</span>
+<span class="nc" id="L267">            saveAisDevServerToPreference(isChecked);</span>
+<span class="nc" id="L268">            updateAisDevCheckedButton(isChecked);</span>
+<span class="nc" id="L269">        };</span>
+    }
+
+    private MenuSettingSwitchView.OnCheckedChangeListener onCorpModeChange() {
+<span class="nc" id="L273">        return (view, isChecked) -&gt; {</span>
+<span class="nc" id="L274">            saveCorpToPreference(isChecked);</span>
+<span class="nc" id="L275">        };</span>
+    }
+
+    public MenuSettingSwitchView.OnCheckedChangeListener onMockServerChange() {
+<span class="nc" id="L279">        return (view, isChecked) -&gt; {</span>
+<span class="nc" id="L280">            URL.isMock = isChecked;</span>
+<span class="nc" id="L281">            updateUrl();</span>
+<span class="nc" id="L282">            saveMockToPreference(isChecked);</span>
+
+<span class="nc" id="L284">            addSimpleAnimation();</span>
+<span class="nc bnc" id="L285" title="All 2 branches missed.">            rgMobileMockMode.setVisibility(isChecked ? View.VISIBLE : View.INVISIBLE);</span>
+<span class="nc bnc" id="L286" title="All 2 branches missed.">            msCorpMode.setVisibility(isChecked ? View.VISIBLE : View.INVISIBLE);</span>
+<span class="nc" id="L287">        };</span>
+    }
+
+    private MenuSettingSwitchView.OnCheckedChangeListener onRotateSwitchChange() {
+<span class="nc" id="L291">        return (view, isChecked) -&gt; {</span>
+<span class="nc" id="L292">            saveRotateSwitchToPreference(isChecked);</span>
+<span class="nc" id="L293">        };</span>
+    }
+
+
+    @Override
+    public void onCheckedChanged(View view, boolean isChecked) {
+<span class="nc bnc" id="L299" title="All 2 branches missed.">        if (view == msLanguage) {</span>
+<span class="nc" id="L300">            onLanguageChanged(isChecked);</span>
+        }
+<span class="nc" id="L302">    }</span>
+
+    @Override
+    public void onCheckedChanged(RadioGroup radioGroup, int checkedId) {
+        String mobileType;
+<span class="nc bnc" id="L307" title="All 2 branches missed.">        if (R.id.my_ais_rb_developer_mode_postpaid == checkedId) {</span>
+<span class="nc" id="L308">            mobileType = MobileType.POSTPAID.toString();</span>
+<span class="nc bnc" id="L309" title="All 2 branches missed.">        } else if (R.id.my_ais_rb_developer_mode_prepaid == checkedId) {</span>
+<span class="nc" id="L310">            mobileType = MobileType.PREPAID.toString();</span>
+        } else {
+<span class="nc" id="L312">            mobileType = MobileType.FBB.toString();</span>
+        }
+
+<span class="nc" id="L315">        sharedPreferences.edit().putString(KEY_MOCK_MOBILE_MODE, mobileType).apply();</span>
+<span class="nc" id="L316">    }</span>
+
+    private void onLanguageChanged(boolean isChecked) {
+<span class="nc bnc" id="L319" title="All 2 branches missed.">        setLanguage(isChecked ? NextzyLanguage.ENGLISH : NextzyLanguage.THAI);</span>
+<span class="nc" id="L320">    }</span>
+
+    //&lt;/editor-fold&gt;
+
+    //&lt;editor-fold desc=&quot;SharePreference&quot;&gt;
+    private void saveRotateSwitchToPreference(boolean isChecked) {
+<span class="nc" id="L326">        sharedPreferences.edit().putBoolean(KEY_ROTABLE_SCREEN, isChecked).apply();</span>
+<span class="nc" id="L327">    }</span>
+
+    private void saveMockToPreference(boolean isChecked) {
+<span class="nc" id="L330">        sharedPreferences.edit().putBoolean(KEY_IS_URL_MOCK, isChecked).apply();</span>
+<span class="nc" id="L331">    }</span>
+
+    private void saveCorpToPreference(boolean isChecked) {
+<span class="nc" id="L334">        sharedPreferences.edit().putBoolean(KEY_IS_CORP, isChecked).apply();</span>
+<span class="nc" id="L335">    }</span>
+
+    private void saveAisDevServerToPreference(boolean isChecked) {
+<span class="nc" id="L338">        sharedPreferences.edit().putBoolean(KEY_IS_AIS_DEV, isChecked).apply();</span>
+<span class="nc" id="L339">    }</span>
+
+    private boolean getRotateSwitchFromPreference() {
+<span class="nc" id="L342">        return sharedPreferences.getBoolean(KEY_ROTABLE_SCREEN, false);</span>
+    }
+
+    private boolean getIsMockFromPreference() {
+<span class="nc" id="L346">        return sharedPreferences.getBoolean(KEY_IS_URL_MOCK, false);</span>
+    }
+
+    private boolean getIsCorpFromPreference() {
+<span class="nc" id="L350">        return sharedPreferences.getBoolean(KEY_IS_CORP, false);</span>
+    }
+
+    private boolean getIsAisDevFromPreference() {
+<span class="nc" id="L354">        return sharedPreferences.getBoolean(KEY_IS_AIS_DEV, false);</span>
+    }
+    //&lt;/editor-fold&gt;
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

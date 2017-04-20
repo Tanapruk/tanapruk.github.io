@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NotificationRequestParam.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.helper.pushnotification.model</a> &gt; <span class="el_source">NotificationRequestParam.java</span></div><h1>NotificationRequestParam.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.helper.pushnotification.model;
+
+import android.os.Build;
+
+/**
+ * Created by trusttanapruk on 11/7/2016.
+ */
+
+public class NotificationRequestParam {
+    private String userId;
+<span class="nc" id="L11">    private String deviceToken = &quot;d74cacc4 a9fa7a6b 80a0e1cd d6743859 f11b1921 024abf4b ff1e4a69 a03a9ea8&quot;;</span>
+<span class="nc" id="L12">    private String deviceModel = Build.MODEL;</span>
+<span class="nc" id="L13">    private String appId = &quot;454400030025003&quot;;</span>
+<span class="nc" id="L14">    private String appName = &quot;MyAIS&quot;;</span>
+<span class="nc" id="L15">    private String appVersion = &quot;1.0.0&quot;;</span>
+<span class="nc" id="L16">    private String platform = &quot;Android&quot;;</span>
+    private String platformVersion;
+<span class="nc" id="L18">    private String eventName = &quot;default&quot;;</span>
+<span class="nc" id="L19">    private String sender = &quot;MyAIS&quot;;</span>
+
+<span class="nc" id="L21">    public NotificationRequestParam() {</span>
+<span class="nc" id="L22">        platformVersion = String.valueOf(Build.VERSION.RELEASE);</span>
+<span class="nc" id="L23">    }</span>
+
+    public String getUserId() {
+<span class="nc" id="L26">        return userId;</span>
+    }
+
+    public void setUserId(String phoneNumberWith66Prefix) {
+<span class="nc" id="L30">        this.userId = phoneNumberWith66Prefix;</span>
+<span class="nc" id="L31">    }</span>
+
+    public String getDeviceToken() {
+<span class="nc" id="L34">        return deviceToken;</span>
+    }
+
+    public void setDeviceToken(String deviceToken) {
+<span class="nc bnc" id="L38" title="All 2 branches missed.">        if (deviceToken == null) {</span>
+<span class="nc" id="L39">            return;</span>
+        }
+<span class="nc" id="L41">        this.deviceToken = deviceToken;</span>
+<span class="nc" id="L42">    }</span>
+
+    public String getDeviceModel() {
+<span class="nc" id="L45">        return deviceModel;</span>
+    }
+
+    public void setDeviceModel(String deviceModel) {
+<span class="nc" id="L49">        this.deviceModel = deviceModel;</span>
+<span class="nc" id="L50">    }</span>
+
+    public String getAppId() {
+<span class="nc" id="L53">        return appId;</span>
+    }
+
+    public void setAppId(String appId) {
+<span class="nc" id="L57">        this.appId = appId;</span>
+<span class="nc" id="L58">    }</span>
+
+    public String getAppVersion() {
+<span class="nc" id="L61">        return appVersion;</span>
+    }
+
+    public void setAppVersion(String appVersion) {
+<span class="nc" id="L65">        this.appVersion = appVersion;</span>
+<span class="nc" id="L66">    }</span>
+
+    public String getPlatform() {
+<span class="nc" id="L69">        return platform;</span>
+    }
+
+    public void setPlatform(String platform) {
+<span class="nc" id="L73">        this.platform = platform;</span>
+<span class="nc" id="L74">    }</span>
+
+    public String getEventName() {
+<span class="nc" id="L77">        return eventName;</span>
+    }
+
+    public void setEventName(String eventName) {
+<span class="nc" id="L81">        this.eventName = eventName;</span>
+<span class="nc" id="L82">    }</span>
+
+    public String getSender() {
+<span class="nc" id="L85">        return sender;</span>
+    }
+
+    public void setSender(String sender) {
+<span class="nc" id="L89">        this.sender = sender;</span>
+<span class="nc" id="L90">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

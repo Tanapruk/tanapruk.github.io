@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SettingPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.setting.activity</a> &gt; <span class="el_source">SettingPresenter.java</span></div><h1>SettingPresenter.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.setting.activity;
+
+import com.ais.mimo.eservice.helper.term.network.TermManager;
+import com.ais.mimo.eservice.module.setting.event.GoToChangePasscodeFragmentEvent;
+import com.ais.mimo.eservice.module.setting.event.GoToFirstNewPasscodeFragmentEvent;
+import com.ais.mimo.eservice.module.setting.event.GoToPasscodeSettingFragmentEvent;
+import com.ais.mimo.eservice.module.setting.event.SetLanguageEvent;
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.eventlog.EventLogBlob;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.mvp.NextzyActivityPresenter;
+
+/**
+ * Created by Akexorcist on 9/7/2016 AD.
+ */
+
+public class SettingPresenter extends NextzyActivityPresenter&lt;SettingContractor.View&gt; implements SettingContractor.Presenter {
+
+    public static SettingPresenter createPresenter(SettingContractor.View view) {
+<span class="nc" id="L21">        return new SettingPresenter(view);</span>
+    }
+
+    public SettingPresenter(SettingContractor.View view) {
+<span class="nc" id="L25">        super(view);</span>
+<span class="nc" id="L26">    }</span>
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L30">        RxBus.get().register(this);</span>
+<span class="nc" id="L31">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L35">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L36">    }</span>
+
+    @Override
+    public void onViewStart() {
+<span class="nc" id="L40">        super.onViewStart();</span>
+<span class="nc" id="L41">        EventLogBlob.getInstance().addEventLog(</span>
+                TermManager.SERVICE_NAME_BY_MOBILE_TERM_OF_CONDITION,
+                new EventLogParam(&quot;APP_SETTING_TERMS_CONDITION&quot;, &quot;5009&quot;, &quot;5009&quot;));
+<span class="nc" id="L44">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L48">    }</span>
+
+
+    @Subscribe
+    public void onSetLanguageEvent(SetLanguageEvent event) {
+<span class="nc" id="L53">        getView().setLanguage(event.getLanguage());</span>
+<span class="nc" id="L54">    }</span>
+
+    @Subscribe
+    public void onGoToPasscodeSettingFragmentEvent(GoToPasscodeSettingFragmentEvent event) {
+<span class="nc" id="L58">        getView().openPasscodeSettingFragment();</span>
+<span class="nc" id="L59">    }</span>
+
+    @Subscribe
+    public void onGoToChangePasscodeFragmentEvent(GoToChangePasscodeFragmentEvent event) {
+<span class="nc" id="L63">        getView().openChangePasscodeFragment(event.getOldPasscode());</span>
+<span class="nc" id="L64">    }</span>
+
+    @Subscribe
+    public void onGoToFirstNewPasscodeActivityEvent(GoToFirstNewPasscodeFragmentEvent event) {
+<span class="nc" id="L68">        getView().openFirstNewPasscodeActivity();</span>
+<span class="nc" id="L69">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

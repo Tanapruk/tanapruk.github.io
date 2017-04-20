@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegisterStep1Presenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.register.step1</a> &gt; <span class="el_source">RegisterStep1Presenter.java</span></div><h1>RegisterStep1Presenter.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.register.step1;
+
+import android.graphics.Bitmap;
+
+import com.ais.mimo.eservice.helper.register.network.RegisterManager;
+import com.ais.mimo.eservice.helper.register.network.exception.RegisterSSBE309Exception;
+import com.ais.mimo.eservice.helper.register.network.exception.RegisterVerifyIdentityDataException;
+import com.ais.mimo.eservice.helper.register.network.exception.RegisterVerifyMyAisDataException;
+import com.ais.mimo.eservice.helper.register.network.request.RegisterVerifyIdentityBody;
+import com.ais.mimo.eservice.helper.register.network.response.RegisterVerifyIdentityResult;
+import com.ais.mimo.eservice.helper.register.network.response.RegisterVerifyMyAisResult;
+import com.ais.mimo.eservice.module.register.base.RegisterBasePresenter;
+import com.ais.mimo.eservice.module.register.event.GoToStep2FragmentEvent;
+import com.ais.mimo.eservice.module.register.event.data.Step2EventData;
+import com.ais.mimo.eservice.module.register.utility.RegisterValidateUtility;
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.database.NextzyDatabase;
+import com.nextzy.myais.common.utility.NextzyBitmapUtility;
+
+import static com.ais.mimo.eservice.helper.register.network.RegisterManager.FLAG_Y;
+import static com.ais.mimo.eservice.helper.register.network.RegisterManager.SERVICE_VERIFY_IDENTITY_MASTER;
+import static com.ais.mimo.eservice.module.register.utility.RegisterValidateUtility.INVALIDATE_CAPTCHA_FORMAT;
+import static com.ais.mimo.eservice.module.register.utility.RegisterValidateUtility.INVALIDATE_EMAIL_FORMAT;
+import static com.ais.mimo.eservice.module.register.utility.RegisterValidateUtility.INVALIDATE_EMPTY_2;
+import static com.ais.mimo.eservice.module.register.utility.RegisterValidateUtility.INVALIDATE_EMPTY_3;
+import static com.ais.mimo.eservice.module.register.utility.RegisterValidateUtility.INVALIDATE_ID_CARD_FORMAT;
+import static com.ais.mimo.eservice.module.register.utility.RegisterValidateUtility.INVALIDATE_MOBILE_NUMBER_FORMAT;
+
+/**
+ * Created by TheKhaeng on 9/20/2016.
+ */
+public class RegisterStep1Presenter extends RegisterBasePresenter&lt;RegisterStep1Contractor.View&gt; implements RegisterStep1Contractor.Presenter {
+<span class="fc" id="L34">    private final static String TAG = RegisterStep1Presenter.class.getSimpleName();</span>
+    private final RegisterValidateUtility validateUtil;
+    private RegisterManager registerManager;
+    private String refIdCaptcha;
+
+    public void setManager(RegisterManager manager) {
+<span class="fc" id="L40">        registerManager = manager;</span>
+<span class="fc" id="L41">    }</span>
+
+    private RegisterStep1Presenter(RegisterStep1Contractor.View view) {
+<span class="fc" id="L44">        super(view);</span>
+<span class="fc" id="L45">        registerManager = RegisterManager.getInstance();</span>
+<span class="fc" id="L46">        validateUtil = RegisterValidateUtility.getInstance();</span>
+<span class="fc" id="L47">    }</span>
+
+    public static RegisterStep1Presenter createPresenter(RegisterStep1Contractor.View view) {
+<span class="fc" id="L50">        return new RegisterStep1Presenter(view);</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L55">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L59">    }</span>
+
+    @Override
+    public void onViewStart() {
+
+<span class="nc" id="L64">    }</span>
+
+    @Override
+    public void onViewStop() {
+
+<span class="nc" id="L69">    }</span>
+
+    @Override
+    public void registerRx() {
+<span class="fc" id="L73">        RxBus.get().register(this);</span>
+<span class="fc" id="L74">    }</span>
+
+    @Override
+    public void unregisterRx() {
+<span class="fc" id="L78">        RxBus.get().unregister(this);</span>
+<span class="fc" id="L79">    }</span>
+
+    /*******************/
+    /** For view call **/
+    /*******************/
+    //&lt;editor-fold desc=&quot;For view folding&quot;&gt;
+    @Override
+    public void validateRequestVerifyMyAis(String mobileNumber,
+                                           String cardId,
+                                           String email,
+                                           String captcha) {
+<span class="fc" id="L90">        getView().showDefaultMobileNumber();</span>
+<span class="fc" id="L91">        getView().showDefaultIdCard();</span>
+<span class="fc" id="L92">        getView().showDefaultEmail();</span>
+<span class="fc" id="L93">        getView().showDefaultCaptchaEdt();</span>
+
+<span class="pc bpc" id="L95" title="2 of 3 branches missed.">        switch (validateUtil.validateEmptyTwoOrThree(mobileNumber,cardId,email)) {</span>
+            case INVALIDATE_EMPTY_2:
+<span class="nc" id="L97">                getView().showDialogInvalidateEmpty();</span>
+<span class="nc" id="L98">                return;</span>
+            case INVALIDATE_EMPTY_3:
+<span class="nc" id="L100">                getView().showDialogInvalidateEmpty();</span>
+<span class="nc" id="L101">                return;</span>
+        }
+
+<span class="fc bfc" id="L104" title="All 2 branches covered.">        switch (validateUtil.validateMobileOrInternetNumber(mobileNumber)) {</span>
+            case INVALIDATE_MOBILE_NUMBER_FORMAT:
+<span class="fc" id="L106">                getView().showDialogInvalidateMobileNumber();</span>
+<span class="fc" id="L107">                return;</span>
+        }
+
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        switch (validateUtil.validateIdCard(cardId)) {</span>
+            case INVALIDATE_ID_CARD_FORMAT:
+<span class="fc" id="L112">                getView().showDialogInvalidateIdCard();</span>
+<span class="fc" id="L113">                return;</span>
+        }
+
+<span class="fc bfc" id="L116" title="All 2 branches covered.">        switch (validateUtil.validateEmail(email)) {</span>
+            case INVALIDATE_EMAIL_FORMAT:
+<span class="fc" id="L118">                getView().showDialogInvalidateEmail();</span>
+<span class="fc" id="L119">                return;</span>
+        }
+
+<span class="fc bfc" id="L122" title="All 2 branches covered.">        if (getView().isCaptchaVisible()) {</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">            switch (validateUtil.validateCaptcha(captcha)) {</span>
+                case INVALIDATE_CAPTCHA_FORMAT:
+<span class="fc" id="L125">                    getView().showDialogInvalidateCaptchaEdt();</span>
+<span class="fc" id="L126">                    return;</span>
+            }
+        }
+
+<span class="fc" id="L130">        requestVerifyMyAis(mobileNumber, cardId);</span>
+<span class="fc" id="L131">    }</span>
+
+
+    @Override
+    public void validateRequestVerifyIdentity(String mobileNumber,
+                                              String cardId,
+                                              String email,
+                                              String captcha) {
+<span class="fc" id="L139">        getView().showDefaultMobileNumber();</span>
+<span class="fc" id="L140">        getView().showDefaultIdCard();</span>
+<span class="fc" id="L141">        getView().showDefaultEmail();</span>
+<span class="fc" id="L142">        getView().showDefaultCaptchaEdt();</span>
+
+
+<span class="fc bfc" id="L145" title="All 2 branches covered.">        switch (validateUtil.validateMobileOrInternetNumber(mobileNumber)) {</span>
+            case INVALIDATE_MOBILE_NUMBER_FORMAT:
+<span class="fc" id="L147">                getView().showDialogInvalidateMobileNumber();</span>
+<span class="fc" id="L148">                return;</span>
+        }
+
+<span class="fc bfc" id="L151" title="All 2 branches covered.">        switch (validateUtil.validateIdCard(cardId)) {</span>
+            case INVALIDATE_ID_CARD_FORMAT:
+<span class="fc" id="L153">                getView().showDialogInvalidateIdCard();</span>
+<span class="fc" id="L154">                return;</span>
+        }
+
+<span class="fc bfc" id="L157" title="All 2 branches covered.">        switch (validateUtil.validateEmail(email)) {</span>
+            case INVALIDATE_EMAIL_FORMAT:
+<span class="fc" id="L159">                getView().showDialogInvalidateEmail();</span>
+<span class="fc" id="L160">                return;</span>
+        }
+
+<span class="fc bfc" id="L163" title="All 2 branches covered.">        if (getView().isCaptchaVisible()) {</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">            switch (validateUtil.validateCaptcha(captcha)) {</span>
+                case INVALIDATE_CAPTCHA_FORMAT:
+<span class="fc" id="L166">                    getView().showDialogInvalidateCaptchaEdt();</span>
+<span class="fc" id="L167">                    return;</span>
+            }
+        }
+
+<span class="fc" id="L171">        requestVerifyIdentity(mobileNumber, cardId, email, captcha);</span>
+<span class="fc" id="L172">    }</span>
+
+    @Override
+    public void restoreRefIdCaptcha(String refIdCaptcha) {
+<span class="nc" id="L176">        this.refIdCaptcha = refIdCaptcha;</span>
+<span class="nc" id="L177">    }</span>
+
+    @Override
+    public String getRefIdCaptcha() {
+<span class="nc" id="L181">        return refIdCaptcha;</span>
+    }
+    //&lt;/editor-fold&gt;
+
+    @Subscribe
+    public void onReceiveVerifyMyAIS(RegisterVerifyMyAisResult result) {
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        if (result.isCanRequestVerifyIdentity()) {</span>
+<span class="fc" id="L188">            getView().fillParameterAndRequestVerifyIdentity();</span>
+        } else {
+<span class="fc" id="L190">            getView().showDialogErrorVerifyMyAis();</span>
+        }
+<span class="fc" id="L192">    }</span>
+
+    @Subscribe
+    public void onReceiveIdentityResponse(RegisterVerifyIdentityResult response) {
+<span class="fc bfc" id="L196" title="All 2 branches covered.">        if (response.isCanNextStep()) {</span>
+<span class="fc" id="L197">            getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L198">            goToFragmentStep2();</span>
+        } else {
+<span class="fc" id="L200">            getView().showResponseException(response.getResultDescription());</span>
+        }
+
+<span class="fc" id="L203">    }</span>
+
+    @Subscribe
+    public void onReceiveSSBE309Exception(RegisterSSBE309Exception exception) {
+<span class="fc" id="L207">        getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L208">        refIdCaptcha = exception.getReferenceId();</span>
+<span class="fc" id="L209">        Bitmap captcha</span>
+<span class="fc" id="L210">                = NextzyBitmapUtility.decodeBase64Image(exception.getCaptcha());</span>
+<span class="fc" id="L211">        getView().showCaptcha(captcha);</span>
+<span class="fc" id="L212">    }</span>
+
+    @Subscribe
+    public void onReceiveIdentityResponseException(RegisterVerifyIdentityDataException exception) {
+<span class="fc" id="L216">        showResponseExceptionDismiss(exception.getMessage());</span>
+<span class="fc" id="L217">    }</span>
+
+    @Subscribe
+    public void onReceiveMyAisResponseException(RegisterVerifyMyAisDataException exception) {
+<span class="fc" id="L221">        showResponseExceptionDismiss(exception.getMessage());</span>
+<span class="fc" id="L222">    }</span>
+
+    /********************/
+    /** Private method **/
+    /********************/
+    //&lt;editor-fold desc=&quot;Private function folding&quot;&gt;
+    private void requestVerifyMyAis(String mobileNumber, String cardId) {
+<span class="fc" id="L229">        getView().showLoadingNoFade();</span>
+<span class="fc" id="L230">        registerManager.verifyMyAisWithIdCard(mobileNumber, cardId);</span>
+<span class="fc" id="L231">    }</span>
+
+    private void requestVerifyIdentity(String mobileNumber, String cardId, String email, String captcha) {
+<span class="fc" id="L234">        String refId = null;</span>
+<span class="fc" id="L235">        String cap = null;</span>
+<span class="fc bfc" id="L236" title="All 2 branches covered.">        if (getView().isCaptchaVisible()) {</span>
+<span class="fc" id="L237">            refId = getRefId();</span>
+<span class="fc" id="L238">            cap = captcha;</span>
+        }
+<span class="fc" id="L240">        RegisterVerifyIdentityBody body = new RegisterVerifyIdentityBody()</span>
+<span class="fc" id="L241">                .setNumber(mobileNumber)</span>
+<span class="fc" id="L242">                .setCardId(cardId)</span>
+<span class="fc" id="L243">                .setEmail(email)</span>
+<span class="fc" id="L244">                .setVerifyCaptchaFlag(FLAG_Y)</span>
+<span class="fc" id="L245">                .setSendOtpFlag(FLAG_Y)</span>
+<span class="fc" id="L246">                .setReferenceId(refId)</span>
+<span class="fc" id="L247">                .setCaptcha(cap);</span>
+
+<span class="fc" id="L249">        registerManager.verifyIdentityMasterNumber(mobileNumber, body);</span>
+<span class="fc" id="L250">    }</span>
+
+    private void goToFragmentStep2() {
+<span class="fc" id="L253">        Step2EventData data = new Step2EventData(</span>
+<span class="fc" id="L254">                getView().getMobileNumberFromEditText(),</span>
+<span class="fc" id="L255">                getView().getIdCardFromEditText(),</span>
+<span class="fc" id="L256">                getView().getEmailFromEditText());</span>
+<span class="fc" id="L257">        RxBus.get().post(new GoToStep2FragmentEvent(data));</span>
+<span class="fc" id="L258">    }</span>
+    //&lt;/editor-fold&gt;
+
+
+    /*******************/
+    /** Getter Setter **/
+    /*******************/
+    //&lt;editor-fold desc=&quot;Getter Setter folding&quot;&gt;
+    private String getRefId() {
+<span class="pc bpc" id="L267" title="2 of 4 branches missed.">        if (getView().isCaptchaVisible() &amp;&amp; refIdCaptcha != null) return refIdCaptcha;</span>
+
+<span class="fc" id="L269">        RegisterVerifyIdentityResult identity = NextzyDatabase.getInstance().findByName(</span>
+                SERVICE_VERIFY_IDENTITY_MASTER,
+                RegisterVerifyIdentityResult.class);
+<span class="pc bpc" id="L272" title="1 of 2 branches missed.">        if (identity != null) {</span>
+<span class="fc" id="L273">            return identity.getData().getReferenceId();</span>
+        }
+<span class="nc" id="L275">        return null;</span>
+
+    }
+    //&lt;/editor-fold&gt;
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegisterConfirmBody.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.helper.register.network.request</a> &gt; <span class="el_source">RegisterConfirmBody.java</span></div><h1>RegisterConfirmBody.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.helper.register.network.request;
+
+import java.util.List;
+
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+/**
+ * Created by TheKhaeng on 10/11/2016.
+ */
+
+<span class="nc" id="L12">@ToString</span>
+<span class="pc bpc" id="L13" title="51 of 70 branches missed.">@EqualsAndHashCode</span>
+public class RegisterConfirmBody {
+    private String cardId;
+    private String user;
+    private String password;
+    private String email;
+    private String referenceId;
+    private List&lt;String&gt; postpaidList;
+    private List&lt;String&gt; prepaidList;
+    private List&lt;String&gt; fibreList;
+
+<span class="fc" id="L24">    public RegisterConfirmBody(){}</span>
+
+
+    public RegisterConfirmBody setCardId(String cardId) {
+<span class="fc" id="L28">        this.cardId = cardId;</span>
+<span class="fc" id="L29">        return this;</span>
+    }
+    public RegisterConfirmBody setUser(String user) {
+<span class="fc" id="L32">        this.user = user;</span>
+<span class="fc" id="L33">        return this;</span>
+    }
+    public RegisterConfirmBody setPassword(String password) {
+<span class="fc" id="L36">        this.password = password;</span>
+<span class="fc" id="L37">        return this;</span>
+    }
+    public RegisterConfirmBody setEmail(String email) {
+<span class="fc" id="L40">        this.email = email;</span>
+<span class="fc" id="L41">        return this;</span>
+    }
+    public RegisterConfirmBody setReferenceId(String referenceId) {
+<span class="fc" id="L44">        this.referenceId = referenceId;</span>
+<span class="fc" id="L45">        return this;</span>
+    }
+    public RegisterConfirmBody setPostpaidList(List&lt;String&gt; postpaidList) {
+<span class="fc" id="L48">        this.postpaidList = postpaidList;</span>
+<span class="fc" id="L49">        return this;</span>
+    }
+    public RegisterConfirmBody setPrepaidList(List&lt;String&gt; prepaidList) {
+<span class="fc" id="L52">        this.prepaidList = prepaidList;</span>
+<span class="fc" id="L53">        return this;</span>
+    }
+    public RegisterConfirmBody setFibreList(List&lt;String&gt; fibreList) {
+<span class="fc" id="L56">        this.fibreList = fibreList;</span>
+<span class="fc" id="L57">        return this;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

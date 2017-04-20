@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginPasscodeFragment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.login.fragment</a> &gt; <span class="el_source">LoginPasscodeFragment.java</span></div><h1>LoginPasscodeFragment.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.login.fragment;
+
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.view.View;
+import android.widget.EditText;
+
+import com.ais.mimo.eservice.helper.devtool.NextzyInjector;
+import com.nextzy.myais.common.mvp.NextzyMvpActivity;
+import com.nextzy.myais.common.passcode.manager.NextzyFingerprintManager;
+import com.nextzy.myais.common.utility.DefaultPreference;
+import com.nextzy.myais.common.widget.AISTextView;
+import com.nextzy.myais.common.widget.dialog.AisDialog;
+import com.nextzy.myais.common.widget.dialog.listener.ChoiceDialogClickListener;
+import com.nextzy.myais.myais.R;
+
+import th.co.thekhaeng.pinlock.IndicatorDots;
+import th.co.thekhaeng.pinlock.LeftButtonClickListener;
+import th.co.thekhaeng.pinlock.PinLockListener;
+import th.co.thekhaeng.pinlock.PinLockView;
+import timber.log.Timber;
+
+import static com.ais.mimo.eservice.module.passcode.ValidatePasscodeActivity.KEY_CANCEL_TOUCH_ID;
+import static com.nextzy.myais.common.passcode.manager.NextzyFingerprintManager.ERROR_FINGERPRINT_5_TIMES;
+import static com.nextzy.myais.common.passcode.manager.NextzyFingerprintManager.ERROR_FINGERPRINT_ERROR_HELP;
+import static com.nextzy.myais.common.passcode.manager.NextzyFingerprintManager.ERROR_FINGERPRINT_NOT_RECOGNIZED;
+import static com.nextzy.myais.common.passcode.manager.NextzyFingerprintManager.ERROR_FINGERPRINT_NOT_SUPPORTED;
+import static com.nextzy.myais.common.passcode.manager.NextzyFingerprintManager.ERROR_FINGERPRINT_PERMISSION_DENIED;
+import static com.nextzy.myais.common.passcode.manager.NextzyFingerprintManager.ERROR_FINGERPRINT_REGISTRATION_NEEDED;
+
+
+/**
+ * Created by trusttanapruk on 8/17/2016.
+ */
+public class LoginPasscodeFragment extends LoginBaseFragment implements NextzyInjector {
+    private static final int MAX_ERROR_COUNT = 3;
+    public static final int PIN_LENGTH = 6;
+    public static final String KEY_MASTER_NUMBER_FOR_LOGIN = &quot;key_master_number_for_login&quot;;
+    public static final String KEY_PASSCODE_FOR_LOGIN = &quot;key_passcode_for_login&quot;;
+    public static final String KEY_PRIVATE_ID_FOR_LOGIN = &quot;key_private_id_for_login&quot;;
+    public static final String KEY_TOKEN_FOR_LOGIN = &quot;key_token_for_login&quot;;
+    private final NextzyFingerprintManager fingerPrintManager;
+    private final AisDialog dialog;
+    private final DefaultPreference preference;
+    private IndicatorDots indicatorDots;
+    private PinLockView pinLockView;
+    private AISTextView tvPasscodeTitle;
+    private String myPasscode;
+    private int errorCount = 0;
+    private String myPrivateId;
+    private String myToken;
+    private String myMasterNumber;
+    private boolean isCancelTouchId = false;
+
+    public LoginPasscodeFragment() {
+        fingerPrintManager = NextzyFingerprintManager.getInstance();
+        preference = DefaultPreference.getInstance();
+        dialog = AisDialog.getInstance();
+    }
+
+    public static LoginPasscodeFragment newInstance(Bundle bundle) {
+        LoginPasscodeFragment fragment = new LoginPasscodeFragment();
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+
+    @Override
+    public int getLayoutView() {
+        return R.layout.my_ais_login_fragment_passcode;
+    }
+
+    @Override
+    public void bindView(View view) {
+        tvPasscodeTitle = (AISTextView) view.findViewById(R.id.my_ais_pinlock_tv_title);
+        indicatorDots = (IndicatorDots) view.findViewById(R.id.my_ais_pinlock_indicator_dots);
+        pinLockView = (PinLockView) view.findViewById(R.id.my_ais_pinlock_view);
+    }
+
+    @Override
+    public void setupView() {
+        dismissAllDialogs(); // make sure dialog dismiss when restore view
+        myMasterNumber = getArguments().getString(KEY_MASTER_NUMBER_FOR_LOGIN);
+        myPasscode = getArguments().getString(KEY_PASSCODE_FOR_LOGIN);
+        myPrivateId = getArguments().getString(KEY_PRIVATE_ID_FOR_LOGIN);
+        myToken = getArguments().getString(KEY_TOKEN_FOR_LOGIN);
+        if (myMasterNumber == null)
+            throw new NullPointerException(&quot;You must send KEY_MASTER_NUMBER_FOR_LOGIN to this activity&quot;);
+        if (myPasscode == null)
+            throw new NullPointerException(&quot;You must send KEY_PASSCODE_FOR_LOGIN to this activity&quot;);
+        if (myPrivateId == null)
+            throw new NullPointerException(&quot;You must send KEY_PRIVATE_ID_FOR_LOGIN to this activity&quot;);
+        if (myToken == null)
+            throw new NullPointerException(&quot;You must send KEY_TOKEN_FOR_LOGIN to this activity&quot;);
+
+        pinLockView.attachIndicatorDots(indicatorDots);
+        pinLockView.setPinLockListener(onPinLockListener());
+        pinLockView.setOnClickButtonLeftListener(createLeftButtonListener());
+        pinLockView.setPinLength(PIN_LENGTH);
+
+        fingerPrintManager.init(this, onFingerListener());
+    }
+
+    @Override
+    public void restoreArgument(Bundle bundle) {
+
+    }
+
+    @Override
+    public void initialize() {
+    }
+
+    @Override
+    public void restoreView() {
+
+    }
+
+    @Override
+    public void saveInstanceState(Bundle outState) {
+        outState.putBoolean(KEY_CANCEL_TOUCH_ID, isCancelTouchId);
+    }
+
+    @Override
+    public void restoreInstanceState(Bundle savedInstanceState) {
+        isCancelTouchId = savedInstanceState.getBoolean(KEY_CANCEL_TOUCH_ID, false);
+    }
+
+    @Override
+    public EditText getInjectEditText() {
+        return null;
+    }
+
+    @Override
+    public void showDuplicateOrExpireLoginDialog(String message) {
+        showAlertDialogCustomOnClick(
+                message,
+                data -&gt; getPresenter().requestDisableFingerScanAndGoToLoginFragment(myMasterNumber, myPrivateId, myToken, false)
+        );
+    }
+
+    private void showTouchIdDialog() {
+        AisDialog.getInstance().showSimpleNegativeDialog(
+                getFragmentManager(),
+                R.drawable.my_ais_library_ic_fingerprint,
+                null,
+                getActivity().getString(R.string.my_ais_login_touch_id_message),
+                getActivity().getString(R.string.cancel),
+                false,
+                data -&gt; fingerPrintManager.stop());
+    }
+
+    private void showTouchIdCannotAuthenticationDialog() {
+        AisDialog.getInstance().showSimpleNegativeDialog(
+                getFragmentManager(),
+                R.drawable.my_ais_library_ic_fingerprint,
+                getString(R.string.my_ais_login_touch_id_try_again),
+                getString(R.string.my_ais_login_touch_id_cannot_authentication),
+                getActivity().getString(R.string.cancel),
+                false,
+                data -&gt; {
+                    isCancelTouchId = true;
+                    fingerPrintManager.stop();
+                });
+    }
+
+
+    private void showMaximumPasscodeLimitDialog() {
+        AisDialog.getInstance().showSimpleDialog(getFragmentManager(),
+                null,
+                getString(R.string.my_ais_passcode_message_maximum_invalidate),
+                getString(R.string.ok), data -&gt; getPresenter().requestDisableFingerScanAndGoToLoginFragment(myMasterNumber, myPrivateId, myToken, true));
+    }
+
+
+    private void setReEnterPasscode() {
+        pinLockView.animateNotMatchPasscodeAndClearIndicator();
+    }
+
+    private void clickReset() {
+        AisDialog.getInstance().showChoiceDialog(getFragmentManager(),
+                null,
+                getString(R.string.my_ais_passcode_dialog_reset),
+                getString(R.string.ok),
+                getString(R.string.cancel),
+<span class="nc" id="L185">                new ChoiceDialogClickListener() {</span>
+                    @Override
+                    public void onDialogPositiveButtonClick(@Nullable Bundle data) {
+<span class="nc" id="L188">                        getPresenter().requestDisableFingerScanAndGoToLoginFragment(myMasterNumber, myPrivateId, myToken, true);</span>
+<span class="nc" id="L189">                    }</span>
+
+                    @Override
+                    public void onDialogNegativeButtonClick(@Nullable Bundle data) {
+<span class="nc" id="L193">                        dismissDialog();</span>
+<span class="nc" id="L194">                    }</span>
+                });
+    }
+
+    @NonNull
+    private LeftButtonClickListener createLeftButtonListener() {
+        return numberViewHolder -&gt; clickReset();
+    }
+
+    @Override
+    public void showResponseException(String message) {
+        pinLockView.clearIndicator();
+        if (getActivity() instanceof NextzyMvpActivity) {
+            ((NextzyMvpActivity) getActivity())
+                    .showAlertDialogDismissOnClick(message);
+        }
+    }
+
+    @NonNull
+    private PinLockListener onPinLockListener() {
+<span class="nc" id="L214">        return new PinLockListener() {</span>
+            @Override
+            public void onComplete(String putPasscode) {
+<span class="nc" id="L217">                Timber.i(&quot;Pin complete: &quot; + putPasscode);</span>
+<span class="nc bnc" id="L218" title="All 2 branches missed.">                if (putPasscode.equals(myPasscode)) {</span>
+<span class="nc" id="L219">                    getPresenter().onLoginWithTokens(myMasterNumber, null, myToken, myPrivateId, null, null);</span>
+                } else {
+<span class="nc" id="L221">                    setReEnterPasscode();</span>
+<span class="nc" id="L222">                    errorCount += 1;</span>
+                }
+
+<span class="nc bnc" id="L225" title="All 2 branches missed.">                if (errorCount &gt;= MAX_ERROR_COUNT) {</span>
+<span class="nc" id="L226">                    showMaximumPasscodeLimitDialog();</span>
+<span class="nc" id="L227">                    pinLockView.clearIndicator();</span>
+                }
+<span class="nc" id="L229">            }</span>
+
+            @Override
+            public void onEmpty() {
+<span class="nc" id="L233">                Timber.i(&quot;Pin empty&quot;);</span>
+<span class="nc" id="L234">            }</span>
+
+            @Override
+            public void onPinChange(int pinLength, String intermediatePin) {
+<span class="nc" id="L238">                Timber.i(&quot;Pin changed, new length &quot; + pinLength + &quot; with intermediate pin &quot; + intermediatePin);</span>
+<span class="nc" id="L239">            }</span>
+        };
+    }
+
+    @NonNull
+    private NextzyFingerprintManager.OnFingerprintResultCallback onFingerListener() {
+<span class="nc" id="L245">        return new NextzyFingerprintManager.OnFingerprintResultCallback() {</span>
+<span class="nc" id="L246">            boolean isErrorFirst = false;</span>
+
+            @Override
+            public void onFingerprintAuthenticationSuccess() {
+<span class="nc" id="L250">                Timber.i(&quot;onFingerprintAuthenticationSuccess: &quot;);</span>
+<span class="nc" id="L251">                dismissDialog();</span>
+<span class="nc" id="L252">                getPresenter().onLoginWithTokens(myMasterNumber, null, myToken, myPrivateId, null, null);</span>
+<span class="nc" id="L253">            }</span>
+
+            @Override
+            public void onFingerprintAuthenticationError(int errorType, Exception exception) {
+<span class="nc" id="L257">                Timber.i(&quot;onFingerprintAuthenticationError: errorType=&quot; + errorType + &quot; exception=&quot; + exception.getMessage());</span>
+<span class="nc bnc" id="L258" title="All 7 branches missed.">                switch (errorType) {</span>
+                    case ERROR_FINGERPRINT_NOT_SUPPORTED:
+<span class="nc" id="L260">                        break;</span>
+                    case ERROR_FINGERPRINT_NOT_RECOGNIZED:
+<span class="nc bnc" id="L262" title="All 2 branches missed.">                        if (!isErrorFirst) {</span>
+<span class="nc" id="L263">                            isErrorFirst = true;</span>
+<span class="nc" id="L264">                            showTouchIdCannotAuthenticationDialog();</span>
+                        }
+                        break;
+                    case ERROR_FINGERPRINT_PERMISSION_DENIED:
+<span class="nc" id="L268">                        break;</span>
+                    case ERROR_FINGERPRINT_REGISTRATION_NEEDED:
+<span class="nc" id="L270">                        break;</span>
+                    case ERROR_FINGERPRINT_ERROR_HELP:
+<span class="nc" id="L272">                        break;</span>
+                    case ERROR_FINGERPRINT_5_TIMES:
+<span class="nc" id="L274">                        fingerPrintManager.stop();</span>
+<span class="nc" id="L275">                        dismissDialog();</span>
+                        break;
+                }
+<span class="nc" id="L278">            }</span>
+
+            @Override
+            public void onFingerprintAuthenticationReady() {
+<span class="nc" id="L282">                Timber.i(&quot;onFingerprintAuthenticationReady: &quot;);</span>
+<span class="nc" id="L283">                isErrorFirst = false;</span>
+<span class="nc bnc" id="L284" title="All 4 branches missed.">                if (preference.loadTouchIdSwitchSetting() &amp;&amp; !isCancelTouchId) {</span>
+<span class="nc" id="L285">                    fingerPrintManager.start();</span>
+                } else {
+<span class="nc" id="L287">                    fingerPrintManager.stop();</span>
+                }
+<span class="nc" id="L289">            }</span>
+
+            @Override
+            public void onFingerprintAuthenticationScanning(boolean invalidKey) {
+<span class="nc" id="L293">                Timber.i(&quot;onFingerprintAuthenticationScanning: invalidKey=&quot; + invalidKey);</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">                if (!isShowAisAlertDialog()) {</span>
+<span class="nc" id="L295">                    showTouchIdDialog();</span>
+                }
+<span class="nc" id="L297">            }</span>
+        };
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

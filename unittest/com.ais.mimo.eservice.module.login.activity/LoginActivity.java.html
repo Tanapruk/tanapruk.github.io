@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.login.activity</a> &gt; <span class="el_source">LoginActivity.java</span></div><h1>LoginActivity.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.login.activity;
+
+import android.app.ActivityManager;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.ais.mimo.eservice.helper.devtool.GetNextzySMS;
+import com.ais.mimo.eservice.helper.devtool.NextzyInjector;
+import com.ais.mimo.eservice.helper.login.event.GoToForgotPasswordEvent;
+import com.ais.mimo.eservice.helper.login.event.GotoLoginRegisterEvent;
+import com.ais.mimo.eservice.helper.mock.MobileMock;
+import com.ais.mimo.eservice.module.devtool.DeveloperModeActivity;
+import com.ais.mimo.eservice.module.forgot.ForgotPasswordActivity;
+import com.ais.mimo.eservice.module.login.fragment.LoginPasscodeFragment;
+import com.ais.mimo.eservice.module.login.fragment.LoginPasswordFragment;
+import com.ais.mimo.eservice.module.login.fragment.LoginSecondaryFragment;
+import com.ais.mimo.eservice.module.login.fragment.LoginVerifyChoiceFragment;
+import com.ais.mimo.eservice.module.login.fragment.LoginWelcomeFragment;
+import com.ais.mimo.eservice.module.main.activity.MainActivity;
+import com.ais.mimo.eservice.module.register.intro.RegisterIntroActivity;
+import com.ais.mimo.eservice.module.term.TermActivity;
+import com.ais.mimo.eservice.module.tutorial.TutorialActivity;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.config.mobile.MobileType;
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.database.NextzyDatabase;
+import com.nextzy.myais.common.delegate.FragmentHelperDelegate;
+import com.nextzy.myais.common.mvp.NextzyMvpActivity;
+import com.nextzy.myais.common.utility.DataUpdatePreference;
+import com.nextzy.myais.common.utility.DefaultPreference;
+import com.nextzy.myais.common.utility.NextzyAndroidUtility;
+import com.nextzy.myais.common.widget.dialog.AisDialog;
+import com.nextzy.myais.myais.BuildConfig;
+import com.nextzy.myais.myais.R;
+
+import java.util.Map;
+
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+import static com.ais.mimo.eservice.module.devtool.DeveloperModeActivity.KEY_IS_AIS_DEV;
+import static com.ais.mimo.eservice.module.devtool.DeveloperModeActivity.KEY_IS_URL_MOCK;
+import static com.ais.mimo.eservice.module.devtool.DeveloperModeActivity.KEY_MOCK_MOBILE_MODE;
+import static com.ais.mimo.eservice.module.devtool.DeveloperModeActivity.KEY_SKIP_ACTIVITY_NAME;
+import static com.ais.mimo.eservice.module.login.fragment.LoginPasscodeFragment.KEY_MASTER_NUMBER_FOR_LOGIN;
+import static com.ais.mimo.eservice.module.login.fragment.LoginPasscodeFragment.KEY_PASSCODE_FOR_LOGIN;
+import static com.ais.mimo.eservice.module.login.fragment.LoginPasscodeFragment.KEY_PRIVATE_ID_FOR_LOGIN;
+import static com.ais.mimo.eservice.module.login.fragment.LoginPasscodeFragment.KEY_TOKEN_FOR_LOGIN;
+import static com.ais.mimo.eservice.module.register.base.RegisterBaseFragment.KEY_COME_FROM_TAG;
+import static com.ais.mimo.eservice.module.register.base.RegisterBaseFragment.KEY_MOBILE_NUMBER;
+import static com.ais.mimo.eservice.module.tutorial.TutorialActivity.TUTORIAL_VERSION;
+import static com.nextzy.myais.common.utility.DefaultPreference.KEY_MASTER_NUMBER;
+import static com.nextzy.myais.common.utility.DefaultPreference.KEY_PASSCODE;
+import static com.nextzy.myais.common.utility.DefaultPreference.KEY_PRIVATE_ID;
+import static com.nextzy.myais.common.utility.DefaultPreference.KEY_TOKEN;
+
+public class LoginActivity extends NextzyMvpActivity&lt;LoginContractor.Presenter&gt; implements LoginContractor.View {
+    private static final String TAG = LoginActivity.class.getSimpleName();
+    public final static String SHOULD_BYPASS = &quot;SHOULD_BYPASS&quot;;
+    private static final int REQUEST_PASSCODE = 0;
+    TextView tvCreateAccount;
+    FragmentHelperDelegate fragmentHelperDelegate = new FragmentHelperDelegate(this);
+    LinearLayout vgDevMode;
+    SharedPreferences sharedPreferences;
+    String toActivityName;
+    boolean shouldByPass = true;
+    private DefaultPreference preference;
+    private NextzyAndroidUtility androidUtility;
+    private LinearLayout llBackground;
+
+    @Override
+    protected void createPresenter() {
+        LoginPresenter.createPresenter(this);
+        preference = DefaultPreference.getInstance();
+        androidUtility = NextzyAndroidUtility.getInstance();
+    }
+
+    @Override
+    public int getLayoutView() {
+        return R.layout.my_ais_activity_login;
+    }
+
+
+    @Override
+    public void bindView() {
+        fragmentHelperDelegate.bind(R.id.my_ais_login_fragment_container);
+        llBackground = (LinearLayout) findViewById(R.id.login_background);
+        tvCreateAccount = (TextView) findViewById(R.id.my_ais_login_activity_tv_create_my_ais);
+        vgDevMode = (LinearLayout) findViewById(R.id.container_dev_login);
+    }
+
+
+    private void checkPasscodeLogin() {
+        if (preference.loadPasscodeSwitchSetting()) {
+            gotoLoginPasscodeFragment();
+        } else {
+            requestAutoOtp();
+        }
+    }
+
+    private boolean isNotEmpty(Map&lt;String, String&gt; result) {
+        return result != null
+                &amp;&amp; result.get(KEY_MASTER_NUMBER) != null
+                &amp;&amp; result.get(KEY_PASSCODE) != null
+                &amp;&amp; result.get(KEY_PRIVATE_ID) != null
+                &amp;&amp; result.get(KEY_TOKEN) != null;
+    }
+
+
+    private void restoreIsMockBooleanFromSharedPreferences() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        URL.isMock = sharedPreferences.getBoolean(DeveloperModeActivity.KEY_IS_URL_MOCK, false);
+        URL.isAisDevServer = sharedPreferences.getBoolean(DeveloperModeActivity.KEY_IS_AIS_DEV, false);
+    }
+
+    private void requestMsisdnIfAvailable() {
+        if (androidUtility.isMobileConnection(getApplicationContext()) &amp;&amp; shouldByPass) {
+            getPresenter().checkMsisdnBypass();
+        } else {
+            gotoWelcomeFragment();
+        }
+    }
+
+    private void clearStorageData() {
+        NextzyDatabase.getInstance().deleteAllDatabase();
+        Mobile.getInstance().clear();
+        DataUpdatePreference.getInstance().clear(this);
+    }
+
+    @Override
+    public void restoreInstanceState(Bundle savedInstanceState) {
+        shouldByPass = savedInstanceState.getBoolean(SHOULD_BYPASS);
+    }
+
+    @Override
+    public void setupView() {
+        tvCreateAccount.setOnClickListener(v -&gt; openActivity(RegisterIntroActivity.class));
+    }
+
+    @Override
+    public void initialize() {
+        setupDevTool();
+        checkPasscodeLogin();
+        restoreIsMockBooleanFromSharedPreferences();
+        clearStorageData();
+    }
+
+    @Override
+    public void restoreView() {
+        setupDevTool();
+        checkPasscodeLogin();
+        restoreIsMockBooleanFromSharedPreferences();
+        clearStorageData();
+    }
+
+    @Override
+    public void restoreArgument(Bundle bundle) {
+        shouldByPass = bundle.getBoolean(SHOULD_BYPASS);
+    }
+
+
+    @Override
+    public void saveInstanceState(Bundle outState) {
+        outState.putBoolean(SHOULD_BYPASS, shouldByPass);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (fragmentHelperDelegate.getCurrentFragment() instanceof LoginPasswordFragment) {
+            gotoWelcomeFragment();
+            return;
+        }
+
+        AisDialog.getInstance().showExitDialog(this);
+    }
+
+    @Override
+    public void loginSuccess() {
+        if (DefaultPreference.getInstance().isFirstOpenTutorialActivity(TUTORIAL_VERSION)) {
+            openActivityFadeInOut(TutorialActivity.class, true);
+        } else {
+            openActivity(MainActivity.class, true);
+            dismissDialog();
+        }
+    }
+
+    public void gotoWelcomeFragment() {
+        llBackground.setVisibility(VISIBLE);
+        fragmentHelperDelegate.clearAllBackStacks();
+//        Mobile.getInstance().clear();
+        fragmentHelperDelegate.openFragmentAddToBackStack(LoginWelcomeFragment.newInstance());
+    }
+
+    private void gotoLoginPasscodeFragment() {
+        llBackground.setVisibility(GONE);
+        Map&lt;String, String&gt; result = preference.loadPasscodeMasterNumberAndPrivateIdAndToken();
+        if (isNotEmpty(result)) {
+            Bundle bundle = new Bundle();
+            bundle.putString(KEY_MASTER_NUMBER_FOR_LOGIN, result.get(KEY_MASTER_NUMBER));
+            bundle.putString(KEY_PASSCODE_FOR_LOGIN, result.get(KEY_PASSCODE));
+            bundle.putString(KEY_PRIVATE_ID_FOR_LOGIN, result.get(KEY_PRIVATE_ID));
+            bundle.putString(KEY_TOKEN_FOR_LOGIN, result.get(KEY_TOKEN));
+            fragmentHelperDelegate.clearAllBackStacks();
+//          Mobile.getInstance().clear();
+            fragmentHelperDelegate.openFragmentAddToBackStack(LoginPasscodeFragment.newInstance(bundle));
+        } else {
+            requestAutoOtp();
+        }
+    }
+
+    @Override
+    public void gotoWelcomeFragmentAfterClickingOk() {
+        showServiceUnavailableDialog(false);
+    }
+
+    public void gotoVerifyChoiceFragment() {
+        fragmentHelperDelegate.openFragmentAddToBackStack(LoginVerifyChoiceFragment.newInstance());
+    }
+
+    @Override
+    public void gotoPasswordFragment(String otpOrPassword, String referenceId, String otpMethod, String captcha) {
+        fragmentHelperDelegate.openFragmentAddToBackStack(LoginPasswordFragment.newInstance(otpOrPassword, referenceId, otpMethod, captcha));
+    }
+
+    @Override
+    public void gotoLoginRegisterEvent(GotoLoginRegisterEvent event) {
+        Bundle bundle = new Bundle();
+        bundle.putString(KEY_MOBILE_NUMBER, event.getMobileNumber());
+        bundle.putString(KEY_COME_FROM_TAG, event.getComeFromTag());
+        openActivity(RegisterIntroActivity.class, bundle);
+    }
+
+    @Override
+    public void gotoForgotPasswordEvent(GoToForgotPasswordEvent event) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ForgotPasswordActivity.KEY_ACCOUNT_NUMBER, event.getMobileNumber());
+        openActivity(ForgotPasswordActivity.class, bundle);
+    }
+
+    @Override
+    public void showTermAcceptDecline() {
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(TermActivity.KEY_SHOW_ACCEPT_AND_DECLINE_BUTTON, true);
+        openActivity(TermActivity.class, bundle, false);
+    }
+
+    @Override
+    public void goToSecondaryOtpFragment(String secondaryType) {
+        fragmentHelperDelegate.openFragmentAddToBackStack(LoginSecondaryFragment.newInstance(secondaryType));
+    }
+
+    @Override
+    public void onReloadApiService() {
+        // Passcode cannot by pass
+        if (!(fragmentHelperDelegate.getCurrentFragment() instanceof LoginPasscodeFragment)) {
+            getPresenter().checkMsisdnBypass();
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // dev tool
+    ///////////////////////////////////////////////////////////////////////////
+
+    private void setupDevTool() {
+        if (BuildConfig.DEV_MODE) {
+            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            if (!ActivityManager.isUserAMonkey()) {
+                Button btnDevMode = new Button(getApplicationContext());
+                btnDevMode.setText(&quot;DevMode Settings&quot;);
+                btnDevMode.setOnClickListener(v -&gt; openActivity(DeveloperModeActivity.class));
+                vgDevMode.addView(btnDevMode);
+            } else {
+                URL.isMock = true;
+                sharedPreferences.edit().putBoolean(KEY_IS_URL_MOCK, true).apply();
+                sharedPreferences.edit().putBoolean(KEY_IS_AIS_DEV, false).apply();
+                sharedPreferences.edit().putString(KEY_MOCK_MOBILE_MODE, MobileType.POSTPAID.toString()).apply();
+                sharedPreferences.edit().putString(KEY_SKIP_ACTIVITY_NAME, MainActivity.class.getName()).apply();
+            }
+
+            Button btnGetNumber = new Button(getApplicationContext());
+            btnGetNumber.setText(&quot;Get Nextzy Number&quot;);
+            btnGetNumber.setOnClickListener(onGetNextzyNumberClickListener());
+            vgDevMode.addView(btnGetNumber);
+
+            Button btnGetOtp = new Button(getApplicationContext());
+            btnGetOtp.setText(&quot;Get Otp&quot;);
+            btnGetOtp.setOnClickListener(onGetOtpClickListener());
+            vgDevMode.addView(btnGetOtp);
+
+            Button btnSkip = new Button(getApplicationContext());
+            btnSkip.setText(getToActivityNameString());
+            btnSkip.setOnClickListener(onSkipToActivity());
+            vgDevMode.addView(btnSkip);
+
+            TextView textView = new TextView(getApplicationContext());
+            textView.setPadding(20, 0, 0, 0);
+            textView.setTextColor(Color.WHITE);
+            textView.setBackgroundColor(Color.argb(90, 100, 0, 0));
+            vgDevMode.addView(textView);
+
+            updateGotoActivityName();
+        }
+    }
+
+    private void requestAutoOtp() {
+        llBackground.setVisibility(VISIBLE);
+        requestMsisdnIfAvailable();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateGotoActivityName();
+    }
+
+    private String getToActivityNameString() {
+        if (toActivityName == null) {
+            return &quot;Skip to[choose your activity]&quot;;
+        }
+        return String.format(&quot;Skip to\n[%1$s]&quot;, toActivityName.substring(toActivityName.lastIndexOf('.') + 1).trim());
+    }
+
+
+    private void updateGotoActivityName() {
+        if (BuildConfig.DEV_MODE) {
+            toActivityName = sharedPreferences.getString(KEY_SKIP_ACTIVITY_NAME, &quot;&quot;);
+            ((Button) vgDevMode.getChildAt(vgDevMode.getChildCount() - 2)).setText(getToActivityNameString());
+        }
+    }
+
+    private View.OnClickListener onSkipToActivity() {
+        //open class from string
+        return v -&gt; {
+            Class&lt;?&gt; c = null;
+            if (toActivityName == null) {
+                Toast.makeText(this, &quot;NO such activity empty string&quot;, Toast.LENGTH_SHORT).show();
+            } else {
+                try {
+                    c = Class.forName(toActivityName);
+                } catch (ClassNotFoundException e) {
+                    Toast.makeText(this, &quot;NO such activity&quot;, Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                }
+                if (c == null) {
+                    Toast.makeText(this, &quot;NO such activity bad parse&quot;, Toast.LENGTH_SHORT).show();
+                } else {
+                    if (URL.isMock) {
+                        ActivityCompat.finishAffinity(this);
+                        openActivity(c);
+                        overridePendingTransition(0, 0);
+                        String mobileType = sharedPreferences.getString(KEY_MOCK_MOBILE_MODE, MobileType.POSTPAID.toString());
+                        boolean isCorp = sharedPreferences.getBoolean(DeveloperModeActivity.KEY_IS_CORP, false);
+
+                        if (MobileType.POSTPAID.toString().equalsIgnoreCase(mobileType)) {
+                            MobileMock.getInstance().mockPostpaid(isCorp);
+                        } else if (MobileType.PREPAID.toString().equalsIgnoreCase(mobileType)) {
+                            MobileMock.getInstance().mockPrepaid(isCorp);
+                        } else {
+                            MobileMock.getInstance().mockFibre();
+                        }
+                        Toast.makeText(this, String.format(&quot;Mock Number is %1$s&quot;, Mobile.getInstance().getMobileNumber()), Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, &quot;You can't skip with real service.&quot;, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+        };
+    }
+
+    private void alertDoesntImplement() {
+        Toast.makeText(this, String.format(&quot;This %1$s doesn't implement %2$s&quot;,
+                fragmentHelperDelegate.getCurrentFragment().getClass().getSimpleName(),
+                NextzyInjector.class.getSimpleName()), Toast.LENGTH_SHORT).
+                show();
+    }
+
+    private View.OnClickListener onGetNextzyNumberClickListener() {
+        return v -&gt; {
+            if (getCurrentFragmentEditText() != null) {
+<span class="nc" id="L404">                new GetNextzySMS(getCurrentFragmentEditText().getText().toString(), new GetNextzySMS.Cycler() {</span>
+                    @Override
+                    public void setMobileNumber(String mobileNumber) {
+<span class="nc" id="L407">                        getCurrentFragmentEditText().setText(mobileNumber);</span>
+<span class="nc" id="L408">                    }</span>
+
+                    @Override
+                    public void alert(String comment) {
+<span class="nc" id="L412">                        TextView textView = (TextView) vgDevMode.getChildAt(vgDevMode.getChildCount() - 1);</span>
+<span class="nc" id="L413">                        textView.setText(String.format(&quot;: %s&quot;, comment));</span>
+<span class="nc" id="L414">                    }</span>
+                });
+            } else {
+                alertDoesntImplement();
+            }
+        };
+    }
+
+    private View.OnClickListener onGetOtpClickListener() {
+        return view -&gt; {
+            if (getCurrentFragmentEditText() == null) {
+                alertDoesntImplement();
+            } else {
+<span class="nc" id="L427">                new GetNextzySMS(new GetNextzySMS.Automator() {</span>
+                    @Override
+                    public void setOtp(String otp) {
+<span class="nc bnc" id="L430" title="All 2 branches missed.">                        if (getCurrentFragmentEditText() != null) {</span>
+<span class="nc" id="L431">                            getCurrentFragmentEditText().setText(otp);</span>
+                        }
+<span class="nc" id="L433">                    }</span>
+
+                    @Override
+                    public void alert(String alertMessage) {
+<span class="nc" id="L437">                        Toast.makeText(LoginActivity.this, alertMessage, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L438">                    }</span>
+                });
+            }
+        };
+    }
+
+
+    private EditText getCurrentFragmentEditText() {
+        if (fragmentHelperDelegate.getCurrentFragment() instanceof NextzyInjector) {
+            NextzyInjector nextzyInjector = (NextzyInjector) fragmentHelperDelegate.getCurrentFragment();
+            return nextzyInjector.getInjectEditText();
+        } else {
+            return null;
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

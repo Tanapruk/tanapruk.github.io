@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MyAccountPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.myaccount.activity</a> &gt; <span class="el_source">MyAccountPresenter.java</span></div><h1>MyAccountPresenter.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.myaccount.activity;
+
+import com.ais.mimo.eservice.helper.login.network.LoginManager;
+import com.ais.mimo.eservice.module.myaccount.event.GoToEditAccountFragmentEvent;
+import com.ais.mimo.eservice.module.myaccount.event.GoToEditEmailFragmentEvent;
+import com.ais.mimo.eservice.module.myaccount.event.GoToEditPasswordFragmentEvent;
+import com.ais.mimo.eservice.module.myaccount.event.GotoLoginPageEvent;
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.eventlog.EventLogBlob;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.mvp.NextzyActivityPresenter;
+
+/**
+ * Created by TheKhaeng on 9/20/2016.
+ */
+
+public class MyAccountPresenter extends NextzyActivityPresenter&lt;MyAccountContractor.View&gt; implements MyAccountContractor.Presenter {
+
+    public MyAccountPresenter(MyAccountContractor.View view) {
+<span class="fc" id="L21">        super(view);</span>
+<span class="fc" id="L22">    }</span>
+
+    public static MyAccountPresenter createPresenter(MyAccountContractor.View view) {
+<span class="nc" id="L25">        return new MyAccountPresenter(view);</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L30">        RxBus.get().register(this);</span>
+<span class="nc" id="L31">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L35">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L36">    }</span>
+
+    @Override
+    public void onViewStart() {
+        // for handle network error
+<span class="nc" id="L41">        super.onViewStart();</span>
+
+
+<span class="nc" id="L44">        EventLogBlob.getInstance().addEventLog(</span>
+                LoginManager.SERVICE_NAME_VERIFY_MYAIS,
+                new EventLogParam(&quot;APP_VIEW_MYAIS_PROFILE&quot;, &quot;5010&quot;, &quot;5108&quot;)
+        );
+<span class="nc" id="L48">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L52">        super.onViewStop();</span>
+<span class="nc" id="L53">    }</span>
+
+
+    @Subscribe
+    public void onGoToEditAccountFragmentEvent(GoToEditAccountFragmentEvent event) {
+<span class="nc" id="L58">        getView().openEditAccountFragment();</span>
+<span class="nc" id="L59">    }</span>
+
+    @Subscribe
+    public void onGoToEditEmailFragmentEvent(GoToEditEmailFragmentEvent event) {
+<span class="nc" id="L63">        getView().openEditEmailFragment();</span>
+<span class="nc" id="L64">    }</span>
+
+    @Subscribe
+    public void onGoToEditPasswordFragmentEvent(GoToEditPasswordFragmentEvent event) {
+<span class="nc" id="L68">        getView().openEditPasswordFragment();</span>
+<span class="nc" id="L69">    }</span>
+
+    @Subscribe
+    public void onGotoLoginPageEvent(GotoLoginPageEvent event){
+<span class="nc" id="L73">        getView().openLoginPage();</span>
+<span class="nc" id="L74">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

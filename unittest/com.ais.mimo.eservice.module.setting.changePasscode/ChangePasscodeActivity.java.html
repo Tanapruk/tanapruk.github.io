@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChangePasscodeActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.setting.changePasscode</a> &gt; <span class="el_source">ChangePasscodeActivity.java</span></div><h1>ChangePasscodeActivity.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.setting.changePasscode;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+
+import com.nextzy.myais.common.mvp.NextzyMvpActivity;
+import com.nextzy.myais.common.utility.DefaultPreference;
+import com.nextzy.myais.common.widget.AISTextView;
+import com.nextzy.myais.common.widget.dialog.AisDialog;
+import com.nextzy.myais.myais.R;
+
+import th.co.thekhaeng.pinlock.IndicatorDots;
+import th.co.thekhaeng.pinlock.PinLockListener;
+import th.co.thekhaeng.pinlock.PinLockView;
+import timber.log.Timber;
+
+
+public class ChangePasscodeActivity extends NextzyMvpActivity&lt;ChangePasscodeContractor.Presenter&gt;
+        implements ChangePasscodeContractor.View {
+    public static final String KEY_OLD_PASSCODE = &quot;key_old_passcode&quot;;
+    public static final int RESULT_NEW_PASSCODE = 20;
+    public static final int PIN_LENGTH = 6;
+    private static final int STATE_ENTER_OLD = 0;
+    private static final int STATE_ENTER_NEW = 1;
+    private static final int STATE_ENTER_RE_NEW = 2;
+    public static final int PASSCODE_DELAY_DISMISS = 3000;
+
+    private IndicatorDots indicatorDots;
+    private PinLockView pinLockView;
+    private AISTextView tvPasscodeTitle;
+
+    private PasscodeData data;
+    private DefaultPreference securePreference;
+    private AISTextView tvCancel;
+
+    @Override
+    protected void createPresenter() {
+        ChangePasscodePresenter.createPresenter(this);
+        securePreference = DefaultPreference.getInstance();
+
+        initPasscodeData();
+    }
+
+    private void initPasscodeData() {
+        data = new PasscodeData();
+        Bundle extra = getIntent().getExtras();
+        initState(extra);
+    }
+
+    private void initState(Bundle extra) {
+        if (extra != null) {
+            data.oldPasscode = extra.getString(KEY_OLD_PASSCODE);
+            if (data.oldPasscode == null) {
+                data.state = STATE_ENTER_NEW;
+            } else {
+                data.state = STATE_ENTER_OLD;
+            }
+        } else {
+            data.state = STATE_ENTER_NEW;
+        }
+    }
+
+    @Override
+    public int getLayoutView() {
+        return R.layout.my_ais_library_passcode_change_activity;
+    }
+
+
+    @Override
+    public void bindView() {
+        tvPasscodeTitle = (AISTextView) findViewById(R.id.my_ais_pinlock_tv_title);
+        indicatorDots = (IndicatorDots) findViewById(R.id.my_ais_pinlock_indicator_dots);
+        pinLockView = (PinLockView) findViewById(R.id.my_ais_pinlock_view);
+        tvCancel = (AISTextView) findViewById(R.id.my_ais_tv_cancel_passcode);
+    }
+
+    @Override
+    public void setupView() {
+        pinLockView.attachIndicatorDots(indicatorDots);
+        pinLockView.setPinLockListener(createPinLockListener());
+        pinLockView.setPinLength(PIN_LENGTH);
+        pinLockView.setShowLeftButton(false);
+        tvCancel.setOnClickListener(v -&gt; clickCancel());
+
+        switch (data.state) {
+            case STATE_ENTER_OLD:
+                tvPasscodeTitle.setText(getString(R.string.my_ais_passcode_title_enter_old_passcode));
+                break;
+            case STATE_ENTER_NEW:
+                tvPasscodeTitle.setText(getString(R.string.my_ais_passcode_title_change_passcode));
+                break;
+        }
+    }
+
+
+    @Override
+    public void initialize() {
+
+    }
+
+
+    @Override
+    public void restoreInstanceState(Bundle savedInstanceState) {
+
+    }
+
+
+    @Override
+    public void restoreArgument(Bundle bundle) {
+    }
+
+    @Override
+    public void restoreView() {
+
+    }
+
+    @Override
+    public void saveInstanceState(Bundle outState) {
+
+    }
+
+    @NonNull
+    private PinLockListener createPinLockListener() {
+<span class="nc" id="L125">        return new PinLockListener() {</span>
+            @Override
+            public void onComplete(String putPasscode) {
+<span class="nc" id="L128">                Timber.i(&quot;Pin complete: &quot; + putPasscode);</span>
+<span class="nc bnc" id="L129" title="All 4 branches missed.">                switch (data.state) {</span>
+                    case STATE_ENTER_OLD:
+<span class="nc bnc" id="L131" title="All 2 branches missed.">                        if (data.isMatchOldPasscode(putPasscode)) {</span>
+<span class="nc" id="L132">                            goToNewPasscodeState();</span>
+                        } else {
+<span class="nc" id="L134">                            backToOldPasscodeState();</span>
+                        }
+<span class="nc" id="L136">                        break;</span>
+                    case STATE_ENTER_NEW:
+<span class="nc" id="L138">                        data.passcode = putPasscode;</span>
+//                        if (data.isPasscodeIsNotOld()) {
+<span class="nc" id="L140">                            goToReNewPasscodeState();</span>
+//                        } else {
+//                            backToIncorrectPasscodeState();
+//                        }
+<span class="nc" id="L144">                        break;</span>
+                    case STATE_ENTER_RE_NEW:
+<span class="nc" id="L146">                        data.rePasscode = putPasscode;</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">                        if (data.isMatchPasscode()) {</span>
+<span class="nc" id="L148">                            securePreference.savePasscode(putPasscode);</span>
+<span class="nc" id="L149">                            showCreatedSuccessDialog();</span>
+                        } else {
+<span class="nc" id="L151">                            backToIncorrectPasscodeState();</span>
+                        }
+                        break;
+                }
+<span class="nc" id="L155">            }</span>
+
+            @Override
+            public void onEmpty() {
+<span class="nc" id="L159">                Timber.i(&quot;Pin empty&quot;);</span>
+<span class="nc" id="L160">            }</span>
+
+            @Override
+            public void onPinChange(int pinLength, String intermediatePin) {
+<span class="nc" id="L164">                Timber.i(&quot;Pin changed, new length &quot; + pinLength + &quot; with intermediate pin &quot; + intermediatePin);</span>
+<span class="nc" id="L165">            }</span>
+        };
+    }
+
+    @Override
+    public void showCreatedSuccessDialog() {
+        AisDialog.getInstance().showNoButtonDialog(
+                getSupportFragmentManager(),
+                R.drawable.my_ais_library_ic_passcode,
+                getString(R.string.my_ais_passcode_dialog_created_success),
+                PASSCODE_DELAY_DISMISS,
+                this::finishChangePasscode);
+    }
+
+    public void finishChangePasscode() {
+        if (data.oldPasscode == null) {
+            Intent returnIntent = new Intent();
+            setResult(RESULT_NEW_PASSCODE, returnIntent);
+        }
+        finish();
+
+    }
+
+    private void clickCancel() {
+        onBackPressed();
+    }
+
+    private void backToOldPasscodeState() {
+        tvPasscodeTitle.setText(getString(R.string.my_ais_passcode_title_enter_old_passcode));
+        data.state = STATE_ENTER_OLD;
+        showFaultPasscode();
+    }
+
+    private void backToIncorrectPasscodeState() {
+        tvPasscodeTitle.setText(getString(R.string.my_ais_passcode_change_not_match));
+        data.backToNewPasscodeState();
+        data.state = STATE_ENTER_NEW;
+        showFaultPasscode();
+    }
+
+    private void goToNewPasscodeState() {
+        data.state = STATE_ENTER_NEW;
+        tvPasscodeTitle.setText(getString(R.string.my_ais_passcode_title_change_passcode));
+        pinLockView.clearIndicator();
+    }
+
+    private void goToReNewPasscodeState() {
+        data.state = STATE_ENTER_RE_NEW;
+        tvPasscodeTitle.setText(getString(R.string.my_ais_passcode_title_re_enter_new_passcode));
+        pinLockView.clearIndicator();
+    }
+
+    private void showFaultPasscode() {
+        pinLockView.animateNotMatchPasscodeAndClearIndicator();
+    }
+
+<span class="nc" id="L221">    class PasscodeData {</span>
+        String oldPasscode;
+        String passcode;
+        String rePasscode;
+<span class="nc" id="L225">        int state = STATE_ENTER_OLD;</span>
+
+        public boolean isMatchOldPasscode(String putPasscode) {
+<span class="nc bnc" id="L228" title="All 2 branches missed.">            if (putPasscode == null) return false;</span>
+<span class="nc" id="L229">            return putPasscode.equals(oldPasscode);</span>
+        }
+
+        public boolean isMatchPasscode() {
+<span class="nc bnc" id="L233" title="All 2 branches missed.">            if (passcode == null) return false;</span>
+<span class="nc" id="L234">            return passcode.equals(rePasscode);</span>
+        }
+
+        public boolean isPasscodeIsNotOld() {
+<span class="nc bnc" id="L238" title="All 2 branches missed.">            if (passcode == null) return false;</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">            if (passcode.equals(oldPasscode)) return false;</span>
+<span class="nc" id="L240">            return true;</span>
+        }
+
+        public void backToNewPasscodeState() {
+<span class="nc" id="L244">            passcode = null;</span>
+<span class="nc" id="L245">            rePasscode = null;</span>
+<span class="nc" id="L246">            state = STATE_ENTER_NEW;</span>
+<span class="nc" id="L247">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

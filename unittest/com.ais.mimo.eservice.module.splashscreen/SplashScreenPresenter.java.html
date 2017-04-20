@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SplashScreenPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.splashscreen</a> &gt; <span class="el_source">SplashScreenPresenter.java</span></div><h1>SplashScreenPresenter.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.splashscreen;
+
+import android.content.Context;
+
+import com.ais.mimo.eservice.helper.appupdate.VersionCompare;
+import com.ais.mimo.eservice.helper.appupdate.network.AppUpdateManager;
+import com.ais.mimo.eservice.helper.appupdate.network.response.AppUpdateResult;
+import com.ais.mimo.eservice.helper.splashscreen.network.SplashScreenManager;
+import com.ais.mimo.eservice.helper.splashscreen.network.response.InternationalRoamingResult;
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.constant.Contextor;
+import com.nextzy.myais.common.mvp.NextzyActivityPresenter;
+import com.nextzy.myais.common.utility.Check;
+import com.nextzy.myais.common.utility.NextzyAndroidUtility;
+import com.nextzy.myais.common.utility.RxObservableManager;
+
+import java.net.SocketTimeoutException;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import rx.Observable;
+import rx.util.async.Async;
+
+import static com.ais.mimo.eservice.helper.splashscreen.network.SplashScreenManager.SERVICE_NAME_CHECK_INTERNATIONAL_ROAMING;
+
+/**
+ * Created by Akexorcist on 8/9/16 AD.
+ */
+public class SplashScreenPresenter extends NextzyActivityPresenter&lt;SplashScreenContractor.View&gt; implements SplashScreenContractor.Presenter {
+<span class="nc" id="L31">    private final static String TAG = SplashScreenPresenter.class.getSimpleName();</span>
+
+    private final SplashScreenManager manager;
+
+    public static SplashScreenPresenter createPresenter(SplashScreenContractor.View view) {
+<span class="nc" id="L36">        return new SplashScreenPresenter(view);</span>
+    }
+
+    public SplashScreenPresenter(SplashScreenContractor.View view) {
+<span class="nc" id="L40">        super(view);</span>
+<span class="nc" id="L41">        manager = SplashScreenManager.getInstance();</span>
+<span class="nc" id="L42">    }</span>
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L46">        RxBus.get().register(this);</span>
+<span class="nc" id="L47">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L51">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L52">    }</span>
+
+    @Override
+    public void onViewStart() {
+<span class="nc" id="L56">        super.onViewStart();</span>
+        // Get observable that create before activity invisible
+<span class="nc" id="L58">        subscribeAppUpdateResultObservableIfAvailable();</span>
+<span class="nc" id="L59">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L63">        super.onViewStop();</span>
+<span class="nc" id="L64">    }</span>
+
+    @Override
+    public void checkAppUpdate() {
+<span class="nc" id="L68">        Observable.empty()</span>
+<span class="nc" id="L69">                .delay(1, TimeUnit.SECONDS)</span>
+<span class="nc" id="L70">                .doOnCompleted(() -&gt; AppUpdateManager.getInstance().checkForceUpdateAndSubscribe())</span>
+<span class="nc" id="L71">                .subscribe();</span>
+<span class="nc" id="L72">    }</span>
+
+
+    @Override
+    public void onSessionExpired(Throwable throwable, List&lt;String&gt; serviceNameList) {
+<span class="nc" id="L77">        waitThenGoToLoginActivity();</span>
+<span class="nc" id="L78">    }</span>
+
+    @Override
+    public void onServiceUnavailable(Throwable throwable, List&lt;String&gt; serviceNameList) {
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        if (throwable instanceof SocketTimeoutException) {</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">            if (!Check.isNull(TAG, serviceNameList)) {</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">                for (String s : serviceNameList) {</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">                    if (SERVICE_NAME_CHECK_INTERNATIONAL_ROAMING.equals(s)) {</span>
+<span class="nc" id="L86">                        getView().showAlertDialogUseRoaming();</span>
+<span class="nc" id="L87">                        return;</span>
+                    }
+<span class="nc" id="L89">                }</span>
+            }
+<span class="nc" id="L91">            waitThenGoToLoginActivity();</span>
+        } else {
+<span class="nc" id="L93">            waitThenGoToLoginActivity();</span>
+        }
+<span class="nc" id="L95">    }</span>
+
+    @Override
+    public void waitThenGoToLoginActivity() {
+<span class="nc" id="L99">        Observable.empty()</span>
+<span class="nc" id="L100">                .delay(500, TimeUnit.MILLISECONDS)</span>
+<span class="nc" id="L101">                .doOnCompleted(() -&gt; getView().checkSmsPermissionBeforeGoToLoginActivity())</span>
+<span class="nc" id="L102">                .subscribe();</span>
+<span class="nc" id="L103">    }</span>
+
+    @Override
+    public void onNoInternetConnection(Throwable throwable, List&lt;String&gt; serviceNameList) {
+<span class="nc" id="L107">        waitThenGoToLoginActivity();</span>
+<span class="nc" id="L108">    }</span>
+
+    @Override
+    public void onUnHandledAisError(Throwable throwable, List&lt;String&gt; serviceNameList) {
+<span class="nc" id="L112">        waitThenGoToLoginActivity();</span>
+<span class="nc" id="L113">    }</span>
+
+    @Override
+    public void onBadRequestException(Throwable throwable, List&lt;String&gt; serviceNameList) {
+<span class="nc" id="L117">        waitThenGoToLoginActivity();</span>
+<span class="nc" id="L118">    }</span>
+
+    @Override
+    public void onNonGlobalException(Throwable throwable, List&lt;String&gt; serviceNameList) {
+<span class="nc" id="L122">        waitThenGoToLoginActivity();</span>
+<span class="nc" id="L123">    }</span>
+
+    @Subscribe
+    public void onReceiveCheckInternationSuccess(InternationalRoamingResult result) {
+<span class="nc" id="L127">        waitThenGoToLoginActivity();</span>
+<span class="nc" id="L128">    }</span>
+
+    @Subscribe
+    public void onAppUpdateResultSuccess(AppUpdateResult result) {
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        if (getView().isActivityVisible()) {</span>
+            // If activity is visible, Sent the result immediately
+<span class="nc" id="L134">            setAppUpdate(result);</span>
+        } else {
+            // If activity is invisible, Create observable in RxObservableManager to hold the result until activity visible again
+<span class="nc" id="L137">            Observable&lt;AppUpdateResult&gt; appUpdateResultObservable = Async.start(() -&gt; result);</span>
+<span class="nc" id="L138">            RxObservableManager.getInstance()</span>
+<span class="nc" id="L139">                    .add(AppUpdateManager.SERVICE_NAME_CHECK_FORCE_UPDATE, appUpdateResultObservable);</span>
+        }
+<span class="nc" id="L141">    }</span>
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private void subscribeAppUpdateResultObservableIfAvailable() {
+        //  It will be null if have no observable that saved in RxObservableManager
+        //  (No observable that running when activity invisible)
+<span class="nc" id="L147">        Observable&lt;AppUpdateResult&gt; appUpdateResultObservable = (Observable&lt;AppUpdateResult&gt;) RxObservableManager.getInstance()</span>
+<span class="nc" id="L148">                .get(AppUpdateManager.SERVICE_NAME_CHECK_FORCE_UPDATE);</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        if (appUpdateResultObservable != null) {</span>
+            // Yeah! It has observable that we want
+<span class="nc" id="L151">            appUpdateResultObservable.doOnNext(this::setAppUpdate).subscribe();</span>
+        }
+<span class="nc" id="L153">    }</span>
+
+    public void setAppUpdate(AppUpdateResult result) {
+        // TODO Change to actual version later
+<span class="nc" id="L157">        VersionCompare currentVersion = new VersionCompare(getView().getAppVersion());</span>
+<span class="nc" id="L158">        VersionCompare latestVersion = new VersionCompare(result.getVersion());</span>
+<span class="nc" id="L159">        int status = currentVersion.compareTo(latestVersion);</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">        if (status == VersionCompare.OLDER) {</span>
+<span class="nc" id="L161">            showNewerVersion(result);</span>
+        } else {
+<span class="nc" id="L163">            checkInternationalRoaming();</span>
+        }
+<span class="nc" id="L165">    }</span>
+
+    private void showNewerVersion(AppUpdateResult result) {
+<span class="nc bnc" id="L168" title="All 2 branches missed.">        if (result.isForce()) {</span>
+<span class="nc" id="L169">            getView().showAlertDialogAndGotoAppUpdateUrl(result.getMessage(), result.getUrl());</span>
+        } else {
+<span class="nc" id="L171">            getView().showAlertDialogAndGotoMainActivity(result.getMessage());</span>
+        }
+<span class="nc" id="L173">    }</span>
+
+    private void checkInternationalRoaming() {
+<span class="nc" id="L176">        NextzyAndroidUtility utility = NextzyAndroidUtility.getInstance();</span>
+<span class="nc" id="L177">        Context context = Contextor.getInstance().getContext();</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">        if (utility.isMobileConnection(context)) {</span>
+<span class="nc" id="L179">            manager.requestInternationalRoaming();</span>
+        } else {
+<span class="nc" id="L181">            waitThenGoToLoginActivity();</span>
+        }
+<span class="nc" id="L183">    }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

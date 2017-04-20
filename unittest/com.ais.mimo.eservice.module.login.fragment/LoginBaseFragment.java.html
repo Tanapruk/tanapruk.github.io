@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginBaseFragment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.login.fragment</a> &gt; <span class="el_source">LoginBaseFragment.java</span></div><h1>LoginBaseFragment.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.login.fragment;
+
+import android.view.View;
+import android.widget.TextView;
+
+import com.ais.mimo.eservice.module.forgot.ForgotPasswordActivity;
+import com.ais.mimo.eservice.module.login.activity.LoginActivity;
+import com.ais.mimo.eservice.module.term.TermActivity;
+import com.ais.mimo.eservice.widget.LoginLanguageBar;
+import com.ais.mimo.eservice.widget.LoginLanguageBarListener;
+import com.nextzy.myais.common.mvp.NextzyMvpActivity;
+import com.nextzy.myais.common.mvp.NextzyMvpFragment;
+import com.nextzy.myais.common.utility.DefaultPreference;
+import com.nextzy.myais.common.widget.TermAndConditionView;
+import com.nextzy.myais.myais.R;
+
+/**
+ * Created by trusttanapruk on 8/17/2016.
+ */
+<span class="nc" id="L20">public abstract class LoginBaseFragment extends NextzyMvpFragment&lt;LoginFragmentContractor.Presenter&gt; implements LoginFragmentContractor.View, LoginLanguageBarListener {</span>
+<span class="fc" id="L21">    public final static String TAG = LoginBaseFragment.class.getSimpleName();</span>
+    private LoginLanguageBar btnLanguageBar;
+    private TermAndConditionView tvTerm;
+    private TextView tvForgetPassword;
+    private DefaultPreference preference;
+
+    @Override
+    protected void createPresenter() {
+<span class="nc" id="L29">        LoginFragmentPresenter.createPresenter(this);</span>
+<span class="nc" id="L30">        preference = DefaultPreference.getInstance();</span>
+<span class="nc" id="L31">    }</span>
+
+
+    @Override
+    public void onDestroy() {
+<span class="nc" id="L36">        super.onDestroy();</span>
+<span class="nc" id="L37">    }</span>
+
+
+    @Override
+    public void setSecondaryButtonTextEmail() {
+
+<span class="nc" id="L43">    }</span>
+
+    @Override
+    public void setSecondaryButtonTextSecondary() {
+
+<span class="nc" id="L48">    }</span>
+
+    @Override
+    public void showEmptyMobileNumberInvalid() {
+
+<span class="nc" id="L53">    }</span>
+
+    @Override
+    public void showMobileNumberInvalid() {
+
+<span class="nc" id="L58">    }</span>
+
+    @Override
+    public void showCaptchaEmpty() {
+
+<span class="nc" id="L63">    }</span>
+
+    @Override
+    public void showOtpEmpty() {
+
+<span class="nc" id="L68">    }</span>
+
+    @Override
+    public void showOtpInvalid() {
+
+<span class="nc" id="L73">    }</span>
+
+    @Override
+    public void showPasswordInvalid() {
+
+<span class="nc" id="L78">    }</span>
+
+    @Override
+    public void showNotAisMobileNumber(String message) {
+
+<span class="nc" id="L83">    }</span>
+
+    @Override
+    public void showWrongOtp(String message) {
+
+<span class="nc" id="L88">    }</span>
+
+    @Override
+    public void showWrong3Otp(String message) {
+
+<span class="nc" id="L93">    }</span>
+
+    @Override
+    public void showWrong3Password() {
+
+<span class="nc" id="L98">    }</span>
+
+    @Override
+    public void setCaptchaImage(String captchaInBase64) {
+
+<span class="nc" id="L103">    }</span>
+
+    @Override
+    public void setAutoOtp(String otp) {
+
+<span class="nc" id="L108">    }</span>
+
+    @Override
+<span class="nc" id="L111">    public void showDuplicateOrExpireLoginDialog(String message){}</span>
+
+    private boolean throwIfNull(View view) {
+<span class="nc bnc" id="L114" title="All 2 branches missed.">        if (view == null) {</span>
+<span class="nc" id="L115">            throw new NullPointerException(&quot;Your haven't binded this button&quot;);</span>
+        } else {
+<span class="nc" id="L117">            return true;</span>
+        }
+    }
+
+    public void bindTermForgotPasswordLanguageBar(View view) {
+<span class="nc bnc" id="L122" title="All 2 branches missed.">        if (idTermAndConditionView() != 0) {</span>
+<span class="nc" id="L123">            tvTerm = (TermAndConditionView) view.findViewById(idTermAndConditionView());</span>
+<span class="nc" id="L124">            setupTermOnClick();</span>
+        }
+
+<span class="nc bnc" id="L127" title="All 2 branches missed.">        if (idTvForgetPassword() != 0) {</span>
+<span class="nc" id="L128">            tvForgetPassword = (TextView) view.findViewById(idTvForgetPassword());</span>
+<span class="nc" id="L129">            setupForgotPasswordOnClick();</span>
+        }
+
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        if (idTvLanguageBar() != 0) {</span>
+<span class="nc" id="L133">            btnLanguageBar = (LoginLanguageBar) view.findViewById(idTvLanguageBar());</span>
+<span class="nc" id="L134">            setupLoginLanguageBar();</span>
+        }
+<span class="nc" id="L136">    }</span>
+
+    protected int idTvLanguageBar() {
+<span class="nc" id="L139">        return 0;</span>
+    }
+
+    protected int idTvForgetPassword() {
+<span class="nc" id="L143">        return 0;</span>
+    }
+
+    protected int idTermAndConditionView() {
+<span class="nc" id="L147">        return 0;</span>
+    }
+
+    @Override
+    public void setLanguage(String language) {
+<span class="nc" id="L152">        ((LoginActivity) getActivity()).setLanguage(language);</span>
+<span class="nc" id="L153">    }</span>
+
+    private void setupTermOnClick() {
+<span class="nc" id="L156">        throwIfNull(tvTerm);</span>
+<span class="nc" id="L157">        tvTerm.setOnClickListener(v -&gt; onTermAndConditionClick());</span>
+<span class="nc" id="L158">    }</span>
+
+    private void setupForgotPasswordOnClick() {
+<span class="nc" id="L161">        throwIfNull(tvForgetPassword);</span>
+<span class="nc" id="L162">        tvForgetPassword.setOnClickListener(v -&gt; onForgetPasswordClick());</span>
+<span class="nc" id="L163">    }</span>
+
+    public void onTermAndConditionClick() {
+<span class="nc" id="L166">        openActivity(TermActivity.class);</span>
+<span class="nc" id="L167">    }</span>
+
+    public void onForgetPasswordClick() {
+<span class="nc" id="L170">        openActivity(ForgotPasswordActivity.class);</span>
+<span class="nc" id="L171">    }</span>
+
+    private void setupLoginLanguageBar() {
+<span class="nc" id="L174">        throwIfNull(btnLanguageBar);</span>
+<span class="nc" id="L175">        btnLanguageBar.setLoginLanguageBarListener(this);</span>
+<span class="nc" id="L176">    }</span>
+
+    protected void hideForgotPasswordButton() {
+<span class="nc" id="L179">        tvForgetPassword.setVisibility(View.GONE);</span>
+<span class="nc" id="L180">    }</span>
+
+    protected void showForgotPasswordButton() {
+<span class="nc" id="L183">        tvForgetPassword.setVisibility(View.VISIBLE);</span>
+<span class="nc" id="L184">    }</span>
+
+    @Override
+    public void removePasscodeAndMasterNumberAndPrivateIdAndToken() {
+<span class="nc" id="L188">        preference.removeAllPasscodeData();</span>
+<span class="nc" id="L189">    }</span>
+
+    @Override
+    public void showIsFibreButCannotLogin() {
+<span class="nc" id="L193">        showAlertDialogDismissOnClick(getString(R.string.my_ais_login_dialog_alert_fibre));</span>
+<span class="nc" id="L194">    }</span>
+
+    @Override
+    public void showResponseException(String message) {
+<span class="nc bnc" id="L198" title="All 2 branches missed.">        if (getActivity() instanceof NextzyMvpActivity) {</span>
+<span class="nc" id="L199">            ((NextzyMvpActivity) getActivity())</span>
+<span class="nc" id="L200">                    .showAlertDialogDismissOnClick(message);</span>
+        }
+<span class="nc" id="L202">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

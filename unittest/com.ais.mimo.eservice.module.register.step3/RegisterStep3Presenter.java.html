@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegisterStep3Presenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.register.step3</a> &gt; <span class="el_source">RegisterStep3Presenter.java</span></div><h1>RegisterStep3Presenter.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.register.step3;
+
+
+import com.ais.mimo.eservice.helper.term.network.TermManager;
+import com.ais.mimo.eservice.helper.term.network.exception.TermWithEmptyBodyException;
+import com.ais.mimo.eservice.helper.term.network.response.TermData;
+import com.ais.mimo.eservice.module.register.base.RegisterBasePresenter;
+import com.ais.mimo.eservice.module.register.event.GoToStep4FragmentEvent;
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.eventlog.EventLogBlob;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+
+/**
+ * Created by TheKhaeng on 9/20/2016.
+ */
+
+public class RegisterStep3Presenter extends RegisterBasePresenter&lt;RegisterStep3Contractor.View&gt; implements RegisterStep3Contractor.Presenter {
+<span class="fc" id="L19">    private final static String TAG = RegisterStep3Presenter.class.getSimpleName();</span>
+    private TermManager termManager;
+
+    public void setMockManager(TermManager mockManager) {
+<span class="fc" id="L23">        termManager = mockManager;</span>
+<span class="fc" id="L24">    }</span>
+
+    protected RegisterStep3Presenter(RegisterStep3Contractor.View view) {
+<span class="fc" id="L27">        super(view);</span>
+<span class="fc" id="L28">        termManager = TermManager.getInstance();</span>
+<span class="fc" id="L29">    }</span>
+
+    public static RegisterStep3Presenter createPresenter(RegisterStep3Contractor.View view) {
+<span class="fc" id="L32">        return new RegisterStep3Presenter(view);</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L37">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L41">    }</span>
+
+    @Override
+    public void onViewStart() {
+
+<span class="nc" id="L46">    }</span>
+
+    @Override
+    public void onViewStop() {
+
+<span class="nc" id="L51">    }</span>
+
+    @Override
+    public void registerRx() {
+<span class="fc" id="L55">        RxBus.get().register(this);</span>
+<span class="fc" id="L56">    }</span>
+
+    @Override
+    public void unregisterRx() {
+<span class="fc" id="L60">        RxBus.get().unregister(this);</span>
+<span class="fc" id="L61">    }</span>
+
+
+    /*******************/
+    /** For view call **/
+    /*******************/
+    //&lt;editor-fold desc=&quot;For view folding&quot;&gt;
+    @Override
+    public void requestTerm() {
+<span class="fc" id="L70">        getView().showLoadingNoFade();</span>
+<span class="fc" id="L71">        String mobileNumber = getView().getArgumentsStringMobileNumber();</span>
+<span class="fc" id="L72">        EventLogBlob.getInstance().addEventLog(</span>
+                TermManager.SERVICE_NAME_BY_MOBILE_TERM_OF_CONDITION,
+                new EventLogParam(&quot;APP_REGISTER_TERMS_CONDITION&quot;, &quot;5010&quot;, &quot;5110&quot;));
+<span class="fc" id="L75">        termManager.getTermOfConditionByMobileNumber(mobileNumber);</span>
+<span class="fc" id="L76">    }</span>
+
+    @Override
+    public void goToFragmentStep4() {
+<span class="fc" id="L80">        RxBus.get().post(new GoToStep4FragmentEvent());</span>
+<span class="fc" id="L81">    }</span>
+    //&lt;/editor-fold&gt;
+
+    @Subscribe
+    public void onTermOfConditionResult(TermData termData) {
+<span class="fc" id="L86">        String term = termData.getTerm();</span>
+<span class="fc" id="L87">        getView().showTerm(term);</span>
+<span class="fc" id="L88">    }</span>
+    @Subscribe
+    public void onTermOfConditionNoData(TermWithEmptyBodyException exception) {
+<span class="fc" id="L91">        showResponseExceptionDismiss(exception.getMessage());</span>
+<span class="fc" id="L92">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

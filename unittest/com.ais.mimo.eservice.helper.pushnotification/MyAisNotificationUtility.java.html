@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MyAisNotificationUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.helper.pushnotification</a> &gt; <span class="el_source">MyAisNotificationUtility.java</span></div><h1>MyAisNotificationUtility.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.helper.pushnotification;
+
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.support.annotation.DrawableRes;
+import android.support.v4.app.NotificationCompat;
+
+import com.ais.mimo.eservice.helper.pushnotification.model.MyAisNotification;
+import com.nextzy.myais.common.R;
+
+import java.util.Random;
+
+/**
+ * Created by tanapruk on 11/18/2016 AD.
+ */
+
+<span class="nc" id="L22">public class MyAisNotificationUtility {</span>
+    private static MyAisNotificationUtility instance;
+
+    public static MyAisNotificationUtility getInstance() {
+<span class="nc bnc" id="L26" title="All 2 branches missed.">        if (instance == null) {</span>
+<span class="nc" id="L27">            instance = new MyAisNotificationUtility();</span>
+        }
+<span class="nc" id="L29">        return instance;</span>
+    }
+
+    public Bitmap getNotificationIcon(Context context, String icon) {
+<span class="nc" id="L33">        return BitmapFactory.decodeResource(context.getResources(), getIconResource(icon));</span>
+    }
+
+    @DrawableRes
+    public int getIconResource(String icon) {
+<span class="nc bnc" id="L38" title="All 2 branches missed.">        if (icon.equalsIgnoreCase(&quot;payment&quot;)) {</span>
+<span class="nc" id="L39">            return R.drawable.my_ais_current_package_ic_billing_cycle;</span>
+        } else {
+<span class="nc" id="L41">            return R.drawable.my_ais_current_package_ic_arrow_right_green;</span>
+        }
+    }
+
+    public void createNotification(MyAisNotification myAisNotification, Context context) {
+<span class="nc" id="L46">        NotificationCompat.Builder mBuilder =</span>
+                new NotificationCompat.Builder(context)
+<span class="nc" id="L48">                        .setContentTitle(&quot;This is a title&quot;)</span>
+<span class="nc" id="L49">                        .setSmallIcon(R.drawable.my_ais_current_package_ic_billing_cycle)</span>
+<span class="nc" id="L50">                        .setLargeIcon(MyAisNotificationUtility.getInstance().getNotificationIcon(context, myAisNotification.getIcon()))</span>
+<span class="nc" id="L51">                        .setContentText(myAisNotification.getMessage());</span>
+
+<span class="nc" id="L53">        mBuilder.setContentIntent(getPendingIntentURL(myAisNotification.getDestinationPage(), context));</span>
+
+<span class="nc" id="L55">        NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);</span>
+<span class="nc" id="L56">        mNotifyMgr.notify(generateRandom(), mBuilder.build());</span>
+<span class="nc" id="L57">    }</span>
+
+    private int generateRandom() {
+<span class="nc" id="L60">        Random random = new Random();</span>
+<span class="nc" id="L61">        return random.nextInt(9999 - 1000) + 1000;</span>
+    }
+
+    private PendingIntent getPendingIntentURL(String urlScheme, Context context) {
+<span class="nc" id="L65">        String url = &quot;myais://&quot; + urlScheme;</span>
+<span class="nc" id="L66">        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));</span>
+<span class="nc" id="L67">        return PendingIntent.getActivity(context, 0, intent, 0);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

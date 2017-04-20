@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VerifyMyAISResult.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.helper.login.network.response</a> &gt; <span class="el_source">VerifyMyAISResult.java</span></div><h1>VerifyMyAISResult.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.helper.login.network.response;
+
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.config.mobile.MobileContact;
+import com.nextzy.myais.common.config.mobile.MobileType;
+import com.nextzy.myais.common.config.mobile.MobileUtility;
+import com.nextzy.myais.common.network.model.GenericResult;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by Oat on 10/13/2016 AD.
+ */
+
+<span class="fc" id="L16">public class VerifyMyAISResult extends GenericResult&lt;VerifyMyAISData&gt; {</span>
+
+    private boolean isMobileNumber() {
+<span class="pc bpc" id="L19" title="1 of 2 branches missed.">        if (Mobile.getInstance().getMobileNumber() == null) {</span>
+<span class="nc" id="L20">            throw new NullPointerException(&quot;You must logged in before coming to this method &quot;);</span>
+        }
+<span class="fc" id="L22">        return Mobile.getInstance().getMobileNumber().startsWith(&quot;0&quot;);</span>
+    }
+
+    private boolean isFibre() {
+<span class="pc bpc" id="L26" title="1 of 2 branches missed.">        if (Mobile.getInstance().getMobileNumber() == null) {</span>
+<span class="nc" id="L27">            throw new NullPointerException(&quot;You must logged in before coming to this method &quot;);</span>
+        }
+<span class="fc" id="L29">        return Mobile.getInstance().getMobileNumber().startsWith(&quot;88&quot;);</span>
+    }
+
+    private boolean isMyAis(String yOrN) {
+<span class="pc bpc" id="L33" title="1 of 4 branches missed.">        return hasData() &amp;&amp; yOrN.equalsIgnoreCase(getData().getIsMyAIS());</span>
+    }
+
+    private boolean isMaster(String yOrN) {
+<span class="pc bpc" id="L37" title="1 of 4 branches missed.">        return hasData() &amp;&amp; yOrN.equalsIgnoreCase(getData().getIsMaster());</span>
+    }
+
+    private boolean isMyAisYes() {
+<span class="fc" id="L41">        return isMyAis(&quot;Y&quot;);</span>
+    }
+
+    private boolean isMyAisNo() {
+<span class="fc" id="L45">        return isMyAis(&quot;N&quot;);</span>
+    }
+
+    private boolean isMasterYes() {
+<span class="fc" id="L49">        return isMaster(&quot;Y&quot;);</span>
+    }
+
+    private boolean isMasterNo() {
+<span class="fc" id="L53">        return isMaster(&quot;N&quot;);</span>
+    }
+
+    public boolean shouldShowVerifyChoice() {
+<span class="pc bpc" id="L57" title="1 of 6 branches missed.">        return isMobileNumber() &amp;&amp; isMyAisYes() &amp;&amp; isMasterYes();</span>
+    }
+
+    public boolean shouldGotoPassword() {
+<span class="fc bfc" id="L61" title="All 6 branches covered.">        return isFibre() &amp;&amp; isMyAisYes() &amp;&amp; isMasterYes();</span>
+    }
+
+    public boolean isFibreButCannotLogin(){
+<span class="nc bnc" id="L65" title="All 6 branches missed.">        return isFibre() &amp;&amp; isMyAisYes() &amp;&amp; isMasterNo();</span>
+    }
+
+    public boolean shouldGotoOtp() {
+<span class="pc bpc" id="L69" title="1 of 6 branches missed.">        return isMobileNumber() &amp;&amp; (!isMyAisYes() || !isMasterYes());</span>
+    }
+
+    public boolean shouldGotoRegister() {
+<span class="pc bpc" id="L73" title="1 of 6 branches missed.">        return isFibre() &amp;&amp; isMyAisNo() &amp;&amp; isMasterNo();</span>
+    }
+
+    public boolean shouldAlertToLoginWithMaster() {
+<span class="fc bfc" id="L77" title="All 6 branches covered.">        return isFibre() &amp;&amp; isMyAisYes() &amp;&amp; isMasterNo();</span>
+    }
+
+    public boolean isCanRequestVerifyIdentity(){
+<span class="nc bnc" id="L81" title="All 4 branches missed.">        return isMasterNo() &amp;&amp; isMyAisNo();</span>
+    }
+
+    public List&lt;MobileContact&gt; toMobileContactList() {
+<span class="pc bpc" id="L85" title="3 of 6 branches missed.">        if (data != null &amp;&amp; data.getDataList() != null &amp;&amp; !data.getDataList().isEmpty()) {</span>
+<span class="fc" id="L86">            List&lt;MobileContact&gt; mobileContacts = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">            for (MobileData mobileData : data.getDataList()) {</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">                if (!&quot;active&quot;.equalsIgnoreCase(mobileData.getStatusCode())) {</span>
+<span class="fc" id="L89">                    continue;</span>
+                }
+
+<span class="fc" id="L92">                MobileType mobileType = MobileUtility.getInstance().getMobileTypeByMobileData(mobileData.getChargeType(), mobileData.getMobileType());</span>
+<span class="fc" id="L93">                mobileContacts.add(new MobileContact(mobileData.getNumber(), mobileType));</span>
+<span class="fc" id="L94">            }</span>
+<span class="fc" id="L95">            return mobileContacts;</span>
+        }
+<span class="nc" id="L97">        return null;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

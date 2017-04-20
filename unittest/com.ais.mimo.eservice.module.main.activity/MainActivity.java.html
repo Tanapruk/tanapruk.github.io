@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MainActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.main.activity</a> &gt; <span class="el_source">MainActivity.java</span></div><h1>MainActivity.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.main.activity;
+
+import android.Manifest;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Parcelable;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.ViewSwitcher;
+
+import com.adobe.mobile.Config;
+import com.ais.mimo.eservice.helper.adobeanalytics.AisAdobeAnalytics;
+import com.ais.mimo.eservice.module.main.sidemenu.SideMenuFragment;
+import com.ais.mimo.eservice.module.main.tabmenu.TabMenuAdapter;
+import com.ais.mimo.eservice.module.main.utility.UserAccountConverter;
+import com.ais.mimo.eservice.module.notification.NotificationActivity;
+import com.crashlytics.android.Crashlytics;
+import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
+import com.nextzy.myais.common.barcode.QrScannerActivity;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.config.mobile.MobileContact;
+import com.nextzy.myais.common.database.NextzyDatabase;
+import com.nextzy.myais.common.database.NotificationDatabase;
+import com.nextzy.myais.common.database.model.NextzyRealmObject;
+import com.nextzy.myais.common.menu.MyAisMenu;
+import com.nextzy.myais.common.mvp.NextzyMvpSlidingMenuActivity;
+import com.nextzy.myais.common.mvp.tablist.NextzyTabListFragment;
+import com.nextzy.myais.common.mvp.webview.MyAisWebViewActivity;
+import com.nextzy.myais.common.permission.NextzyPermission;
+import com.nextzy.myais.common.utility.NextzyUtility;
+import com.nextzy.myais.common.utility.UrlSchemeUtils;
+import com.nextzy.myais.common.widget.AISShadowView;
+import com.nextzy.myais.common.widget.dialog.AisDialog;
+import com.nextzy.myais.common.widget.toolbar.header.MyAisToolbarHeader;
+import com.nextzy.myais.common.widget.toolbar.userdetail.MyAisToolbarUserDetail;
+import com.nextzy.myais.common.widget.toolbar.userdetail.MyAisToolbarUserDetailSwitchAccountMenu;
+import com.nextzy.myais.myais.R;
+import com.nextzy.myais.payment.module.topup.activity.TopupActivity;
+import com.nextzy.myais.service.config.TabServiceMenuKey;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import io.fabric.sdk.android.Fabric;
+import rx.Observable;
+
+import static com.nextzy.myais.payment.module.topup.activity.TopupActivity.KEY_PAGE;
+import static com.nextzy.myais.payment.module.topup.activity.TopupActivity.PAGE_CONFIRM;
+
+<span class="nc" id="L57">public class MainActivity extends NextzyMvpSlidingMenuActivity&lt;MainContractor.Presenter&gt; implements MainContractor.View, MyAisToolbarHeader.OnToolbarClickListener, MyAisToolbarUserDetail.UserAccountMenuListener, TabLayout.OnTabSelectedListener, View.OnClickListener {</span>
+    private static final String KEY_MENU_LIST = &quot;key_menu_list&quot;;
+    private MyAisToolbarHeader tbHeader;
+    private MyAisToolbarUserDetail tbUserDetail;
+    private TextView tvTitle;
+    private AISShadowView svShadow;
+    private TabLayout tlContent;
+    private ViewPager vpContent;
+    private TabMenuAdapter tabMenuAdapter;
+    private ViewSwitcher vsTitle;
+    private ImageView ivTitleFirst;
+    private ImageView ivTitleSecond;
+    private int previousPos;
+
+    @Override
+    public int getLayoutView() {
+<span class="nc" id="L73">        return R.layout.my_ais_activity_main;</span>
+    }
+
+    @Override
+    public int getBehindLayoutView() {
+<span class="nc" id="L78">        return R.layout.my_ais_activity_main_side_menu_container;</span>
+    }
+
+    @Override
+    protected void createPresenter() {
+<span class="nc" id="L83">        MainPresenter.createPresenter(this);</span>
+<span class="nc" id="L84">    }</span>
+
+    @Override
+    public void bindView() {
+<span class="nc" id="L88">        tbHeader = (MyAisToolbarHeader) findViewById(R.id.my_ais_main_tb_header);</span>
+<span class="nc" id="L89">        tbUserDetail = (MyAisToolbarUserDetail) findViewById(R.id.my_ais_main_tb_user_detail);</span>
+<span class="nc" id="L90">        tlContent = (TabLayout) findViewById(R.id.my_ais_main_tl_content);</span>
+<span class="nc" id="L91">        tvTitle = (TextView) findViewById(R.id.my_ais_main_tv_title);</span>
+<span class="nc" id="L92">        ivTitleFirst = (ImageView) findViewById(R.id.my_ais_main_iv_title_second);</span>
+<span class="nc" id="L93">        ivTitleSecond = (ImageView) findViewById(R.id.my_ais_main_iv_title_first);</span>
+<span class="nc" id="L94">        vsTitle = (ViewSwitcher) findViewById(R.id.my_ais_main_vs_title);</span>
+<span class="nc" id="L95">        svShadow = (AISShadowView) findViewById(R.id.my_ais_main_sv_shadow);</span>
+<span class="nc" id="L96">        vpContent = (ViewPager) findViewById(R.id.my_ais_main_vp_content);</span>
+<span class="nc" id="L97">    }</span>
+
+    @Override
+    public void setupView() {
+<span class="nc" id="L101">        Mobile.getInstance().logEvent(&quot;APP_VIEW_HOME&quot;, &quot;5005&quot;, &quot;5130&quot;);</span>
+<span class="nc" id="L102">        svShadow.hideImmediately();</span>
+<span class="nc" id="L103">        svShadow.setOnClickListener(this);</span>
+<span class="nc" id="L104">        tbHeader.setOnToolbarClickListener(this);</span>
+<span class="nc" id="L105">        tlContent.addOnTabSelectedListener(this);</span>
+<span class="nc" id="L106">        tbUserDetail.setUserAccountMenuListener(this);</span>
+<span class="nc" id="L107">        tabMenuAdapter = new TabMenuAdapter(getSupportFragmentManager());</span>
+<span class="nc" id="L108">    }</span>
+
+    private void updateNotificationCount() {
+<span class="nc bnc" id="L111" title="All 2 branches missed.">        if (NotificationDatabase.getInstance().getAllMessages() != null) {</span>
+<span class="nc" id="L112">            tbHeader.setNotificationCount(NotificationDatabase.getInstance().getAllMessages().size());</span>
+        }
+<span class="nc" id="L114">    }</span>
+
+    @Override
+    public void onStart() {
+<span class="nc" id="L118">        super.onStart();</span>
+//        updateNotificationCount();
+<span class="nc" id="L120">    }</span>
+
+    @Override
+    public void setupSlidingMenuView(SlidingMenu slidingMenu) {
+<span class="nc" id="L124">        slidingMenu.setBehindWidthRes(R.dimen.my_ais_main_side_menu_width);</span>
+<span class="nc" id="L125">        slidingMenu.setShadowWidthRes(R.dimen.my_ais_main_side_menu_shadow_width);</span>
+<span class="nc" id="L126">        slidingMenu.setShadowDrawable(R.drawable.my_ais_main_shape_sliding_menu_shadow);</span>
+<span class="nc" id="L127">        slidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_MARGIN);</span>
+<span class="nc" id="L128">    }</span>
+
+    @Override
+    protected Fragment getSlidingMenuFragment() {
+<span class="nc" id="L132">        return SideMenuFragment.newInstance();</span>
+    }
+
+    @Override
+    protected int getSlidingMenuLayoutContainer() {
+<span class="nc" id="L137">        return R.id.my_ais_main_layout_side_menu_container;</span>
+    }
+
+    @Override
+    public void restoreArgument(Bundle bundle) {
+
+<span class="nc" id="L143">    }</span>
+
+    @Override
+    public void initialize() {
+<span class="nc" id="L147">        getPresenter().createUserAccount();</span>
+<span class="nc" id="L148">        getPresenter().getKeyForAdobe();</span>
+        // Implement Lifecycle Metrics adobe analytics
+<span class="nc" id="L150">        Config.setContext(this.getApplicationContext());</span>
+<span class="nc" id="L151">    }</span>
+
+    @Override
+    public void onResume() {
+<span class="nc" id="L155">        super.onResume();</span>
+        // Implement Lifecycle Metrics adobe analytics
+<span class="nc" id="L157">        Config.collectLifecycleData(this);</span>
+<span class="nc" id="L158">        getPresenter().updateUserAccount();</span>
+<span class="nc" id="L159">    }</span>
+
+    @Override
+    protected void onPause() {
+<span class="nc" id="L163">        super.onPause();</span>
+        // Implement Lifecycle Metrics adobe analytics
+<span class="nc" id="L165">        Config.pauseCollectingLifecycleData();</span>
+<span class="nc" id="L166">    }</span>
+
+    @Override
+    public void restoreView() {
+<span class="nc" id="L170">        createTabMenu(getPresenter().getMenuList());</span>
+<span class="nc" id="L171">        getPresenter().onSideMenuUpdate();</span>
+<span class="nc" id="L172">    }</span>
+
+    @Override
+    public void saveInstanceState(Bundle outState) {
+<span class="nc" id="L176">        outState.putParcelableArrayList(KEY_MENU_LIST, (ArrayList&lt;? extends Parcelable&gt;) getPresenter().getMenuList());</span>
+<span class="nc" id="L177">    }</span>
+
+    @Override
+    public void restoreInstanceState(Bundle savedInstanceState) {
+<span class="nc" id="L181">        getPresenter().setMenuList(savedInstanceState.getParcelableArrayList(KEY_MENU_LIST));</span>
+<span class="nc" id="L182">    }</span>
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+<span class="nc bnc" id="L186" title="All 2 branches missed.">        switch (item.getItemId()) {</span>
+            case android.R.id.home:
+<span class="nc" id="L188">                showMenu();</span>
+<span class="nc" id="L189">                return true;</span>
+        }
+<span class="nc" id="L191">        return super.onOptionsItemSelected(item);</span>
+    }
+
+    @Override
+    public void onBackPressed() {
+<span class="nc" id="L196">        AisDialog.getInstance().showExitDialog(this);</span>
+<span class="nc" id="L197">    }</span>
+
+    @Override
+    public void onSideMenuClick() {
+<span class="nc" id="L201">        openSideMenu();</span>
+<span class="nc" id="L202">    }</span>
+
+    @Override
+    public void onCameraMenuClick() {
+<span class="nc" id="L206">        getPresenter().onCameraMenuClick();</span>
+<span class="nc" id="L207">    }</span>
+
+    @Override
+    public void onNotificationMenuClick() {
+//        getPresenter().onNotificationMenuClick();
+<span class="nc" id="L212">    }</span>
+
+    @Override
+    public void launchNotificationActivity() {
+<span class="nc" id="L216">        openActivity(NotificationActivity.class);</span>
+<span class="nc" id="L217">    }</span>
+
+    @Override
+    public void trackUserIdentifier(String identifier) {
+<span class="nc bnc" id="L221" title="All 2 branches missed.">        if (!Fabric.isInitialized()) {</span>
+<span class="nc" id="L222">            Fabric.with(this, new Crashlytics());</span>
+        }
+<span class="nc" id="L224">        Crashlytics.setUserIdentifier(identifier);</span>
+<span class="nc" id="L225">        AisAdobeAnalytics.getInstance().track(identifier);</span>
+<span class="nc" id="L226">    }</span>
+
+    @Override
+    public void createTabMenu(List&lt;MyAisMenu.Menu&gt; menuList) {
+<span class="nc" id="L230">        tabMenuAdapter = new TabMenuAdapter(getSupportFragmentManager());</span>
+<span class="nc" id="L231">        tabMenuAdapter.setMenuList(menuList);</span>
+<span class="nc" id="L232">        vpContent.setAdapter(tabMenuAdapter);</span>
+<span class="nc" id="L233">        tlContent.setupWithViewPager(vpContent);</span>
+<span class="nc" id="L234">    }</span>
+
+    @Override
+    public void setCurrentTabIndex(int tabIndex) {
+<span class="nc" id="L238">        vpContent.setCurrentItem(tabIndex);</span>
+<span class="nc" id="L239">    }</span>
+
+    @Override
+    public void onUserAccountSelected(String userAccountNumber, int position) {
+<span class="nc" id="L243">        getPresenter().onUserAccountSelected(userAccountNumber, position);</span>
+<span class="nc" id="L244">    }</span>
+
+    @Override
+    public void onReloadMenu() {
+<span class="nc" id="L248">        getPresenter().setupMenu();</span>
+<span class="nc" id="L249">    }</span>
+
+    @Override
+    public void setUserAccountNumber(String accountNumber) {
+<span class="nc" id="L253">        tbUserDetail.setUserAccountNumber(accountNumber);</span>
+<span class="nc" id="L254">    }</span>
+
+    @Override
+    public void onSwitchAccountClick(int oldContentItemSize) {
+<span class="nc" id="L258">        getPresenter().checkDiffMobileContractList(oldContentItemSize);</span>
+<span class="nc" id="L259">    }</span>
+
+    @Override
+    public void clearAllDatabase() {
+<span class="nc" id="L263">        NextzyDatabase.getInstance().deleteAllDatabase();</span>
+<span class="nc" id="L264">    }</span>
+
+    @Override
+    public void setCurrentTab(int index) {
+<span class="nc" id="L268">        vpContent.setCurrentItem(index);</span>
+<span class="nc" id="L269">    }</span>
+
+    @Override
+    public boolean isUrlSchemeAvailable() {
+<span class="nc" id="L273">        return UrlSchemeUtils.getInstance().isUrlScheme();</span>
+    }
+
+    @Override
+    public boolean isUrlHostEqual(String urlScheme) {
+<span class="nc" id="L278">        return UrlSchemeUtils.getInstance().getHost().equals(urlScheme);</span>
+    }
+
+    @Override
+    public void clearUrlScheme() {
+<span class="nc" id="L283">        UrlSchemeUtils.getInstance().clearUrlScheme();</span>
+<span class="nc" id="L284">    }</span>
+
+    @Override
+    public void gotoUrlScheme(int currentTab, MyAisMenu.SubMenu subMenu) {
+<span class="nc" id="L288">        setCurrentTab(currentTab);</span>
+<span class="nc" id="L289">        Observable.empty().delay(300, TimeUnit.MILLISECONDS).doOnCompleted(</span>
+                () -&gt; {
+<span class="nc" id="L291">                    final Fragment currentFragment = tabMenuAdapter.getFragment(currentTab);</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">                    if (currentFragment instanceof NextzyTabListFragment) {</span>
+<span class="nc" id="L293">                        ((NextzyTabListFragment) currentFragment).gotoMenuByUrlScheme(subMenu);</span>
+                    }
+<span class="nc" id="L295">                }</span>
+<span class="nc" id="L296">        ).subscribe();</span>
+<span class="nc" id="L297">    }</span>
+
+
+    @Override
+    public void onUserAccountMenuShow() {
+<span class="nc" id="L302">        svShadow.show();</span>
+<span class="nc" id="L303">    }</span>
+
+    @Override
+    public void onUserAccountMenuDismiss() {
+<span class="nc" id="L307">        svShadow.hide();</span>
+<span class="nc" id="L308">    }</span>
+
+    @Override
+    public void saveTabMenuToRealm(List&lt;MyAisMenu.Menu&gt; menuList) {
+<span class="nc bnc" id="L312" title="All 2 branches missed.">        if (menuList != null) {</span>
+<span class="nc" id="L313">            NextzyRealmObject object = getPresenter().convertTabMenuToRealmObject(menuList);</span>
+<span class="nc" id="L314">            NextzyDatabase.getInstance().add(object);</span>
+        }
+<span class="nc" id="L316">    }</span>
+
+    private void updateUserAccountGeneric(List&lt;MobileContact&gt; mobileContactList, boolean shouldReload) {
+<span class="nc" id="L319">        List&lt;MyAisToolbarUserDetailSwitchAccountMenu.ContentItem&gt; contentItemList = UserAccountConverter.getInstance().convertUserAccountToSwitchAccountMenuItem(mobileContactList);</span>
+<span class="nc" id="L320">        String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
+<span class="nc bnc" id="L321" title="All 2 branches missed.">        if (shouldReload) {</span>
+<span class="nc" id="L322">            tbUserDetail.setMenuItem(contentItemList, mobileNumber);</span>
+        } else {
+<span class="nc" id="L324">            tbUserDetail.setMenuItemWithoutReloadingMenu(contentItemList, mobileNumber);</span>
+        }
+<span class="nc" id="L326">    }</span>
+
+    @Override
+    public void updateUserAccount(List&lt;MobileContact&gt; mobileContactList) {
+<span class="nc" id="L330">        updateUserAccountGeneric(mobileContactList, true);</span>
+<span class="nc" id="L331">    }</span>
+
+    @Override
+    public void updateUserAccountWithoutReloading(List&lt;MobileContact&gt; mobileContactList) {
+<span class="nc" id="L335">        updateUserAccountGeneric(mobileContactList, false);</span>
+<span class="nc" id="L336">    }</span>
+
+    @Override
+    public void requestCameraPermission() {
+<span class="nc" id="L340">        NextzyPermission.requestPermission(this, permissionResult -&gt; {</span>
+<span class="nc bnc" id="L341" title="All 2 branches missed.">            if (permissionResult.areAllPermissionsGranted()) {</span>
+<span class="nc" id="L342">                openActivityOnResult(QrScannerActivity.class, QrScannerActivity.REQUEST_CODE);</span>
+            } else {
+<span class="nc" id="L344">                Observable.empty()</span>
+<span class="nc" id="L345">                        .delay(500, TimeUnit.MILLISECONDS)</span>
+<span class="nc" id="L346">                        .doOnCompleted(this::showCameraPermissionDenied)</span>
+<span class="nc" id="L347">                        .subscribe();</span>
+            }
+<span class="nc" id="L349">        }, Manifest.permission.CAMERA);</span>
+<span class="nc" id="L350">    }</span>
+
+    @Override
+    public void setUsername(String username) {
+<span class="nc" id="L354">        tbUserDetail.setUsername(username);</span>
+<span class="nc" id="L355">    }</span>
+
+    @Override
+    public void gotoTopUpConfirmEvent() {
+<span class="nc" id="L359">        Bundle bundle = new Bundle();</span>
+<span class="nc" id="L360">        bundle.putString(KEY_PAGE, PAGE_CONFIRM);</span>
+<span class="nc" id="L361">        openActivity(TopupActivity.class, bundle);</span>
+<span class="nc" id="L362">    }</span>
+
+    @Override
+    public void showUnknownBusinessType() {
+<span class="nc" id="L366">        showAlertDialogGotoLoginOnClick(&quot;Unknown business type. Can't setup tab menu&quot;);</span>
+<span class="nc" id="L367">    }</span>
+
+    @Override
+    public void onClick(View view) {
+<span class="nc bnc" id="L371" title="All 2 branches missed.">        if (view == svShadow) {</span>
+<span class="nc" id="L372">            tbUserDetail.dismissSwitchAccountMenu();</span>
+        }
+<span class="nc" id="L374">    }</span>
+
+    @Override
+    public void onTabSelected(TabLayout.Tab tab) {
+<span class="nc" id="L378">        MyAisMenu.Menu menu = tabMenuAdapter.getMenu(tab.getPosition());</span>
+<span class="nc" id="L379">        tvTitle.setText(NextzyUtility.getInstance().getLocalMessage(menu.getNameEn(), menu.getNameTh(), getCurrentLanguage()));</span>
+<span class="nc bnc" id="L380" title="All 2 branches missed.">        if (vsTitle.getDisplayedChild() == 0) {</span>
+<span class="nc" id="L381">            ivTitleSecond.setImageResource(menu.getImage());</span>
+        } else {
+<span class="nc" id="L383">            ivTitleFirst.setImageResource(menu.getImage());</span>
+        }
+<span class="nc" id="L385">    }</span>
+
+    @Override
+    public void onTabUnselected(TabLayout.Tab tab) {
+<span class="nc" id="L389">        MyAisMenu.Menu menu = tabMenuAdapter.getMenu(tab.getPosition());</span>
+<span class="nc bnc" id="L390" title="All 2 branches missed.">        if (vsTitle.getDisplayedChild() == 0) {</span>
+<span class="nc" id="L391">            ivTitleFirst.setImageResource(menu.getImage());</span>
+        } else {
+<span class="nc" id="L393">            ivTitleSecond.setImageResource(menu.getImage());</span>
+        }
+<span class="nc" id="L395">        vsTitle.showNext();</span>
+
+<span class="nc" id="L397">        previousPos = tab.getPosition();</span>
+<span class="nc" id="L398">    }</span>
+
+    @Override
+    public void onTabReselected(TabLayout.Tab tab) {
+<span class="nc" id="L402">    }</span>
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+<span class="nc bnc" id="L406" title="All 2 branches missed.">        if (isFromQrUrlScheme(requestCode, resultCode)) {</span>
+<span class="nc" id="L407">            String url = data.getStringExtra(QrScannerActivity.KEY_URL);</span>
+<span class="nc" id="L408">            setupUrlScheme(url);</span>
+<span class="nc" id="L409">            moveToPrivilegeTab();</span>
+<span class="nc bnc" id="L410" title="All 2 branches missed.">        } else if (isFromAisUrlScheme(requestCode, resultCode)) {</span>
+<span class="nc" id="L411">            String url = data.getStringExtra(MyAisWebViewActivity.KEY_URL);</span>
+<span class="nc" id="L412">            setupUrlScheme(url);</span>
+<span class="nc" id="L413">            getPresenter().openUrlScheme();</span>
+<span class="nc" id="L414">        } else {</span>
+<span class="nc" id="L415">            super.onActivityResult(requestCode, resultCode, data);</span>
+        }
+<span class="nc" id="L417">    }</span>
+
+    @Override
+    public void onAfterLocaleChanged() {
+<span class="nc bnc" id="L421" title="All 2 branches missed.">        if (getSlidingMenu().isMenuShowing()) {</span>
+<span class="nc" id="L422">            toggle();</span>
+        }
+<span class="nc" id="L424">        getPresenter().getUserProfile();</span>
+<span class="nc" id="L425">    }</span>
+
+    private boolean isFromAisUrlScheme(int requestCode, int resultCode) {
+<span class="nc bnc" id="L428" title="All 4 branches missed.">        return requestCode == MyAisWebViewActivity.REQUEST_CODE &amp;&amp; resultCode == MyAisWebViewActivity.RESULT_URL_SCHEME;</span>
+    }
+
+    private boolean isFromQrUrlScheme(int requestCode, int resultCode) {
+<span class="nc bnc" id="L432" title="All 4 branches missed.">        return requestCode == QrScannerActivity.REQUEST_CODE &amp;&amp; resultCode == QrScannerActivity.RESULT_URL_SCHEME;</span>
+    }
+
+
+    private void setupUrlScheme(String url) {
+<span class="nc bnc" id="L437" title="All 2 branches missed.">        if (url == null) {</span>
+<span class="nc" id="L438">            return;</span>
+        }
+<span class="nc bnc" id="L440" title="All 2 branches missed.">        if (url.contains(&quot;#&quot;)) {</span>
+<span class="nc" id="L441">            url = url.split(&quot;#&quot;)[0];</span>
+        }
+<span class="nc" id="L443">        UrlSchemeUtils.getInstance().setupUrlScheme(Uri.parse(url));</span>
+<span class="nc" id="L444">    }</span>
+
+    private void moveToPrivilegeTab() {
+        // TODO Fix this because we can't access to privilege module
+<span class="nc" id="L448">        setCurrentTabItem(TabServiceMenuKey.KEY_SERVICE.toString());</span>
+<span class="nc" id="L449">    }</span>
+
+    private void setCurrentTabItem(String key) {
+<span class="nc" id="L452">        int index = tabMenuAdapter.getTabIndexByKey(key);</span>
+<span class="nc" id="L453">        vpContent.setCurrentItem(index, true);</span>
+<span class="nc" id="L454">    }</span>
+
+    public void showCameraPermissionDenied() {
+<span class="nc" id="L457">        showAlertDialogDismissOnClick(getString(com.nextzy.myais.common.R.string.my_ais_library_qr_camera_permission_denied));</span>
+<span class="nc" id="L458">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

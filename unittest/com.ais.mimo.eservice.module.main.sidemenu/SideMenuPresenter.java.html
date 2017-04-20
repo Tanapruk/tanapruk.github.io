@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SideMenuPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.main.sidemenu</a> &gt; <span class="el_source">SideMenuPresenter.java</span></div><h1>SideMenuPresenter.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.main.sidemenu;
+
+import com.ais.mimo.eservice.config.menu.side.SideCorporateMenu;
+import com.ais.mimo.eservice.config.menu.side.SideFibreMenu;
+import com.ais.mimo.eservice.config.menu.side.SideMenuKey;
+import com.ais.mimo.eservice.config.menu.side.SidePostpaidMenu;
+import com.ais.mimo.eservice.config.menu.side.SidePrepaidMenu;
+import com.ais.mimo.eservice.module.main.event.SideMenuUpdateEvent;
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.database.NextzyDatabaseKey;
+import com.nextzy.myais.common.database.RealmUtility;
+import com.nextzy.myais.common.database.model.NextzyRealmObject;
+import com.nextzy.myais.common.menu.MyAisMenu;
+import com.nextzy.myais.common.mvp.NextzyPresenter;
+import com.nextzy.myais.common.widget.sidemenu.SideMenuItem;
+import com.nextzy.myais.myais.R;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import rx.Observable;
+import rx.functions.Action0;
+
+/**
+ * Created by Akexorcist on 8/17/16 AD.
+ */
+public class SideMenuPresenter extends NextzyPresenter&lt;SideMenuContractor.View&gt; implements SideMenuContractor.Presenter {
+    private List&lt;SideMenuItem.BaseMenu&gt; sideMenuItemList;
+
+    public static SideMenuPresenter createPresenter(SideMenuContractor.View view) {
+<span class="nc" id="L33">        return new SideMenuPresenter(view);</span>
+    }
+
+    public SideMenuPresenter(SideMenuContractor.View view) {
+<span class="fc" id="L37">        super(view);</span>
+<span class="fc" id="L38">    }</span>
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L42">        RxBus.get().register(this);</span>
+<span class="nc" id="L43">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L47">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L48">    }</span>
+
+    @Override
+    public void onViewStart() {
+
+<span class="nc" id="L53">    }</span>
+
+    @Override
+    public void onViewStop() {
+
+<span class="nc" id="L58">    }</span>
+
+    @Override
+    public void onSubMenuClick(SideMenuItem.SubMenu subMenu) {
+//        Log.e(&quot;Check&quot;, &quot;onSubMenuClick : &quot; + subMenu.getKey());
+<span class="nc" id="L63">    }</span>
+
+    @Override
+    public void onMenuClick(SideMenuItem.Menu menu) {
+//        Log.e(&quot;Check&quot;, &quot;onMenuClick : &quot; + menu.getKey());
+<span class="nc" id="L68">    }</span>
+
+    @Override
+    public void onSideMenuSetup() {
+<span class="fc" id="L72">        getView().updateBusinessTypeIcon();</span>
+<span class="fc" id="L73">        getView().setMobileNumber(Mobile.getInstance().getMobileNumber());</span>
+
+        // TODO Setup side menu config here
+<span class="fc" id="L76">        List&lt;MyAisMenu.Menu&gt; menuList = null;</span>
+<span class="fc bfc" id="L77" title="All 4 branches covered.">        if (Mobile.getInstance().isPostpaid() &amp;&amp; !Mobile.getInstance().isCorporate()) {</span>
+<span class="fc" id="L78">            menuList = SidePostpaidMenu.getInstance().getMenu();</span>
+<span class="pc bpc" id="L79" title="1 of 4 branches missed.">        } else if (Mobile.getInstance().isPrepaid() &amp;&amp; !Mobile.getInstance().isCorporate()) {</span>
+<span class="fc" id="L80">            menuList = SidePrepaidMenu.getInstance().getMenu();</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        } else if (Mobile.getInstance().isCorporate()) {</span>
+<span class="fc" id="L82">            menuList = SideCorporateMenu.getInstance().getMenu();</span>
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">        } else if (Mobile.getInstance().isFibre()) {</span>
+<span class="fc" id="L84">            menuList = SideFibreMenu.getInstance().getMenu();</span>
+        }
+
+<span class="fc" id="L87">        addRegisterOrMyAccountSideMenu(menuList);</span>
+
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">        if (menuList != null) {</span>
+<span class="fc" id="L90">            String language = getView().getCurrentLanguage();</span>
+<span class="fc" id="L91">            sideMenuItemList = SideMenuUtility.getInstance().convertMyAisMenuToSideMenuItem(menuList, language);</span>
+<span class="fc" id="L92">            getView().saveSideMenuToRealm(sideMenuItemList);</span>
+<span class="fc" id="L93">            getView().setSideMenuItem();</span>
+<span class="fc" id="L94">        } else {</span>
+<span class="nc" id="L95">            getView().showUnknownBusinessType();</span>
+        }
+<span class="fc" id="L97">    }</span>
+
+    @Override
+    public NextzyRealmObject convertSideMenuToRealmObject(List&lt;MyAisMenu.Menu&gt; menuList) {
+<span class="fc" id="L101">        return RealmUtility.getInstance().createRealmObject(NextzyDatabaseKey.CONFIG_SIDE_MENU, new MyAisMenu.Container(menuList));</span>
+    }
+
+    @Override
+    public List&lt;SideMenuItem.BaseMenu&gt; convertSideMenuContainerToList(SideMenuItem.Container menuContainer) {
+<span class="nc" id="L106">        return SideMenuUtility.getInstance().restoreSideMenuItemFromDatabase(menuContainer);</span>
+    }
+
+
+    public List&lt;SideMenuItem.BaseMenu&gt; getSideMenuItemList() {
+<span class="nc" id="L111">        return sideMenuItemList;</span>
+    }
+
+    public void setSideMenuItemList(List&lt;SideMenuItem.BaseMenu&gt; sideMenuItemList) {
+<span class="nc" id="L115">        this.sideMenuItemList = sideMenuItemList;</span>
+<span class="nc" id="L116">    }</span>
+
+    @Subscribe
+    public void createSideMenuItem(SideMenuUpdateEvent event) {
+<span class="fc" id="L120">        createDebounceObservable().doOnCompleted(actionUpdateSideMenu).subscribe();</span>
+<span class="fc" id="L121">    }</span>
+
+<span class="fc" id="L123">    private Action0 actionUpdateSideMenu = () -&gt; getView().updateSideMenu();</span>
+
+    public Observable createDebounceObservable() {
+<span class="fc" id="L126">        return Observable.empty().debounce(500, TimeUnit.MILLISECONDS);</span>
+    }
+
+    protected void addRegisterOrMyAccountSideMenu(List&lt;MyAisMenu.Menu&gt; menuList) {
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">        if (Mobile.getInstance().isCurrentNumberIsMasterNumber()</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">                &amp;&amp; !Mobile.getInstance().isCorporate()) {</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">            if (Mobile.getInstance().isMyAis()</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">                    &amp;&amp; Mobile.getInstance().isMaster()) {</span>
+<span class="nc" id="L134">                menuList.add(0, new MyAisMenu.Menu()</span>
+<span class="nc" id="L135">                        .setNameEn(&quot;my AIS Account&quot;)</span>
+<span class="nc" id="L136">                        .setNameTh(&quot;บัญชี my AIS&quot;)</span>
+<span class="nc" id="L137">                        .setImage(R.drawable.my_ais_side_menu_ic_menu_register)</span>
+<span class="nc" id="L138">                        .setKey(SideMenuKey.KEY_AIS_ACCOUNT.toString()));</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">            } else if (!Mobile.getInstance().isMyAis()</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">                    &amp;&amp; !Mobile.getInstance().isMaster()) {</span>
+<span class="nc" id="L141">                menuList.add(0, new MyAisMenu.Menu()</span>
+<span class="nc" id="L142">                        .setNameEn(&quot;Register&quot;)</span>
+<span class="nc" id="L143">                        .setNameTh(&quot;สมัคร my AIS&quot;)</span>
+<span class="nc" id="L144">                        .setImage(R.drawable.my_ais_side_menu_ic_menu_register)</span>
+<span class="nc" id="L145">                        .setKey(SideMenuKey.KEY_AIS_REGISTER.toString()));</span>
+            }
+        }
+        //else: no add menuList
+<span class="fc" id="L149">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SideMenuContractor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.main.sidemenu</a> &gt; <span class="el_source">SideMenuContractor.java</span></div><h1>SideMenuContractor.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.main.sidemenu;
+
+import com.nextzy.myais.common.database.model.NextzyRealmObject;
+import com.nextzy.myais.common.menu.MyAisMenu;
+import com.nextzy.myais.common.mvp.NextzyContractorPresenter;
+import com.nextzy.myais.common.mvp.NextzyFragmentContractorView;
+import com.nextzy.myais.common.widget.sidemenu.SideMenuItem;
+
+import java.util.List;
+
+/**
+ * Created by Akexorcist on 8/17/16 AD.
+ */
+<span class="nc" id="L14">public class SideMenuContractor {</span>
+    public interface Presenter extends NextzyContractorPresenter {
+
+        void onSubMenuClick(SideMenuItem.SubMenu subMenu);
+
+        void onMenuClick(SideMenuItem.Menu menu);
+
+        void onSideMenuSetup();
+
+        NextzyRealmObject convertSideMenuToRealmObject(List&lt;MyAisMenu.Menu&gt; menuList);
+
+        List&lt;SideMenuItem.BaseMenu&gt; convertSideMenuContainerToList(SideMenuItem.Container menuContainer);
+
+        List&lt;SideMenuItem.BaseMenu&gt; getSideMenuItemList();
+
+        void setSideMenuItemList(List&lt;SideMenuItem.BaseMenu&gt; sideMenuItemList);
+    }
+
+    public interface View extends NextzyFragmentContractorView&lt;Presenter&gt; {
+
+        void setMobileNumber(String mobileNumber);
+
+        void setSideMenuItem();
+
+        void saveSideMenuToRealm(List&lt;SideMenuItem.BaseMenu&gt; menuList);
+
+        void updateSideMenu();
+
+        void showUnknownBusinessType();
+
+        void updateBusinessTypeIcon();
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

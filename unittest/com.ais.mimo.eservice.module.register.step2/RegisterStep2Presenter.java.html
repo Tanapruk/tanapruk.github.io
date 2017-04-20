@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegisterStep2Presenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.register.step2</a> &gt; <span class="el_source">RegisterStep2Presenter.java</span></div><h1>RegisterStep2Presenter.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.register.step2;
+
+import com.ais.mimo.eservice.helper.login.network.response.MobileData;
+import com.ais.mimo.eservice.helper.register.network.RegisterManager;
+import com.ais.mimo.eservice.helper.register.network.exception.RegisterMyNumberDataException;
+import com.ais.mimo.eservice.helper.register.network.exception.RegisterVerifyOtpDataException;
+import com.ais.mimo.eservice.helper.register.network.request.RegisterVerifyOtpBody;
+import com.ais.mimo.eservice.helper.register.network.response.RegisterMyNumberResult;
+import com.ais.mimo.eservice.helper.register.network.response.RegisterVerifyIdentityResult;
+import com.ais.mimo.eservice.module.register.base.RegisterBasePresenter;
+import com.ais.mimo.eservice.module.register.event.GoToSelectMasterFragmentEvent;
+import com.ais.mimo.eservice.module.register.event.GoToStep3FragmentEvent;
+import com.ais.mimo.eservice.module.register.event.data.SelectPostpaidEventData;
+import com.ais.mimo.eservice.module.register.event.data.Step3EventData;
+import com.ais.mimo.eservice.module.register.step2.model.RegisterChangeMainNumberModel;
+import com.ais.mimo.eservice.module.register.utility.RegisterConverterUtility;
+import com.ais.mimo.eservice.module.register.utility.RegisterValidateUtility;
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.database.NextzyDatabase;
+
+import java.util.ArrayList;
+
+import static com.ais.mimo.eservice.helper.register.network.RegisterManager.SERVICE_VERIFY_IDENTITY_MASTER;
+import static com.ais.mimo.eservice.module.register.utility.RegisterValidateUtility.INVALIDATE_OTP_FORMAT;
+import static com.ais.mimo.eservice.module.register.utility.RegisterValidateUtility.INVALIDATE_PASSWORD_FORMAT;
+import static com.ais.mimo.eservice.module.register.utility.RegisterValidateUtility.INVALIDATE_PASSWORD_NOT_MATCH;
+
+/**
+ * Created by TheKhaeng on 9/20/2016.
+ */
+public class RegisterStep2Presenter extends RegisterBasePresenter&lt;RegisterStep2Contractor.View&gt; implements RegisterStep2Contractor.Presenter {
+<span class="fc" id="L34">    private final static String TAG = RegisterStep2Presenter.class.getSimpleName();</span>
+    private final RegisterValidateUtility validateUtil;
+    private RegisterManager manager;
+
+    public void setMockManager(RegisterManager mockManager) {
+<span class="fc" id="L39">        this.manager = mockManager;</span>
+<span class="fc" id="L40">    }</span>
+
+    private RegisterStep2Presenter(RegisterStep2Contractor.View view) {
+<span class="fc" id="L43">        super(view);</span>
+<span class="fc" id="L44">        manager = RegisterManager.getInstance();</span>
+<span class="fc" id="L45">        validateUtil = RegisterValidateUtility.getInstance();</span>
+<span class="fc" id="L46">    }</span>
+
+    public static RegisterStep2Presenter createPresenter(RegisterStep2Contractor.View view) {
+<span class="fc" id="L49">        return new RegisterStep2Presenter(view);</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L54">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L58">    }</span>
+
+    @Override
+    public void onViewStart() {
+<span class="nc" id="L62">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L66">    }</span>
+
+    @Override
+    public void registerRx() {
+<span class="fc" id="L70">        RxBus.get().register(this);</span>
+<span class="fc" id="L71">    }</span>
+
+    @Override
+    public void unregisterRx() {
+<span class="fc" id="L75">        RxBus.get().unregister(this);</span>
+<span class="fc" id="L76">    }</span>
+
+
+    /*******************/
+    /** For view call **/
+    /*******************/
+    //&lt;editor-fold desc=&quot;For view folding&quot;&gt;
+    @Override
+    public void validateRequestVerifyOtp(String otp,
+                                         String pass,
+                                         String repass) {
+<span class="fc" id="L87">        getView().showDefaultOtpEdt();</span>
+<span class="fc" id="L88">        getView().showDefaultPasswordEdt();</span>
+<span class="pc bpc" id="L89" title="1 of 4 branches missed.">        if (isShowOtpEditText() &amp;&amp; validateUtil.validateOtp(otp) == INVALIDATE_OTP_FORMAT) {</span>
+<span class="fc" id="L90">            getView().showFormatErrorOtpEdt();</span>
+<span class="fc" id="L91">            return;</span>
+        }
+
+<span class="fc bfc" id="L94" title="All 3 branches covered.">        switch (validateUtil.validatePassword(pass, repass)) {</span>
+            case INVALIDATE_PASSWORD_FORMAT:
+<span class="fc" id="L96">                getView().showFormatErrorPasswordEdt();</span>
+<span class="fc" id="L97">                return;</span>
+            case INVALIDATE_PASSWORD_NOT_MATCH:
+<span class="fc" id="L99">                getView().showNotMatchErrorPasswordEdt();</span>
+<span class="fc" id="L100">                return;</span>
+        }
+
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        if (isShowOtpEditText()) {</span>
+<span class="fc" id="L104">            requestVerifyOtpAndMyNumber(otp);</span>
+        }else{
+<span class="nc" id="L106">            requestMyNumber();</span>
+        }
+<span class="fc" id="L108">    }</span>
+
+    @Override
+    public boolean isShowOtpEditText() {
+<span class="pc bpc" id="L112" title="3 of 4 branches missed.">        if (isLogin() &amp;&amp; !Mobile.getInstance().isMyAis()) {</span>
+<span class="nc" id="L113">            return false;</span>
+        }
+<span class="fc" id="L115">        return true;</span>
+    }
+
+    //&lt;/editor-fold&gt;
+
+    @Subscribe
+    public void onRegisterChangeMainNumberModel(RegisterChangeMainNumberModel model) {
+<span class="fc bfc" id="L122" title="All 2 branches covered.">        if (model.isCanNextStep()) {</span>
+<span class="fc" id="L123">            handleMyAccountResult(model.getMyNumberResult());</span>
+        } else {
+<span class="fc" id="L125">            getView().showResponseException(model.getErrorResultDescription());</span>
+        }
+<span class="fc" id="L127">    }</span>
+
+    @Subscribe
+    public void onReceiverMyNumber(RegisterMyNumberResult result){
+<span class="nc" id="L131">        handleMyAccountResult(result);</span>
+<span class="nc" id="L132">    }</span>
+
+    @Subscribe
+    public void onReceiveVerifyOtpException(RegisterVerifyOtpDataException exception) {
+<span class="fc" id="L136">        showResponseExceptionDismiss(exception.getMessage());</span>
+<span class="fc" id="L137">    }</span>
+
+    @Subscribe
+    public void onReceiveMyNumberException(RegisterMyNumberDataException exception) {
+<span class="fc" id="L141">        showResponseExceptionDismiss(exception.getMessage());</span>
+<span class="fc" id="L142">    }</span>
+
+    /********************/
+    /** Private method **/
+    /********************/
+    //&lt;editor-fold desc=&quot;Private function folding&quot;&gt;
+    private void requestVerifyOtpAndMyNumber(String otp) {
+<span class="fc" id="L149">        getView().showLoadingNoFade();</span>
+<span class="fc" id="L150">        String refId = getRefId();</span>
+<span class="fc" id="L151">        String mobileNumber = getView().getArgumentsStringMobileNumber();</span>
+
+<span class="fc" id="L153">        RegisterVerifyOtpBody body = new RegisterVerifyOtpBody(</span>
+                refId,
+                otp
+        );
+
+<span class="fc" id="L158">        manager.verifyOtpAndGetMyNumber(mobileNumber, body);</span>
+<span class="fc" id="L159">    }</span>
+
+    private void requestMyNumber() {
+<span class="nc" id="L162">        getView().showLoadingNoFade();</span>
+<span class="nc" id="L163">        String mobileNumber = getView().getArgumentsStringMobileNumber();</span>
+<span class="nc" id="L164">        manager.getMyNumber(mobileNumber);</span>
+<span class="nc" id="L165">    }</span>
+
+    private void handleMyAccountResult(RegisterMyNumberResult result) {
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">        if (result.isSuccess()) {</span>
+<span class="fc" id="L169">            ArrayList&lt;MobileData&gt; postpaidGroup = RegisterConverterUtility.getInstance()</span>
+<span class="fc" id="L170">                    .getPostpaidGroup(result.getDataList());</span>
+<span class="fc" id="L171">            ArrayList&lt;MobileData&gt; fbbGroup = RegisterConverterUtility.getInstance()</span>
+<span class="fc" id="L172">                    .getFbbGroup(result.getDataList());</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">            if (isActivePostpaidNumber()) {</span>
+<span class="fc" id="L174">                getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L175">                goToFragmentScreen3();</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">            } else if (isActivePrepaidNumber()) {</span>
+<span class="fc bfc" id="L177" title="All 4 branches covered.">                if (postpaidGroup.size() == 0 &amp;&amp; fbbGroup.size() == 0) {</span>
+<span class="fc" id="L178">                    getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L179">                    goToFragmentScreen3();</span>
+                } else {
+<span class="fc" id="L181">                    getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L182">                    goToChangeMainNumberFragment(postpaidGroup, fbbGroup);</span>
+                }
+<span class="pc bpc" id="L184" title="1 of 2 branches missed.">            } else if (isActiveFibreNumber()) {</span>
+<span class="pc bpc" id="L185" title="1 of 2 branches missed.">                if (postpaidGroup.size() == 0) {</span>
+<span class="nc" id="L186">                    getView().dismissLoadingNoFade();</span>
+<span class="nc" id="L187">                    goToFragmentScreen3();</span>
+                } else {
+<span class="fc" id="L189">                    getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L190">                    goToChangeMainNumberFragment(postpaidGroup, new ArrayList&lt;&gt;());</span>
+                }
+            }
+        }
+<span class="fc" id="L194">    }</span>
+
+
+    private void goToChangeMainNumberFragment(ArrayList&lt;MobileData&gt; postpaidGroup, ArrayList&lt;MobileData&gt; fbbGroup) {
+<span class="fc" id="L198">        SelectPostpaidEventData data = new SelectPostpaidEventData(</span>
+<span class="fc" id="L199">                getView().getPasswordStringFromEditText(),</span>
+<span class="fc" id="L200">                getView().getRePasswordStringFromEditText(),</span>
+                postpaidGroup,
+                fbbGroup);
+<span class="fc" id="L203">        RxBus.get().post(new GoToSelectMasterFragmentEvent(data));</span>
+
+<span class="fc" id="L205">    }</span>
+
+    private void goToFragmentScreen3() {
+<span class="fc" id="L208">        Step3EventData data = new Step3EventData(</span>
+<span class="fc" id="L209">                getView().getPasswordStringFromEditText(),</span>
+<span class="fc" id="L210">                getView().getRePasswordStringFromEditText());</span>
+<span class="fc" id="L211">        RxBus.get().post(new GoToStep3FragmentEvent(data));</span>
+<span class="fc" id="L212">    }</span>
+
+    private String getRefId() {
+        RegisterVerifyIdentityResult identity
+<span class="fc" id="L216">                = NextzyDatabase.getInstance().findByName(SERVICE_VERIFY_IDENTITY_MASTER, RegisterVerifyIdentityResult.class);</span>
+<span class="fc bfc" id="L217" title="All 2 branches covered.">        if (identity != null) {</span>
+<span class="fc" id="L218">            return identity.getData().getReferenceId();</span>
+        }
+<span class="fc" id="L220">        return null;</span>
+    }
+
+    //&lt;/editor-fold&gt;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

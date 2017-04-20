@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SideMenuUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.main.sidemenu</a> &gt; <span class="el_source">SideMenuUtility.java</span></div><h1>SideMenuUtility.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.main.sidemenu;
+
+import com.nextzy.myais.common.menu.MyAisMenu;
+import com.nextzy.myais.common.utility.NextzyUtility;
+import com.nextzy.myais.common.widget.sidemenu.SideMenu;
+import com.nextzy.myais.common.widget.sidemenu.SideMenuItem;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by Akexorcist on 8/22/16 AD.
+ */
+<span class="fc" id="L14">public class SideMenuUtility {</span>
+    private static SideMenuUtility sideMenuUtility;
+
+    public static SideMenuUtility getInstance() {
+<span class="fc bfc" id="L18" title="All 2 branches covered.">        if (sideMenuUtility == null) {</span>
+<span class="fc" id="L19">            sideMenuUtility = new SideMenuUtility();</span>
+        }
+<span class="fc" id="L21">        return sideMenuUtility;</span>
+    }
+
+    public List&lt;SideMenuItem.BaseMenu&gt; convertMyAisMenuToSideMenuItem(List&lt;MyAisMenu.Menu&gt; myAisMenuList, String locale) {
+<span class="fc" id="L25">        SideMenu.Builder builder = new SideMenu.Builder();</span>
+<span class="fc" id="L26">        builder.addBlank();</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        if (myAisMenuList != null) {</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">            for (MyAisMenu.Menu myAisMenu : myAisMenuList) {</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">                if (myAisMenu.getKey().equals(SideMenuItem.Divider.TYPE)) {</span>
+<span class="fc" id="L30">                    builder.addDivider();</span>
+                } else {
+<span class="fc" id="L32">                    String menuTitle = NextzyUtility.getInstance().getLocalMessage(myAisMenu.getNameEn(), myAisMenu.getNameTh(), locale);</span>
+<span class="fc" id="L33">                    String menuKey = myAisMenu.getKey();</span>
+<span class="fc" id="L34">                    int menuIcon = myAisMenu.getImage();</span>
+<span class="fc" id="L35">                    SideMenuItem.Menu menu = new SideMenuItem.Menu(menuIcon, menuTitle, menuKey);</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">                    if (myAisMenu.isContainSectionMenu()) {</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">                        for (MyAisMenu.SectionMenu sectionMenu : myAisMenu.getSectionMenuList()) {</span>
+<span class="fc" id="L38">                            String sectionMenuTitle = NextzyUtility.getInstance().getLocalMessage(sectionMenu.getNameEn(), sectionMenu.getNameTh(), locale);</span>
+<span class="fc" id="L39">                            String sectionMenuKey = sectionMenu.getKey();</span>
+<span class="fc" id="L40">                            menu.addSubMenu(new SideMenuItem.SubMenu(sectionMenuTitle, sectionMenuKey));</span>
+<span class="fc" id="L41">                        }</span>
+                    }
+<span class="fc" id="L43">                    builder.addMenu(menu);</span>
+                }
+<span class="fc" id="L45">            }</span>
+        }
+<span class="fc" id="L47">        builder.addBlank();</span>
+<span class="fc" id="L48">        return builder.build();</span>
+    }
+
+    public List&lt;SideMenuItem.BaseMenu&gt; restoreSideMenuItemFromDatabase(SideMenuItem.Container menuContainer) {
+<span class="fc" id="L52">        List&lt;SideMenuItem.BaseMenu&gt; restoreMenuList = new ArrayList&lt;&gt;();</span>
+<span class="pc bpc" id="L53" title="2 of 4 branches missed.">        if (menuContainer != null &amp;&amp; menuContainer.getMenuList() != null) {</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">            for (SideMenuItem.BaseMenu menuItem : menuContainer.getMenuList()) {</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">                if (isMenuType(menuItem)) {</span>
+<span class="fc" id="L56">                    restoreMenuList.add(convertSideMenuItemToMenu(menuItem));</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">                } else if (isSubMenuType(menuItem)) {</span>
+<span class="fc" id="L58">                    restoreMenuList.add(convertSideMenuItemToSubMenu(menuItem));</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">                } else if (isDividerType(menuItem)) {</span>
+<span class="fc" id="L60">                    restoreMenuList.add(convertSideMenuItemToDivider());</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">                } else if (isBlankType(menuItem)) {</span>
+<span class="fc" id="L62">                    restoreMenuList.add(convertSideMenuItemToBlank());</span>
+                }
+<span class="fc" id="L64">            }</span>
+        }
+<span class="fc" id="L66">        return restoreMenuList;</span>
+    }
+
+    private boolean isMenuType(SideMenuItem.BaseMenu menuItem) {
+<span class="fc" id="L70">        return SideMenuItem.Menu.TYPE.equals(menuItem.getType());</span>
+    }
+
+    private boolean isSubMenuType(SideMenuItem.BaseMenu menuItem) {
+<span class="fc" id="L74">        return SideMenuItem.SubMenu.TYPE.equals(menuItem.getType());</span>
+    }
+
+    private boolean isBlankType(SideMenuItem.BaseMenu menuItem) {
+<span class="fc" id="L78">        return SideMenuItem.Blank.TYPE.equals(menuItem.getType());</span>
+    }
+
+    private boolean isDividerType(SideMenuItem.BaseMenu menuItem) {
+<span class="fc" id="L82">        return SideMenuItem.Divider.TYPE.equals(menuItem.getType());</span>
+    }
+
+    private SideMenuItem.Menu convertSideMenuItemToMenu(SideMenuItem.BaseMenu menuItem) {
+<span class="fc" id="L86">        return new SideMenuItem.Menu(menuItem.getIcon(), menuItem.getTitle(), menuItem.getKey(), menuItem.getSubMenuList());</span>
+    }
+
+    private SideMenuItem.SubMenu convertSideMenuItemToSubMenu(SideMenuItem.BaseMenu menuItem) {
+<span class="fc" id="L90">        return new SideMenuItem.SubMenu(menuItem.getTitle(), menuItem.getKey());</span>
+    }
+
+    private SideMenuItem.Blank convertSideMenuItemToBlank() {
+<span class="fc" id="L94">        return new SideMenuItem.Blank();</span>
+    }
+
+    private SideMenuItem.Divider convertSideMenuItemToDivider() {
+<span class="fc" id="L98">        return new SideMenuItem.Divider();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

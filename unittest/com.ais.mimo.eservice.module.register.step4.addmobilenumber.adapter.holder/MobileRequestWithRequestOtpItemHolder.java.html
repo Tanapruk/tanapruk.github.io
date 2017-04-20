@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MobileRequestWithRequestOtpItemHolder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.register.step4.addmobilenumber.adapter.holder</a> &gt; <span class="el_source">MobileRequestWithRequestOtpItemHolder.java</span></div><h1>MobileRequestWithRequestOtpItemHolder.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.register.step4.addmobilenumber.adapter.holder;
+
+import android.content.Context;
+import android.graphics.Paint;
+import android.graphics.Typeface;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.RecyclerView;
+import android.text.InputType;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.ais.mimo.eservice.utility.AnimationViewUtils;
+import com.nextzy.myais.common.widget.AISButton;
+import com.nextzy.myais.common.widget.AISEditText;
+import com.nextzy.myais.common.widget.AISTextView;
+import com.nextzy.myais.myais.R;
+
+import static com.nextzy.myais.common.delegate.FormatUtility.FORMAT_MOBILE_NUMBER;
+
+/**
+ * Created by TheKhaeng on 10/13/2016.
+ */
+
+public class MobileRequestWithRequestOtpItemHolder extends RecyclerView.ViewHolder {
+    private final TextView tvRequestOtp;
+    private final AISEditText edtOtp;
+    private final AISButton btnOk;
+    private final AISButton btnCancel;
+    private final LinearLayout llRequestOtp;
+    private final ImageView imgDot;
+    private final ImageView imgDone;
+    private final Context context;
+    public AISTextView tvMobileNumber;
+    private OnClickItemListener listener;
+    private int pos;
+
+    public MobileRequestWithRequestOtpItemHolder(View itemView) {
+<span class="nc" id="L40">        super(itemView);</span>
+<span class="nc" id="L41">        imgDot = (ImageView) itemView.findViewById(R.id.my_ais_register_ic_dot);</span>
+<span class="nc" id="L42">        imgDone = (ImageView) itemView.findViewById(R.id.my_ais_register_ic_done);</span>
+<span class="nc" id="L43">        tvMobileNumber = (AISTextView) itemView.findViewById(R.id.my_ais_register_tv_text);</span>
+<span class="nc" id="L44">        tvRequestOtp = (TextView) itemView.findViewById(R.id.my_ais_register_tv_request_otp);</span>
+<span class="nc" id="L45">        edtOtp = (AISEditText) itemView.findViewById(R.id.my_ais_register_edt_otp);</span>
+<span class="nc" id="L46">        btnOk = (AISButton) itemView.findViewById(R.id.my_ais_register_btn_ok);</span>
+<span class="nc" id="L47">        btnCancel = (AISButton) itemView.findViewById(R.id.my_ais_register_btn_cancel);</span>
+<span class="nc" id="L48">        llRequestOtp = (LinearLayout) itemView.findViewById(R.id.my_ais_register_ll_request_otp);</span>
+<span class="nc" id="L49">        context = itemView.getContext();</span>
+
+<span class="nc" id="L51">        setupView();</span>
+<span class="nc" id="L52">    }</span>
+
+    private void setupView() {
+<span class="nc" id="L55">        tvRequestOtp.setClickable(true);</span>
+<span class="nc" id="L56">        tvRequestOtp.setPaintFlags(tvRequestOtp.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);</span>
+<span class="nc" id="L57">        tvRequestOtp.setOnClickListener(v -&gt; {</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">            if (listener != null) {</span>
+<span class="nc" id="L59">                listener.onClick(</span>
+                        this,
+                        tvRequestOtp,
+<span class="nc" id="L62">                        tvMobileNumber.getText().toString(),</span>
+<span class="nc" id="L63">                        edtOtp.getText().toString(),</span>
+                        pos);
+            }
+<span class="nc" id="L66">        });</span>
+
+<span class="nc" id="L68">        btnOk.setOnClickListener(v -&gt; {</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">            if (listener != null) {</span>
+<span class="nc" id="L70">                listener.onClick(</span>
+                        this,
+                        btnOk,
+<span class="nc" id="L73">                        tvMobileNumber.getText().toString(),</span>
+<span class="nc" id="L74">                        edtOtp.getText().toString(),</span>
+                        pos);
+            }
+<span class="nc" id="L77">        });</span>
+<span class="nc" id="L78">        btnCancel.setOnClickListener(v -&gt; {</span>
+<span class="nc" id="L79">            hideRequestOtp();</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">            if (listener != null) {</span>
+<span class="nc" id="L81">                listener.onClick(</span>
+                        this,
+                        btnCancel,
+<span class="nc" id="L84">                        tvMobileNumber.getText().toString(),</span>
+<span class="nc" id="L85">                        edtOtp.getText().toString(),</span>
+                        pos);
+            }
+<span class="nc" id="L88">        });</span>
+
+<span class="nc" id="L90">        Typeface tf = edtOtp.getTypeface(); // must do this because it's bug for set Input Type</span>
+<span class="nc" id="L91">        edtOtp.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);</span>
+<span class="nc" id="L92">        edtOtp.setTypeface(tf);</span>
+<span class="nc" id="L93">    }</span>
+
+    public void markConfirm() {
+<span class="nc" id="L96">        imgDone.setVisibility(View.VISIBLE);</span>
+<span class="nc" id="L97">        imgDot.setVisibility(View.GONE);</span>
+<span class="nc" id="L98">        tvRequestOtp.setVisibility(View.GONE);</span>
+<span class="nc" id="L99">        llRequestOtp.setVisibility(View.GONE);</span>
+<span class="nc" id="L100">    }</span>
+
+    public void markNoConfirm() {
+<span class="nc" id="L103">        imgDone.setVisibility(View.GONE);</span>
+<span class="nc" id="L104">        imgDot.setVisibility(View.VISIBLE);</span>
+<span class="nc" id="L105">        tvRequestOtp.setVisibility(View.VISIBLE);</span>
+<span class="nc" id="L106">        llRequestOtp.setVisibility(View.GONE);</span>
+<span class="nc" id="L107">    }</span>
+
+    public void setText(String text) {
+<span class="nc" id="L110">        tvMobileNumber.setText(text, FORMAT_MOBILE_NUMBER);</span>
+<span class="nc" id="L111">    }</span>
+
+    public void hideRequestOtp() {
+<span class="nc" id="L114">        AnimationViewUtils.getInstance().collapse(llRequestOtp);</span>
+<span class="nc" id="L115">        showDefaultEdt();</span>
+<span class="nc" id="L116">        tvRequestOtp.setTextColor(ContextCompat.getColor(context, R.color.my_ais_text_green));</span>
+<span class="nc" id="L117">        tvRequestOtp.setClickable(true);</span>
+<span class="nc" id="L118">    }</span>
+
+    public void showRequestOtp() {
+<span class="nc" id="L121">        AnimationViewUtils.getInstance().expand(llRequestOtp);</span>
+<span class="nc" id="L122">        edtOtp.setText(&quot;&quot;);</span>
+<span class="nc" id="L123">        tvRequestOtp.setClickable(false);</span>
+<span class="nc" id="L124">        tvRequestOtp.setTextColor(ContextCompat.getColor(context, R.color.base_color_dark_gray));</span>
+<span class="nc" id="L125">    }</span>
+
+    public void toggleRequestOtp() {
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        if (llRequestOtp.getVisibility() == View.VISIBLE) {</span>
+<span class="nc" id="L129">            hideRequestOtp();</span>
+        } else {
+<span class="nc" id="L131">            showRequestOtp();</span>
+        }
+<span class="nc" id="L133">    }</span>
+
+    public void setListener(OnClickItemListener listener) {
+<span class="nc" id="L136">        this.listener = listener;</span>
+<span class="nc" id="L137">    }</span>
+
+    public void setPosition(int position) {
+<span class="nc" id="L140">        pos = position;</span>
+<span class="nc" id="L141">    }</span>
+
+    public int getPos() {
+<span class="nc" id="L144">        return pos;</span>
+    }
+
+    public void showDefaultEdt() {
+<span class="nc" id="L148">        edtOtp.setBackgroundResource(R.drawable.my_ais_library_selector_edit_text_green);</span>
+<span class="nc" id="L149">    }</span>
+
+    public void showErrorCaptchaEdt() {
+<span class="nc" id="L152">        edtOtp.setBackgroundResource(R.drawable.my_ais_library_shape_edit_text_white_red_border);</span>
+<span class="nc" id="L153">    }</span>
+
+    public void emptyOtp() {
+<span class="nc" id="L156">        edtOtp.setText(&quot;&quot;);</span>
+<span class="nc" id="L157">    }</span>
+
+    public String getOtp() {
+<span class="nc" id="L160">        return edtOtp.getText().toString();</span>
+    }
+
+    /*************************/
+    /** CallBack &amp; Listener **/
+    /*************************/
+    //&lt;editor-fold desc=&quot;CallBack &amp; Listener folding&quot;&gt;
+    public interface OnClickItemListener {
+        void onClick(MobileRequestWithRequestOtpItemHolder h,
+                     View v,
+                     String mobileNumber,
+                     String otp,
+                     int pos);
+    }
+    //&lt;/editor-fold&gt;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

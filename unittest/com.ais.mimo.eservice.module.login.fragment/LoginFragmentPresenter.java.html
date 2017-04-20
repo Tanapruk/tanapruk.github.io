@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginFragmentPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.login.fragment</a> &gt; <span class="el_source">LoginFragmentPresenter.java</span></div><h1>LoginFragmentPresenter.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.login.fragment;
+
+import com.ais.mimo.eservice.helper.login.event.GoToForgotPasswordEvent;
+import com.ais.mimo.eservice.helper.login.event.GoToLoginSuccessEvent;
+import com.ais.mimo.eservice.helper.login.event.GoToSecondaryOtpEvent;
+import com.ais.mimo.eservice.helper.login.event.GoToVerifyChoiceEvent;
+import com.ais.mimo.eservice.helper.login.event.GoToWelcomeEvent;
+import com.ais.mimo.eservice.helper.login.event.GotoLoginPasswordEvent;
+import com.ais.mimo.eservice.helper.login.event.GotoLoginRegisterEvent;
+import com.ais.mimo.eservice.helper.login.event.LoginSuccessEvent;
+import com.ais.mimo.eservice.helper.login.network.LoginManager;
+import com.ais.mimo.eservice.helper.login.network.LoginWithCaptchaException;
+import com.ais.mimo.eservice.helper.login.network.exception.GetOtpNotAisNumberException;
+import com.ais.mimo.eservice.helper.login.network.exception.LoginWithOtpWrong3Exception;
+import com.ais.mimo.eservice.helper.login.network.exception.LoginWithOtpWrongException;
+import com.ais.mimo.eservice.helper.login.network.exception.LoginWithPasswordCaptchaException;
+import com.ais.mimo.eservice.helper.login.network.exception.LoginWithPasswordFailedException;
+import com.ais.mimo.eservice.helper.login.network.exception.RequestOtpException;
+import com.ais.mimo.eservice.helper.login.network.exception.SecondaryOtpExistsException;
+import com.ais.mimo.eservice.helper.login.network.exception.ShouldRequestCaptchaException;
+import com.ais.mimo.eservice.helper.login.network.response.RequestCaptchaData;
+import com.ais.mimo.eservice.helper.login.network.response.RequestOtpData;
+import com.ais.mimo.eservice.helper.login.network.response.VerifyMyAISResult;
+import com.ais.mimo.eservice.module.login.LoginKey;
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.autootp.AutoOtpEvent;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.mvp.NextzyFragmentPresenter;
+import com.nextzy.myais.common.network.event.ErrorEvent;
+import com.nextzy.myais.common.passcode.network.PasscodeManager;
+import com.nextzy.myais.common.passcode.network.exception.LoginWithTokensException;
+import com.nextzy.myais.common.passcode.network.request.DisableFingerScanBody;
+import com.nextzy.myais.common.utility.NextzyUtility;
+
+import rx.exceptions.OnErrorNotImplementedException;
+
+/**
+ * Created by trusttanapruk on 8/17/2016.
+ */
+public class LoginFragmentPresenter extends NextzyFragmentPresenter&lt;LoginFragmentContractor.View&gt; implements LoginFragmentContractor.Presenter {
+<span class="nc" id="L43">    private static final String TAG = LoginFragmentPresenter.class.getSimpleName();</span>
+    private final PasscodeManager passcodeManager;
+    private static final int MAXIMUM_ERROR_COUNT = 4;
+    private String referenceId;
+    private String otpMethod;
+<span class="nc" id="L48">    private int passwordErrorCount = 0;</span>
+<span class="nc" id="L49">    private boolean isConcernDisableException = true;</span>
+
+    public static LoginFragmentPresenter createPresenter(LoginFragmentContractor.View view) {
+<span class="nc" id="L52">        return new LoginFragmentPresenter(view);</span>
+    }
+
+    private LoginFragmentPresenter(LoginFragmentContractor.View view) {
+<span class="nc" id="L56">        super(view);</span>
+<span class="nc" id="L57">        passcodeManager = PasscodeManager.getInstance();</span>
+<span class="nc" id="L58">    }</span>
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L62">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L66">    }</span>
+
+    @Override
+    public void onViewStart() {
+        try {
+<span class="nc" id="L71">            RxBus.get().register(this);</span>
+<span class="nc" id="L72">        } catch (OnErrorNotImplementedException ignored) {</span>
+<span class="nc" id="L73">        }</span>
+<span class="nc" id="L74">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L78">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L79">    }</span>
+
+
+    @Override
+    public void onSubmitOtpButtonClick(String otp, String referenceId, boolean isCaptchaVisible, String captcha) {
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        if (isCaptchaVisible) {</span>
+<span class="nc bnc" id="L85" title="All 4 branches missed.">            if (captcha != null &amp;&amp; captcha.isEmpty()) {</span>
+<span class="nc" id="L86">                getView().showCaptchaEmpty();</span>
+<span class="nc" id="L87">                return;</span>
+            }
+        } else {
+<span class="nc" id="L90">            captcha = null;</span>
+        }
+<span class="nc bnc" id="L92" title="All 4 branches missed.">        if (otp == null || otp.isEmpty()) {</span>
+<span class="nc" id="L93">            getView().showOtpEmpty();</span>
+<span class="nc" id="L94">            return;</span>
+        }
+<span class="nc bnc" id="L96" title="All 2 branches missed.">        if (!NextzyUtility.getInstance().isOTP(otp)) {</span>
+<span class="nc" id="L97">            getView().showOtpInvalid();</span>
+<span class="nc" id="L98">            return;</span>
+        }
+<span class="nc" id="L100">        getView().showLoadingDialog();</span>
+<span class="nc" id="L101">        LoginManager.getInstance().loginWithOtp(getEventLogParam(), referenceId, otp, captcha);</span>
+<span class="nc" id="L102">    }</span>
+
+    @Override
+    public void onSubmitPasswordButtonClick(String mobileNumber, String password, boolean isCaptchaVisible, String captcha) {
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        if (isCaptchaVisible) {</span>
+<span class="nc bnc" id="L107" title="All 4 branches missed.">            if (captcha != null &amp;&amp; captcha.isEmpty()) {</span>
+<span class="nc" id="L108">                getView().showCaptchaEmpty();</span>
+<span class="nc" id="L109">                return;</span>
+            }
+        } else {
+<span class="nc" id="L112">            captcha = null;</span>
+        }
+<span class="nc bnc" id="L114" title="All 4 branches missed.">        if (password.isEmpty() || password.length() &lt; 8) {</span>
+<span class="nc" id="L115">            getView().showPasswordInvalid();</span>
+<span class="nc" id="L116">            return;</span>
+        }
+<span class="nc bnc" id="L118" title="All 2 branches missed.">        if (!NextzyUtility.getInstance().isPassword(password)) {</span>
+<span class="nc" id="L119">            getView().showPasswordInvalid();</span>
+<span class="nc" id="L120">            return;</span>
+        }
+
+<span class="nc" id="L123">        getView().showLoadingDialog();</span>
+<span class="nc" id="L124">        String eventLogHeader = new EventLogParam(&quot;APP_LOGIN_WITH_PASSWORD&quot;, &quot;5007&quot;, &quot;5120&quot;).getEventLogHeader();</span>
+<span class="nc" id="L125">        String language = getView().getCurrentLanguage();</span>
+<span class="nc" id="L126">        LoginManager.getInstance().loginWithPassword(eventLogHeader, mobileNumber, password, getReferenceId(), captcha);</span>
+<span class="nc" id="L127">    }</span>
+
+    @Override
+    public void onLoginWithTokens(String mobileNumber, String user, String token, String privateId, String referenceId, String captcha) {
+<span class="nc" id="L131">        getView().showLoadingDialog();</span>
+<span class="nc" id="L132">        LoginManager.getInstance().setMobileNumberAndLoginWithTokens(</span>
+<span class="nc" id="L133">                new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(),</span>
+                mobileNumber,
+                user,
+                token,
+                privateId,
+                referenceId,
+                captcha);
+<span class="nc" id="L140">    }</span>
+
+    @Override
+    public void onVerifyChoiceChooseGetOtp() {
+<span class="nc" id="L144">        getView().showLoadingDialog();</span>
+<span class="nc" id="L145">        requestOtp(Mobile.getInstance().getMobileNumber());</span>
+<span class="nc" id="L146">    }</span>
+
+    @Override
+    public void onVerifyChoiceChoosePassword() {
+<span class="nc" id="L150">        sendGoToPasswordEvent();</span>
+<span class="nc" id="L151">    }</span>
+
+    @Override
+    public void onLoginWelcomeOkButtonClick(String mobileNumber) {
+<span class="nc bnc" id="L155" title="All 4 branches missed.">        if (mobileNumber == null || mobileNumber.isEmpty()) {</span>
+<span class="nc" id="L156">            getView().showEmptyMobileNumberInvalid();</span>
+<span class="nc" id="L157">            return;</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">        } else if (!isValidMobileNumber(mobileNumber)) {</span>
+<span class="nc" id="L159">            getView().showMobileNumberInvalid();</span>
+<span class="nc" id="L160">            return;</span>
+        }
+<span class="nc" id="L162">        getView().showLoadingDialog();</span>
+<span class="nc" id="L163">        LoginManager.getInstance().verifyMyAis(mobileNumber);</span>
+<span class="nc" id="L164">    }</span>
+
+    @Override
+    public void onSecondaryTypeUpdate(String secondaryType) {
+<span class="nc bnc" id="L168" title="All 2 branches missed.">        if (secondaryType.equalsIgnoreCase(LoginKey.VERIFICATION_TYPE_EMAIL)) {</span>
+<span class="nc" id="L169">            getView().setSecondaryButtonTextEmail();</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">        } else if (secondaryType.equalsIgnoreCase(LoginKey.TYPE_DEVICE_SECONDARY)) {</span>
+<span class="nc" id="L171">            getView().setSecondaryButtonTextSecondary();</span>
+        }
+<span class="nc" id="L173">    }</span>
+
+    @Override
+    public void onRequestOtpButtonClick(String otpMethod) {
+<span class="nc" id="L177">        getView().showLoadingDialog();</span>
+<span class="nc" id="L178">        this.otpMethod = otpMethod;</span>
+<span class="nc" id="L179">        LoginManager.getInstance().requestSecondaryOtp(otpMethod);</span>
+<span class="nc" id="L180">    }</span>
+
+    @Subscribe
+    public void onAutoOtpEvent(AutoOtpEvent event) {
+<span class="nc" id="L184">        getView().setAutoOtp(event.getOtp());</span>
+<span class="nc" id="L185">    }</span>
+
+    @Subscribe
+    public void onVerifyMyAISSuccess(VerifyMyAISResult result) {
+<span class="nc bnc" id="L189" title="All 4 branches missed.">        if (result == null || !result.hasData()) {</span>
+<span class="nc" id="L190">            validateMobileNumberAndRequestOtp(Mobile.getInstance().getMobileNumber());</span>
+<span class="nc" id="L191">            return;</span>
+        }
+
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        if (result.isFibreButCannotLogin()) {</span>
+<span class="nc" id="L195">            getView().showIsFibreButCannotLogin();</span>
+<span class="nc" id="L196">            return;</span>
+        }
+<span class="nc" id="L198">        LoginManager.getInstance().saveIsMyAisIsMasterFlag(result);</span>
+<span class="nc" id="L199">        makeDecisionAfterVerifyMyAis(result);</span>
+<span class="nc" id="L200">    }</span>
+
+
+    @Subscribe
+    public void onLoginWithTokenException(LoginWithTokensException error) {
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        if (error.isDuplicateOrExpire()) {</span>
+<span class="nc" id="L206">            getView().showDuplicateOrExpireLoginDialog(error.getMessage());</span>
+        } else {
+<span class="nc" id="L208">            getView().showResponseException(error.getMessage());</span>
+        }
+<span class="nc" id="L210">    }</span>
+
+    @Subscribe
+    public void onLoginSuccessEvent(LoginSuccessEvent event) {
+<span class="nc" id="L214">        sendGoToLoginSuccessEvent();</span>
+<span class="nc" id="L215">    }</span>
+
+    @Subscribe
+    public void onGetOtpNotAisNumber(GetOtpNotAisNumberException error) {
+<span class="nc" id="L219">        getView().dismissDialog();</span>
+<span class="nc" id="L220">        getView().showNotAisMobileNumber(error.getMessage());</span>
+<span class="nc" id="L221">    }</span>
+
+    @Subscribe
+    public void onWrongOtp(LoginWithOtpWrongException error) {
+<span class="nc" id="L225">        getView().dismissDialog();</span>
+<span class="nc" id="L226">        getView().showWrongOtp(error.getMessage());</span>
+<span class="nc" id="L227">    }</span>
+
+    @Subscribe
+    public void onWrong3Otp(LoginWithOtpWrong3Exception error) {
+<span class="nc" id="L231">        getView().dismissDialog();</span>
+<span class="nc" id="L232">        getView().showWrong3Otp(error.getMessage());</span>
+<span class="nc" id="L233">    }</span>
+
+    @Subscribe
+    public void onSecondaryOtpExists(SecondaryOtpExistsException error) {
+<span class="nc" id="L237">        getView().dismissDialog();</span>
+<span class="nc" id="L238">        sendGotToSecondaryOtpEvent(error.getMessage());</span>
+<span class="nc" id="L239">    }</span>
+
+    @Subscribe
+    public void onRequestOtpDataSuccess(RequestOtpData requestOtpData) {
+<span class="nc" id="L243">        getView().dismissDialog();</span>
+<span class="nc" id="L244">        sendGoToPasswordLoginEvent(requestOtpData.getReferenceId(), getOtpMethod());</span>
+<span class="nc" id="L245">    }</span>
+
+    @Subscribe
+    public void onRequestOtpFailure(RequestOtpException requestOtpException) {
+<span class="nc" id="L249">        getView().dismissDialog();</span>
+<span class="nc" id="L250">        getView().showAlertDialogDismissOnClick(requestOtpException.getMessage());</span>
+<span class="nc" id="L251">        sendGoToWelcomeEvent();</span>
+<span class="nc" id="L252">    }</span>
+
+    @Subscribe
+    public void onShouldRequestCaptcha(ShouldRequestCaptchaException exception) {
+        //assume that it is continuing loading. No need to dismissDialog
+<span class="nc" id="L257">        LoginManager.getInstance().requestCaptcha(exception.getReferenceId());</span>
+<span class="nc" id="L258">    }</span>
+
+    @Subscribe
+    public void onRequestCaptchaSuccess(RequestCaptchaData data) {
+<span class="nc" id="L262">        getView().dismissDialog();</span>
+<span class="nc" id="L263">        sendGoToPasswordLoginEvent(data.getReferenceId(), getOtpMethod(), data.getCaptcha());</span>
+<span class="nc" id="L264">    }</span>
+
+    private void showCaptcha(LoginWithCaptchaException exception) {
+<span class="nc" id="L267">        getView().dismissDialog();</span>
+<span class="nc" id="L268">        referenceId = exception.getReferenceId();</span>
+<span class="nc" id="L269">        getView().setCaptchaImage(exception.getCaptcha());</span>
+<span class="nc" id="L270">    }</span>
+
+    @Subscribe
+    public void onLoginWithPasswordCaptchaException(LoginWithPasswordCaptchaException exception) {
+<span class="nc" id="L274">        showCaptcha(exception);</span>
+<span class="nc" id="L275">    }</span>
+
+    @Subscribe
+    public void onLoginWithPasswordFailedException(LoginWithPasswordFailedException exception) {
+<span class="nc" id="L279">        passwordErrorCount++;</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">        if (passwordErrorCount &gt;= MAXIMUM_ERROR_COUNT) {</span>
+<span class="nc" id="L281">            getView().showWrong3Password();</span>
+<span class="nc" id="L282">            passwordErrorCount = 0;</span>
+        } else {
+<span class="nc" id="L284">            getView().dismissDialog();</span>
+<span class="nc" id="L285">            getView().showAlertDialogDismissOnClick(exception.getMessage());</span>
+        }
+<span class="nc" id="L287">    }</span>
+
+    @Subscribe
+    public void onErrorEvent(ErrorEvent errorEvent) {
+<span class="nc bnc" id="L291" title="All 2 branches missed.">        if (errorEvent.isMatch(LoginManager.SERVICE_NAME_VERIFY_MYAIS)) {</span>
+<span class="nc" id="L292">            validateMobileNumberAndRequestOtp(Mobile.getInstance().getMobileNumber());</span>
+        }
+
+<span class="nc" id="L295">    }</span>
+
+    public String getReferenceId() {
+<span class="nc" id="L298">        return referenceId;</span>
+    }
+
+
+    private String getOtpMethod() {
+<span class="nc" id="L303">        return otpMethod;</span>
+    }
+
+    private EventLogParam getEventLogParam() {
+<span class="nc bnc" id="L307" title="All 2 branches missed.">        if (LoginKey.TYPE_DEVICE_PRIMARY.equalsIgnoreCase(getOtpMethod())) {</span>
+<span class="nc" id="L308">            return new EventLogParam(&quot;APP_LOGIN_WITH_PRIMARY_OTP&quot;, &quot;5007&quot;, &quot;5104&quot;);</span>
+        }
+<span class="nc bnc" id="L310" title="All 2 branches missed.">        if (LoginKey.TYPE_DEVICE_SECONDARY.equalsIgnoreCase(getOtpMethod())) {</span>
+<span class="nc" id="L311">            return new EventLogParam(&quot;APP_LOGIN_WITH_SECONDARY_OTP&quot;, &quot;5007&quot;, &quot;5105&quot;);</span>
+        }
+<span class="nc" id="L313">        return new EventLogParam(&quot;APP_LOGIN_WITH_OTP&quot;, &quot;5007&quot;, &quot;5103&quot;);</span>
+    }
+
+    private void makeDecisionAfterVerifyMyAis(VerifyMyAISResult result) {
+
+<span class="nc bnc" id="L318" title="All 2 branches missed.">        if (!result.hasData()) {</span>
+<span class="nc" id="L319">            getView().dismissDialog();</span>
+<span class="nc" id="L320">            validateMobileNumberAndRequestOtp(Mobile.getInstance().getMobileNumber());</span>
+<span class="nc" id="L321">            return;</span>
+        }
+<span class="nc bnc" id="L323" title="All 2 branches missed.">        if (result.shouldShowVerifyChoice()) {</span>
+<span class="nc" id="L324">            getView().dismissDialog();</span>
+<span class="nc" id="L325">            sendGotoVerifyChoiceEvent();</span>
+<span class="nc" id="L326">            return;</span>
+        }
+
+<span class="nc bnc" id="L329" title="All 2 branches missed.">        if (result.shouldGotoOtp()) {</span>
+<span class="nc" id="L330">            validateMobileNumberAndRequestOtp(Mobile.getInstance().getMobileNumber());</span>
+<span class="nc" id="L331">            return;</span>
+        }
+
+<span class="nc bnc" id="L334" title="All 2 branches missed.">        if (result.shouldGotoPassword()) {</span>
+<span class="nc" id="L335">            getView().dismissDialog();</span>
+<span class="nc" id="L336">            sendGoToPasswordEvent();</span>
+<span class="nc" id="L337">            return;</span>
+        }
+
+<span class="nc bnc" id="L340" title="All 2 branches missed.">        if (result.shouldGotoRegister()) {</span>
+<span class="nc" id="L341">            getView().dismissDialog();</span>
+<span class="nc" id="L342">            sendGoToRegisterEvent(Mobile.getInstance().getMobileNumber());</span>
+<span class="nc" id="L343">            return;</span>
+        }
+
+<span class="nc bnc" id="L346" title="All 2 branches missed.">        if (result.shouldAlertToLoginWithMaster()) {</span>
+<span class="nc" id="L347">            getView().dismissDialog();</span>
+<span class="nc" id="L348">            getView().showAlertDialogDismissOnClick(&quot;โปรดลอคอินด้วย Master&quot;);</span>
+<span class="nc" id="L349">            return;</span>
+        }
+<span class="nc" id="L351">    }</span>
+
+    private boolean isValidMobileNumber(String input) {
+<span class="nc bnc" id="L354" title="All 6 branches missed.">        return input.matches(&quot;[0-9]{10}&quot;) &amp;&amp; (input.startsWith(&quot;0&quot;) || input.startsWith(&quot;88&quot;));</span>
+    }
+
+    private void validateMobileNumberAndRequestOtp(String input) {
+<span class="nc bnc" id="L358" title="All 4 branches missed.">        if (input == null || input.isEmpty()) {</span>
+<span class="nc" id="L359">            getView().showEmptyMobileNumberInvalid();</span>
+<span class="nc" id="L360">            return;</span>
+        }
+
+<span class="nc bnc" id="L363" title="All 2 branches missed.">        if (!isValidMobileNumber(input)) {</span>
+<span class="nc" id="L364">            getView().showMobileNumberInvalid();</span>
+<span class="nc" id="L365">            return;</span>
+        }
+
+<span class="nc" id="L368">        requestOtp(input);</span>
+<span class="nc" id="L369">    }</span>
+
+    private void requestOtp(String mobileNumber) {
+<span class="nc" id="L372">        otpMethod = LoginKey.TYPE_DEVICE_PRIMARY;</span>
+<span class="nc" id="L373">        LoginManager.getInstance().checkOtpMethodAndRequestIfPrimaryOtp(mobileNumber);</span>
+<span class="nc" id="L374">    }</span>
+
+    @Override
+    public void sendGoToForgotPasswordEvent(String mobileNumber) {
+<span class="nc" id="L378">        RxBus.get().post(new GoToForgotPasswordEvent(mobileNumber));</span>
+<span class="nc" id="L379">    }</span>
+
+    @Override
+    public void requestDisableFingerScanAndGoToLoginFragment(String masterNumber, String privateId, String token, boolean isConcernDisableException) {
+<span class="nc" id="L383">        this.isConcernDisableException = isConcernDisableException;</span>
+//        getView().showLoadingDialog();
+<span class="nc" id="L385">        DisableFingerScanBody body = new DisableFingerScanBody(</span>
+                masterNumber,
+                token,
+                privateId,
+                null
+        );
+<span class="nc" id="L391">        passcodeManager.requestDisableFingerScan(masterNumber, body);</span>
+<span class="nc" id="L392">        disableFingerScan();</span>
+<span class="nc" id="L393">    }</span>
+
+//    @Subscribe
+//    public void onReceiveDisableFingerScanResult(DisableFingerScanResult result) {
+//        disableFingerScan();
+//    }
+//
+//    @Subscribe
+//    public void onReceiveDisableFingerScanException(DisableFingerScanException e) {
+//        if (isConcernDisableException) {
+//            getView().showResponseException(e.getMessage());
+//        } else {
+//            disableFingerScan();
+//        }
+//    }
+
+    private void disableFingerScan() {
+<span class="nc" id="L410">        getView().dismissAllDialogs();</span>
+<span class="nc" id="L411">        getView().removePasscodeAndMasterNumberAndPrivateIdAndToken();</span>
+<span class="nc" id="L412">        RxBus.get().post(new GoToWelcomeEvent(false));</span>
+<span class="nc" id="L413">    }</span>
+
+    public void sendGoToWelcomeEvent() {
+<span class="nc" id="L416">        RxBus.get().post(new GoToWelcomeEvent());</span>
+<span class="nc" id="L417">    }</span>
+
+    @Override
+    public int getPasswordErrorCount() {
+<span class="nc" id="L421">        return passwordErrorCount;</span>
+    }
+
+    @Override
+    public void setPasswordErrorCount(int count) {
+<span class="nc" id="L426">        passwordErrorCount = count;</span>
+<span class="nc" id="L427">    }</span>
+
+    private void sendGoToWelcomeWithServiceUnavailableEvent() {
+<span class="nc" id="L430">        RxBus.get().post(new GoToWelcomeEvent(true));</span>
+<span class="nc" id="L431">    }</span>
+
+    private void sendGoToPasswordLoginEvent(String referenceId, String otpMethod) {
+<span class="nc" id="L434">        sendGoToPasswordLoginEvent(referenceId, otpMethod, null);</span>
+<span class="nc" id="L435">    }</span>
+
+    private void sendGoToPasswordLoginEvent(String referenceId, String otpMethod, String captcha) {
+<span class="nc" id="L438">        GotoLoginPasswordEvent event = null;</span>
+<span class="nc bnc" id="L439" title="All 2 branches missed.">        if (LoginKey.TYPE_DEVICE_PRIMARY.equalsIgnoreCase(otpMethod)) {</span>
+<span class="nc" id="L440">            event = new GotoLoginPasswordEvent(referenceId, otpMethod).setGotoSms();</span>
+<span class="nc bnc" id="L441" title="All 2 branches missed.">        } else if (LoginKey.TYPE_DEVICE_SECONDARY.equalsIgnoreCase(otpMethod)) {</span>
+<span class="nc" id="L442">            event = new GotoLoginPasswordEvent(referenceId, otpMethod).setGotoSms();</span>
+<span class="nc bnc" id="L443" title="All 2 branches missed.">        } else if (LoginKey.VERIFICATION_TYPE_EMAIL.equalsIgnoreCase(otpMethod)) {</span>
+<span class="nc" id="L444">            event = new GotoLoginPasswordEvent(referenceId, otpMethod).setGotoEmail();</span>
+        }
+
+<span class="nc bnc" id="L447" title="All 6 branches missed.">        if (event != null &amp;&amp; captcha != null &amp;&amp; !captcha.isEmpty()) {</span>
+<span class="nc" id="L448">            event.setCaptcha(captcha);</span>
+        }
+<span class="nc bnc" id="L450" title="All 2 branches missed.">        if (event != null) {</span>
+<span class="nc" id="L451">            RxBus.get().post(event);</span>
+<span class="nc" id="L452">            return;</span>
+        }
+
+<span class="nc" id="L455">        throw new NullPointerException(String.format(&quot;%s doesn't not match any available method.&quot;, otpMethod));</span>
+    }
+
+    private void sendGoToPasswordEvent() {
+<span class="nc" id="L459">        RxBus.get().post(new GotoLoginPasswordEvent().setGotoPassword());</span>
+<span class="nc" id="L460">    }</span>
+
+    private void sendGotoVerifyChoiceEvent() {
+<span class="nc" id="L463">        RxBus.get().post(new GoToVerifyChoiceEvent());</span>
+<span class="nc" id="L464">    }</span>
+
+    private void sendGoToRegisterEvent(String mobileNumber) {
+<span class="nc" id="L467">        RxBus.get().post(new GotoLoginRegisterEvent(mobileNumber, LoginBaseFragment.TAG));</span>
+<span class="nc" id="L468">    }</span>
+
+    private void sendGoToLoginSuccessEvent() {
+<span class="nc" id="L471">        RxBus.get().post(new GoToLoginSuccessEvent());</span>
+<span class="nc" id="L472">    }</span>
+
+    private void sendGotToSecondaryOtpEvent(String message) {
+<span class="nc" id="L475">        RxBus.get().post(new GoToSecondaryOtpEvent(message));</span>
+<span class="nc" id="L476">    }</span>
+
+    private boolean getBoolean(String nOrY) {
+<span class="nc" id="L479">        return NextzyUtility.getInstance().wrapBlank(nOrY).equalsIgnoreCase(&quot;Y&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SideMenuFragment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.main.sidemenu</a> &gt; <span class="el_source">SideMenuFragment.java</span></div><h1>SideMenuFragment.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.main.sidemenu;
+
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Toast;
+
+import com.ais.mimo.eservice.config.menu.side.SideMenuKey;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.database.NextzyDatabase;
+import com.nextzy.myais.common.mvp.NextzyMvpFragment;
+import com.nextzy.myais.common.utility.NextzyAndroidUtility;
+import com.nextzy.myais.common.utility.NextzyUtility;
+import com.nextzy.myais.common.widget.MyAisAccountHeader;
+import com.nextzy.myais.common.widget.sidemenu.SideMenu;
+import com.nextzy.myais.common.widget.sidemenu.SideMenuItem;
+import com.nextzy.myais.myais.R;
+
+import java.util.List;
+
+/**
+ * Created by Akexorcist on 8/17/16 AD.
+ */
+public class SideMenuFragment extends NextzyMvpFragment&lt;SideMenuContractor.Presenter&gt; implements SideMenuContractor.View, SideMenu.OnSideMenuClickListener {
+    public static final String KEY_VALUE = &quot;key_value&quot;;
+    private static final String KEY_SIDE_MENU = &quot;SideMenu&quot;;
+
+    public static SideMenuFragment newInstance() {
+<span class="nc" id="L28">        return new SideMenuFragment();</span>
+    }
+
+    private MyAisAccountHeader ahCurrentUser;
+    private SideMenu smMenuList;
+
+<span class="nc" id="L34">    public SideMenuFragment() {</span>
+<span class="nc" id="L35">    }</span>
+
+    @Override
+    public int getLayoutView() {
+<span class="nc" id="L39">        return R.layout.my_ais_fragment_main_side_menu;</span>
+    }
+
+    @Override
+    protected void createPresenter() {
+<span class="nc" id="L44">        SideMenuPresenter.createPresenter(this);</span>
+<span class="nc" id="L45">    }</span>
+
+    @Override
+    public void bindView(View view) {
+<span class="nc" id="L49">        ahCurrentUser = (MyAisAccountHeader) view.findViewById(R.id.my_ais_main_side_menu_ah_current_user);</span>
+<span class="nc" id="L50">        smMenuList = (SideMenu) view.findViewById(R.id.my_ais_main_side_menu_sm_menu_list);</span>
+<span class="nc" id="L51">    }</span>
+
+    @Override
+    public void setupView() {
+<span class="nc" id="L55">        smMenuList.setOnSideMenuClickListener(this);</span>
+<span class="nc" id="L56">    }</span>
+
+    @Override
+    public void restoreArgument(Bundle bundle) {
+
+<span class="nc" id="L61">    }</span>
+
+    @Override
+    public void initialize() {
+<span class="nc" id="L65">        updateSideMenu();</span>
+<span class="nc" id="L66">    }</span>
+
+    @Override
+    public void restoreInstanceState(Bundle savedInstanceState) {
+<span class="nc" id="L70">    }</span>
+
+    @Override
+    public void restoreView() {
+<span class="nc" id="L74">        setSideMenuItem();</span>
+<span class="nc" id="L75">    }</span>
+
+    @Override
+    public void saveInstanceState(Bundle outState) {
+<span class="nc" id="L79">    }</span>
+
+    @Override
+    public void onMenuClick(SideMenuItem.Menu menu) {
+        try {
+<span class="nc" id="L84">            SideMenuKey key = SideMenuKey.valueOf(menu.getKey());</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">            if (key.isActivity()) {</span>
+<span class="nc" id="L86">                openActivity(key);</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">            } else if (key.isUrl()) {</span>
+<span class="nc bnc" id="L88" title="All 6 branches missed.">                if (key.getEventName() != null &amp;&amp; key.getMenuId() != null &amp;&amp; key.getEventId() != null) {</span>
+<span class="nc" id="L89">                    Mobile.getInstance().logEvent(key.getEventName(), key.getMenuId(), key.getEventId());</span>
+                }
+<span class="nc" id="L91">                openWebUrl(key);</span>
+            }
+<span class="nc" id="L93">            getPresenter().onMenuClick(menu);</span>
+//            Toast.makeText(getContext(), &quot;On Sub Menu Click : &quot; + menu.getTitle() + &quot;(&quot; + menu.getKey() + &quot;)&quot;, Toast.LENGTH_SHORT).show();
+<span class="nc" id="L95">        } catch (IllegalArgumentException e) {</span>
+//            Toast.makeText(getContext(), menu.getKey() + &quot; is not a constant in SideMenuKey&quot;, Toast.LENGTH_SHORT).show();
+<span class="nc" id="L97">        }</span>
+<span class="nc" id="L98">    }</span>
+
+    @Override
+    public void onSubMenuClick(SideMenuItem.SubMenu subMenu) {
+<span class="nc" id="L102">        getPresenter().onSubMenuClick(subMenu);</span>
+//        Toast.makeText(getContext(), &quot;On Sub Menu Click : &quot; + subMenu.getTitle() + &quot;(&quot; + subMenu.getKey() + &quot;)&quot;, Toast.LENGTH_SHORT).show();
+<span class="nc" id="L104">    }</span>
+
+    @Override
+    public void setMobileNumber(String mobileNumber) {
+<span class="nc" id="L108">        ahCurrentUser.setMobileNumber(NextzyUtility.getInstance().applyAisNumberPattern(mobileNumber));</span>
+<span class="nc" id="L109">    }</span>
+
+    @Override
+    public void setSideMenuItem() {
+<span class="nc" id="L113">        SideMenuItem.Container sideMenuContainer = NextzyDatabase.getInstance().findByName(KEY_SIDE_MENU, SideMenuItem.Container.class);</span>
+<span class="nc" id="L114">        List&lt;SideMenuItem.BaseMenu&gt; menuItemList = getPresenter().convertSideMenuContainerToList(sideMenuContainer);</span>
+<span class="nc" id="L115">        smMenuList.setItemList(menuItemList);</span>
+<span class="nc" id="L116">        smMenuList.updateMenu();</span>
+<span class="nc" id="L117">    }</span>
+
+    @Override
+    public void saveSideMenuToRealm(List&lt;SideMenuItem.BaseMenu&gt; menuList) {
+<span class="nc bnc" id="L121" title="All 2 branches missed.">        if (menuList != null) {</span>
+<span class="nc" id="L122">            NextzyDatabase.getInstance().add(KEY_SIDE_MENU, new SideMenuItem.Container(menuList));</span>
+        }
+<span class="nc" id="L124">    }</span>
+
+    @Override
+    public void updateSideMenu() {
+<span class="nc" id="L128">        getPresenter().onSideMenuSetup();</span>
+<span class="nc" id="L129">    }</span>
+
+    @Override
+    public void showUnknownBusinessType() {
+<span class="nc" id="L133">        Toast.makeText(getContext(), &quot;Unknown business type. Can't setup side menu&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L134">    }</span>
+
+    @Override
+    public void updateBusinessTypeIcon() {
+<span class="nc" id="L138">        ahCurrentUser.setBusinessTypeBackground(getBusinessTypeIcon());</span>
+<span class="nc" id="L139">    }</span>
+
+    private int getBusinessTypeIcon() {
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        if (Mobile.getInstance().isFibre()) {</span>
+<span class="nc" id="L143">            return R.drawable.my_ais_side_menu_ic_business_type_background_fibre;</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">        } else if (Mobile.getInstance().isPostpaid()) {</span>
+<span class="nc" id="L145">            return R.drawable.my_ais_side_menu_ic_business_type_background_postpaid;</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        } else if (Mobile.getInstance().isPrepaid()) {</span>
+<span class="nc" id="L147">            return R.drawable.my_ais_side_menu_ic_business_type_background_prepaid;</span>
+        } else {
+<span class="nc" id="L149">            return R.drawable.my_ais_side_menu_ic_business_type_background_postpaid;</span>
+        }
+    }
+
+    private void openActivity(SideMenuKey key) {
+<span class="nc" id="L154">        Bundle bundle = new Bundle();</span>
+<span class="nc" id="L155">        bundle.putString(KEY_VALUE, key.getValue());</span>
+<span class="nc" id="L156">        openActivity(key.getActivity(), bundle);</span>
+<span class="nc" id="L157">    }</span>
+
+    private void openWebUrl(SideMenuKey key) {
+<span class="nc" id="L160">        NextzyAndroidUtility.getInstance().openWebUrl(getActivity(), key.getUrl(), key.getTitle());</span>
+<span class="nc" id="L161">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

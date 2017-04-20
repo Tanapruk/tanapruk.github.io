@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MyProfileMainPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.myprofile.fragment.main</a> &gt; <span class="el_source">MyProfileMainPresenter.java</span></div><h1>MyProfileMainPresenter.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.myprofile.fragment.main;
+
+import com.ais.mimo.eservice.helper.myprofile.network.MyProfileManager;
+import com.ais.mimo.eservice.helper.myprofile.network.response.BillMediaData;
+import com.ais.mimo.eservice.helper.myprofile.network.response.BillMediaResult;
+import com.ais.mimo.eservice.helper.myprofile.network.response.BillingCycleData;
+import com.ais.mimo.eservice.helper.myprofile.network.response.BillingCycleResult;
+import com.ais.mimo.eservice.helper.myprofile.network.response.FibreProfileResult;
+import com.ais.mimo.eservice.helper.myprofile.network.response.PostpaidBillingAddressData;
+import com.ais.mimo.eservice.helper.myprofile.network.response.PostpaidBillingAddressResult;
+import com.ais.mimo.eservice.helper.myprofile.network.response.PostpaidCorporateProfileResult;
+import com.ais.mimo.eservice.helper.myprofile.network.response.PostpaidInfoData;
+import com.ais.mimo.eservice.helper.myprofile.network.response.PostpaidInfoResult;
+import com.ais.mimo.eservice.helper.myprofile.network.response.PostpaidProfileResult;
+import com.ais.mimo.eservice.helper.myprofile.network.response.PrepaidCorporateProfileResult;
+import com.ais.mimo.eservice.helper.myprofile.network.response.PrepaidInfoData;
+import com.ais.mimo.eservice.helper.myprofile.network.response.PrepaidInfoResult;
+import com.ais.mimo.eservice.helper.myprofile.network.response.PrepaidProfileResult;
+import com.ais.mimo.eservice.helper.myprofile.network.response.QueryContactMobileNumberResult;
+import com.ais.mimo.eservice.module.myprofile.event.GoToChangeContactNumberFragmentEvent;
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.mvp.NextzyPresenter;
+import com.nextzy.myais.common.utility.NextzyLanguage;
+import com.nextzy.myais.common.utility.NextzyUtility;
+
+import java.text.DateFormatSymbols;
+import java.util.Arrays;
+import java.util.Locale;
+
+/**
+ * Created by Akexorcist on 11/21/2016 AD.
+ */
+
+public class MyProfileMainPresenter extends NextzyPresenter&lt;MyProfileMainContractor.View&gt; implements MyProfileMainContractor.Presenter {
+    public static MyProfileMainPresenter createPresenter(MyProfileMainContractor.View view) {
+<span class="nc" id="L38">        return new MyProfileMainPresenter(view);</span>
+    }
+
+    private MyProfileMainPresenter(MyProfileMainContractor.View view) {
+<span class="nc" id="L42">        super(view);</span>
+<span class="nc" id="L43">    }</span>
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L47">        RxBus.get().register(this);</span>
+<span class="nc" id="L48">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L52">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L53">    }</span>
+
+    @Override
+    public void onViewStart() {
+
+<span class="nc" id="L58">    }</span>
+
+    @Override
+    public void onViewStop() {
+
+<span class="nc" id="L63">    }</span>
+
+    @Override
+    public void getProfile() {
+<span class="nc" id="L67">        getView().showLoadingDialog();</span>
+<span class="nc" id="L68">        callMyProfileService();</span>
+<span class="nc" id="L69">        setCommonInformation();</span>
+<span class="nc" id="L70">    }</span>
+
+    @Override
+    public void goToChangeContactNumber(String number) {
+<span class="nc" id="L74">        RxBus.get().post(new GoToChangeContactNumberFragmentEvent(number));</span>
+<span class="nc" id="L75">    }</span>
+
+    private void callMyProfileService() {
+<span class="nc" id="L78">        String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        if (Mobile.getInstance().isFibre()) {</span>
+<span class="nc" id="L80">            MyProfileManager.getInstance().getFibreProfile(mobileNumber);</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        } else if (Mobile.getInstance().isCorporate()) {</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">            if (Mobile.getInstance().isPostpaid()) {</span>
+<span class="nc" id="L83">                MyProfileManager.getInstance().getPostpaidCorporateProfile(mobileNumber);</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">            } else if (Mobile.getInstance().isPrepaid()) {</span>
+<span class="nc" id="L85">                MyProfileManager.getInstance().getPrepaidCorporateProfile(mobileNumber);</span>
+            }
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        } else if (!Mobile.getInstance().isCorporate()) {</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">            if (Mobile.getInstance().isPostpaid()) {</span>
+<span class="nc" id="L89">                MyProfileManager.getInstance().getPostpaidProfile(mobileNumber);</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">            } else if (Mobile.getInstance().isPrepaid()) {</span>
+<span class="nc" id="L91">                MyProfileManager.getInstance().getPrepaidProfile(mobileNumber);</span>
+            }
+        }
+<span class="nc" id="L94">    }</span>
+
+    @Subscribe
+    public void onPostpaidProfileResult(PostpaidProfileResult result) {
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        if (result.getPostpaidInfoResult().hasData()) {</span>
+<span class="nc" id="L99">            setPostpaidInformation(result.getPostpaidInfoResult());</span>
+        } else {
+<span class="nc" id="L101">            getView().showServiceUnavailable(result.getPostpaidInfoResult().getResultDescription());</span>
+<span class="nc" id="L102">            return;</span>
+        }
+<span class="nc bnc" id="L104" title="All 2 branches missed.">        if (result.getBillingCycleResult().hasData()) {</span>
+<span class="nc" id="L105">            setBillingCycle(result.getBillingCycleResult());</span>
+        } else {
+<span class="nc" id="L107">            getView().showServiceUnavailable(result.getBillingCycleResult().getResultDescription());</span>
+<span class="nc" id="L108">            return;</span>
+        }
+<span class="nc bnc" id="L110" title="All 2 branches missed.">        if (result.getBillMediaResult().hasData()) {</span>
+<span class="nc" id="L111">            setBillMedia(result.getBillMediaResult());</span>
+        } else {
+<span class="nc" id="L113">            getView().showServiceUnavailable(result.getBillMediaResult().getResultDescription());</span>
+<span class="nc" id="L114">            return;</span>
+        }
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        if (result.getPostpaidBillingAddressResult().hasData()) {</span>
+<span class="nc" id="L117">            setPostpaidBillingAddress(result.getPostpaidBillingAddressResult());</span>
+        } else {
+<span class="nc" id="L119">            getView().showServiceUnavailable(result.getPostpaidBillingAddressResult().getResultDescription());</span>
+<span class="nc" id="L120">            return;</span>
+        }
+<span class="nc" id="L122">        hidePostpaidUselessSection();</span>
+<span class="nc" id="L123">        getView().dismissDialog();</span>
+<span class="nc" id="L124">    }</span>
+
+    @Subscribe
+    public void onPrepaidProfileResult(PrepaidProfileResult result) {
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        if (result.getPrepaidInfoResult().hasData()) {</span>
+<span class="nc" id="L129">            setPrepaidInformation(result.getPrepaidInfoResult());</span>
+        } else {
+<span class="nc" id="L131">            getView().showServiceUnavailable(result.getPrepaidInfoResult().getResultDescription());</span>
+<span class="nc" id="L132">            return;</span>
+        }
+<span class="nc" id="L134">        hidePrepaidUselessSection();</span>
+<span class="nc" id="L135">        getView().dismissDialog();</span>
+<span class="nc" id="L136">    }</span>
+
+    @Subscribe
+    public void onPostpaidCorporateProfileResult(PostpaidCorporateProfileResult result) {
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        if (result.getPostpaidInfoResult().hasData()) {</span>
+<span class="nc" id="L141">            setPostpaidInformation(result.getPostpaidInfoResult());</span>
+        } else {
+<span class="nc" id="L143">            getView().showServiceUnavailable(result.getPostpaidInfoResult().getResultDescription());</span>
+<span class="nc" id="L144">            return;</span>
+        }
+<span class="nc" id="L146">        hidePostpaidCorporateUselessSection();</span>
+<span class="nc" id="L147">        getView().dismissDialog();</span>
+<span class="nc" id="L148">    }</span>
+
+    @Subscribe
+    public void onPrepaidCorporateProfileResult(PrepaidCorporateProfileResult result) {
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        if (result.getPrepaidInfoResult().hasData()) {</span>
+<span class="nc" id="L153">            setPrepaidInformation(result.getPrepaidInfoResult());</span>
+        } else {
+<span class="nc" id="L155">            getView().showServiceUnavailable(result.getPrepaidInfoResult().getResultDescription());</span>
+<span class="nc" id="L156">            return;</span>
+        }
+<span class="nc" id="L158">        hidePrepaidCorporateUselessSection();</span>
+<span class="nc" id="L159">        getView().dismissDialog();</span>
+<span class="nc" id="L160">    }</span>
+
+    @Subscribe
+    public void onFibreProfileResult(FibreProfileResult result) {
+<span class="nc bnc" id="L164" title="All 2 branches missed.">        if (result.getContactMobileNumberResult().hasData()) {</span>
+<span class="nc" id="L165">            setContactFibreNumber(result.getContactMobileNumberResult());</span>
+        } else {
+<span class="nc" id="L167">            getView().showServiceUnavailable(result.getContactMobileNumberResult().getResultDescription());</span>
+<span class="nc" id="L168">            return;</span>
+        }
+<span class="nc bnc" id="L170" title="All 2 branches missed.">        if (result.getPostpaidInfoResult().hasData()) {</span>
+<span class="nc" id="L171">            setPostpaidInformation(result.getPostpaidInfoResult());</span>
+        } else {
+<span class="nc" id="L173">            getView().showServiceUnavailable(result.getPostpaidInfoResult().getResultDescription());</span>
+<span class="nc" id="L174">            return;</span>
+        }
+<span class="nc bnc" id="L176" title="All 2 branches missed.">        if (result.getBillingCycleResult().hasData()) {</span>
+<span class="nc" id="L177">            setBillingCycle(result.getBillingCycleResult());</span>
+        } else {
+<span class="nc" id="L179">            getView().showServiceUnavailable(result.getBillingCycleResult().getResultDescription());</span>
+<span class="nc" id="L180">            return;</span>
+        }
+<span class="nc bnc" id="L182" title="All 2 branches missed.">        if (result.getBillMediaResult().hasData()) {</span>
+<span class="nc" id="L183">            setBillMedia(result.getBillMediaResult());</span>
+        } else {
+<span class="nc" id="L185">            getView().showServiceUnavailable(result.getBillMediaResult().getResultDescription());</span>
+<span class="nc" id="L186">            return;</span>
+        }
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        if (result.getPostpaidBillingAddressResult().hasData()) {</span>
+<span class="nc" id="L189">            setPostpaidBillingAddress(result.getPostpaidBillingAddressResult());</span>
+        } else {
+<span class="nc" id="L191">            getView().showServiceUnavailable(result.getPostpaidBillingAddressResult().getResultDescription());</span>
+<span class="nc" id="L192">            return;</span>
+        }
+<span class="nc" id="L194">        hideFibreUselessSection();</span>
+<span class="nc" id="L195">        getView().dismissDialog();</span>
+<span class="nc" id="L196">    }</span>
+
+    private void hidePostpaidUselessSection() {
+        // Nothing to hide
+<span class="nc" id="L200">    }</span>
+
+    private void hidePrepaidUselessSection() {
+<span class="nc" id="L203">        getView().hideBillingCycleSection();</span>
+<span class="nc" id="L204">        getView().hideBillMediaSection();</span>
+<span class="nc" id="L205">        getView().hideAddressSection();</span>
+<span class="nc" id="L206">    }</span>
+
+    private void hidePostpaidCorporateUselessSection() {
+<span class="nc" id="L209">        getView().hideBillingCycleSection();</span>
+<span class="nc" id="L210">        getView().hideBillMediaSection();</span>
+<span class="nc" id="L211">        getView().hideAddressSection();</span>
+<span class="nc" id="L212">    }</span>
+
+    private void hidePrepaidCorporateUselessSection() {
+<span class="nc" id="L215">        getView().hideBillingCycleSection();</span>
+<span class="nc" id="L216">        getView().hideBillMediaSection();</span>
+<span class="nc" id="L217">        getView().hideAddressSection();</span>
+<span class="nc" id="L218">    }</span>
+
+    private void hideFibreUselessSection() {
+        // Nothing to hide
+<span class="nc" id="L222">    }</span>
+
+    private void setCommonInformation() {
+<span class="nc" id="L225">        getView().setMobileNumber(NextzyUtility.getInstance().applyAisNumberPattern(Mobile.getInstance().getMobileNumber()));</span>
+<span class="nc" id="L226">        getView().setPrivilegeType(NextzyUtility.getInstance().wrapBlank(Mobile.getInstance().getSegment(), &quot;-&quot;));</span>
+<span class="nc" id="L227">        getView().setServiceYear(NextzyUtility.getInstance().wrapBlank(Mobile.getInstance().getMobileServiceYear(), &quot;-&quot;));</span>
+<span class="nc" id="L228">        getView().setEmail(NextzyUtility.getInstance().wrapBlank(Mobile.getInstance().getEmailProfile(), &quot;-&quot;));</span>
+<span class="nc" id="L229">    }</span>
+
+    private void setContactFibreNumber(QueryContactMobileNumberResult result) {
+<span class="nc bnc" id="L232" title="All 4 branches missed.">        if (result != null &amp;&amp; result.getData() != null) {</span>
+<span class="nc" id="L233">            getView().setContactFibreNumber(NextzyUtility.getInstance().wrapBlank(result.getData().getOutServiceMobileNo(), &quot;-&quot;));</span>
+        }
+<span class="nc" id="L235">    }</span>
+
+    private void setPostpaidInformation(PostpaidInfoResult result) {
+<span class="nc bnc" id="L238" title="All 4 branches missed.">        if (result != null &amp;&amp; result.hasData()) {</span>
+<span class="nc" id="L239">            PostpaidInfoData postpaidInfoData = result.getData();</span>
+<span class="nc" id="L240">            String name = Mobile.getInstance().getWelcomeName();</span>
+<span class="nc" id="L241">            String birthday = NextzyUtility.getInstance().wrapBlank(convertBirthDateToFullDate(postpaidInfoData.getBirthDate()), &quot;-&quot;);</span>
+<span class="nc" id="L242">            getView().setUserName(name);</span>
+<span class="nc" id="L243">            getView().setBirthday(birthday);</span>
+        }
+<span class="nc" id="L245">    }</span>
+
+    private void setPrepaidInformation(PrepaidInfoResult result) {
+<span class="nc bnc" id="L248" title="All 4 branches missed.">        if (result != null &amp;&amp; result.hasData()) {</span>
+<span class="nc" id="L249">            PrepaidInfoData prepaidInfoData = result.getData();</span>
+<span class="nc" id="L250">            String name = Mobile.getInstance().getWelcomeName();</span>
+<span class="nc" id="L251">            String birthDate = NextzyUtility.getInstance().wrapBlank(convertBirthDateToFullDate(prepaidInfoData.getBirthDate()), &quot;-&quot;);</span>
+<span class="nc" id="L252">            getView().setUserName(name);</span>
+<span class="nc" id="L253">            getView().setBirthday(birthDate);</span>
+        }
+<span class="nc" id="L255">    }</span>
+
+    private void setBillingCycle(BillingCycleResult result) {
+<span class="nc bnc" id="L258" title="All 4 branches missed.">        if (result != null &amp;&amp; result.hasData()) {</span>
+<span class="nc" id="L259">            BillingCycleData billingCycleData = result.getData();</span>
+<span class="nc" id="L260">            getView().setPaymentDueDate(NextzyUtility.getInstance().wrapBlank(billingCycleData.getPaymentDueDate(), &quot;-&quot;));</span>
+<span class="nc" id="L261">            getView().setBillCycleDate(NextzyUtility.getInstance().wrapBlank(getBillingCycle(billingCycleData.getCurrentBillingCycle()), &quot;-&quot;));</span>
+<span class="nc" id="L262">        } else {</span>
+<span class="nc" id="L263">            getView().hideBillingCycleSection();</span>
+        }
+<span class="nc" id="L265">    }</span>
+
+    private void setBillMedia(BillMediaResult result) {
+<span class="nc bnc" id="L268" title="All 4 branches missed.">        if (result != null &amp;&amp; result.hasData()) {</span>
+<span class="nc" id="L269">            BillMediaData billMediaData = result.getData();</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">            if (billMediaData != null) {</span>
+<span class="nc" id="L271">                String billMediaPreference = convertBillMediaPreference(NextzyUtility.getInstance().wrapBlank(billMediaData.getMediaOption(), &quot;-&quot;), getView().getCurrentLanguage());</span>
+<span class="nc" id="L272">                String billMediaLanguage = convertFullLanguage(billMediaData.getLanguage());</span>
+<span class="nc" id="L273">                getView().setBillMediaPreference(billMediaPreference);</span>
+<span class="nc" id="L274">                getView().setBillMediaLanguage(billMediaLanguage);</span>
+<span class="nc" id="L275">                return;</span>
+            }
+        }
+<span class="nc" id="L278">        getView().hideBillMediaSection();</span>
+<span class="nc" id="L279">    }</span>
+
+    private String convertBillMediaPreference(String mediaOption, String language) {
+<span class="nc bnc" id="L282" title="All 2 branches missed.">        if (&quot;hard copy&quot;.equalsIgnoreCase(mediaOption) ||</span>
+<span class="nc bnc" id="L283" title="All 2 branches missed.">                &quot;hard_copy&quot;.equalsIgnoreCase(mediaOption) ||</span>
+<span class="nc bnc" id="L284" title="All 2 branches missed.">                &quot;HARDCOPY&quot;.equalsIgnoreCase(mediaOption)) {</span>
+<span class="nc bnc" id="L285" title="All 2 branches missed.">            if (NextzyLanguage.ENGLISH.equalsIgnoreCase(language)) {</span>
+<span class="nc" id="L286">                return &quot;Hard Copy&quot;;</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">            } else if (NextzyLanguage.THAI.equalsIgnoreCase(language)) {</span>
+<span class="nc" id="L288">                return &quot;ไปรษณีย์&quot;;</span>
+            }
+<span class="nc bnc" id="L290" title="All 2 branches missed.">        } else if (&quot;SMS_Email&quot;.equalsIgnoreCase(mediaOption)) {</span>
+<span class="nc" id="L291">            return &quot;AIS eStatement&quot;;</span>
+        }
+<span class="nc" id="L293">        return mediaOption;</span>
+    }
+
+    private String convertFullLanguage(String language) {
+<span class="nc bnc" id="L297" title="All 2 branches missed.">        if (NextzyLanguage.ENGLISH.equalsIgnoreCase(language)) {</span>
+<span class="nc" id="L298">            return &quot;English&quot;;</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">        } else if (NextzyLanguage.THAI.equalsIgnoreCase(language)) {</span>
+<span class="nc" id="L300">            return &quot;Thai&quot;;</span>
+        }
+<span class="nc" id="L302">        return NextzyUtility.getInstance().wrapBlank(language, &quot;-&quot;);</span>
+    }
+
+    private void setPostpaidBillingAddress(PostpaidBillingAddressResult result) {
+<span class="nc bnc" id="L306" title="All 4 branches missed.">        if (result != null &amp;&amp; result.hasData()) {</span>
+<span class="nc" id="L307">            PostpaidBillingAddressData postpaidBillingAddressData = result.getData();</span>
+<span class="nc" id="L308">            getView().setAddressOwnerName(Mobile.getInstance().getWelcomeName());</span>
+<span class="nc" id="L309">            getView().setAddressInfo(getPostpaidBillingAddress(postpaidBillingAddressData));</span>
+        }
+<span class="nc" id="L311">    }</span>
+
+    private String getPostpaidBillingAddress(PostpaidBillingAddressData data) {
+<span class="nc bnc" id="L314" title="All 2 branches missed.">        if (data != null) {</span>
+<span class="nc" id="L315">            return getView().getPostpaidFullAddress(data);</span>
+        }
+<span class="nc" id="L317">        return &quot;-&quot;;</span>
+    }
+
+    private String getPrepaidBillingAddress(PrepaidInfoData data) {
+<span class="nc bnc" id="L321" title="All 2 branches missed.">        if (data != null) {</span>
+<span class="nc" id="L322">            return getView().getPrepaidFullAddress(data);</span>
+        }
+<span class="nc" id="L324">        return &quot;-&quot;;</span>
+    }
+
+    private String convertBirthDateToFullDate(String birthDate) {
+<span class="nc bnc" id="L328" title="All 2 branches missed.">        if (birthDate != null) {</span>
+<span class="nc" id="L329">            String[] date = birthDate.toUpperCase().split(&quot;/&quot;);</span>
+<span class="nc bnc" id="L330" title="All 2 branches missed.">            if (date.length == 3) {</span>
+<span class="nc" id="L331">                String month = new DateFormatSymbols(new Locale(getView().getCurrentLanguage())).getMonths()[Integer.parseInt(date[1]) - 1];</span>
+<span class="nc" id="L332">                return NextzyUtility.getInstance().joinStringWithSeparator(Arrays.asList(date[0], month, date[2]), &quot; &quot;);</span>
+            }
+        }
+<span class="nc" id="L335">        return NextzyUtility.getInstance().wrapBlank(birthDate, &quot;-&quot;);</span>
+    }
+
+    private String getBillingCycle(BillingCycleData.CurrentBillingCycle currentBillingCycle) {
+<span class="nc bnc" id="L339" title="All 2 branches missed.">        if (currentBillingCycle != null) {</span>
+<span class="nc" id="L340">            return NextzyUtility.getInstance().wrapBlank(currentBillingCycle.getText(), &quot;-&quot;);</span>
+        }
+<span class="nc" id="L342">        return &quot;-&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

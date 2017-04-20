@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MainContractor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.main.activity</a> &gt; <span class="el_source">MainContractor.java</span></div><h1>MainContractor.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.main.activity;
+
+import com.nextzy.myais.common.config.mobile.MobileContact;
+import com.nextzy.myais.common.database.model.NextzyRealmObject;
+import com.nextzy.myais.common.menu.MyAisMenu;
+import com.nextzy.myais.common.mvp.NextzyActivityContractorPresenter;
+import com.nextzy.myais.common.mvp.NextzyActivityContractorView;
+
+import java.util.List;
+
+/**
+ * Created by Akexorcist on 8/9/16 AD.
+ */
+<span class="nc" id="L14">public class MainContractor {</span>
+    public interface Presenter extends NextzyActivityContractorPresenter {
+        void getUserProfile();
+
+        NextzyRealmObject convertTabMenuToRealmObject(List&lt;MyAisMenu.Menu&gt; menuList);
+
+        void onCameraMenuClick();
+
+        void onNotificationMenuClick();
+
+        void createUserAccount();
+
+        void updateUserAccount();
+
+        void getKeyForAdobe();
+
+        void onUserAccountSelected(String userAccountNumber, int index);
+
+        void setupMenu();
+
+        void onSideMenuUpdate();
+
+        List&lt;MyAisMenu.Menu&gt; getMenuList();
+
+        void setMenuList(List&lt;MyAisMenu.Menu&gt; menuList);
+
+        void openUrlScheme();
+
+        void checkDiffMobileContractList(int oldListSize);
+    }
+
+    public interface View extends NextzyActivityContractorView&lt;Presenter&gt; {
+        void createTabMenu(List&lt;MyAisMenu.Menu&gt; menuList);
+
+        void setCurrentTabIndex(int tabIndex);
+
+        void saveTabMenuToRealm(List&lt;MyAisMenu.Menu&gt; menuList);
+
+        void updateUserAccount(List&lt;MobileContact&gt; mobileContactList);
+
+        void updateUserAccountWithoutReloading(List&lt;MobileContact&gt; mobileContactList);
+
+        void requestCameraPermission();
+
+        void setUsername(String username);
+
+        void gotoTopUpConfirmEvent();
+
+        void showUnknownBusinessType();
+
+        void setUserAccountNumber(String accountNumber);
+
+        void clearAllDatabase();
+
+        void setCurrentTab(int index);
+
+        boolean isUrlSchemeAvailable();
+
+        boolean isUrlHostEqual(String urlScheme);
+
+        void clearUrlScheme();
+
+        void gotoUrlScheme(int currentTab, MyAisMenu.SubMenu subMenu);
+
+        void launchNotificationActivity();
+
+        void trackUserIdentifier(String identifier);
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

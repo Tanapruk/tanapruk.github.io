@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegisterAddMobileNumberPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.register.step4.addmobilenumber.fragment</a> &gt; <span class="el_source">RegisterAddMobileNumberPresenter.java</span></div><h1>RegisterAddMobileNumberPresenter.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.register.step4.addmobilenumber.fragment;
+
+import android.graphics.Bitmap;
+
+import com.ais.mimo.eservice.helper.login.network.response.MobileData;
+import com.ais.mimo.eservice.helper.register.network.RegisterManager;
+import com.ais.mimo.eservice.helper.register.network.exception.RegisterSSBE309Exception;
+import com.ais.mimo.eservice.helper.register.network.exception.RegisterVerifyIdentityDataException;
+import com.ais.mimo.eservice.helper.register.network.exception.RegisterVerifyOtpDataException;
+import com.ais.mimo.eservice.helper.register.network.request.RegisterVerifyIdentityBody;
+import com.ais.mimo.eservice.helper.register.network.request.RegisterVerifyOtpBody;
+import com.ais.mimo.eservice.helper.register.network.response.RegisterVerifyIdentityResult;
+import com.ais.mimo.eservice.helper.register.network.response.RegisterVerifyOtpResult;
+import com.ais.mimo.eservice.module.register.base.RegisterBasePresenter;
+import com.ais.mimo.eservice.module.register.utility.RegisterValidateUtility;
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.database.NextzyDatabase;
+import com.nextzy.myais.common.utility.NextzyBitmapUtility;
+import com.nextzy.myais.common.utility.NextzyUtility;
+
+import java.util.ArrayList;
+
+import static com.ais.mimo.eservice.helper.login.network.response.MobileData.CHARGE_TYPE_POSTPAID;
+import static com.ais.mimo.eservice.helper.login.network.response.MobileData.CHARGE_TYPE_PREPAID;
+import static com.ais.mimo.eservice.helper.register.network.RegisterManager.FLAG_N;
+import static com.ais.mimo.eservice.helper.register.network.RegisterManager.FLAG_Y;
+import static com.ais.mimo.eservice.helper.register.network.RegisterManager.MASTER_MOBILE_NUMBER;
+import static com.ais.mimo.eservice.helper.register.network.RegisterManager.SERVICE_VERIFY_IDENTITY_ADD_NO_CONFIRM_NUMBER;
+import static com.ais.mimo.eservice.helper.register.network.RegisterManager.SERVICE_VERIFY_IDENTITY_NUMBER_SELECTED;
+import static com.ais.mimo.eservice.module.register.utility.RegisterValidateUtility.INVALIDATE_CAPTCHA_FORMAT;
+import static com.ais.mimo.eservice.module.register.utility.RegisterValidateUtility.INVALIDATE_MOBILE_NUMBER_FORMAT;
+import static com.ais.mimo.eservice.module.register.utility.RegisterValidateUtility.INVALIDATE_OTP_FORMAT;
+import static com.nextzy.myais.common.constant.BusinessType.FIBRE;
+import static com.nextzy.myais.common.constant.BusinessType.POSTPAID;
+import static com.nextzy.myais.common.constant.BusinessType.PREPAID;
+
+/**
+ * Created by TheKhaeng on 9/20/2016.
+ */
+
+public class RegisterAddMobileNumberPresenter extends RegisterBasePresenter&lt;RegisterAddMobileNumberContractor.View&gt; implements RegisterAddMobileNumberContractor.Presenter {
+<span class="fc" id="L44">    private final static String TAG = RegisterAddMobileNumberPresenter.class.getSimpleName();</span>
+    public static final String KEY_GROUP_FOCUS = &quot;key_group_focus&quot;;
+    public static final int REGISTER_MAX_POSTPAID = 20;
+    public static final int REGISTER_MAX_PREPAID = 5;
+    public static final int REGISTER_MAX_FBB = 5;
+    private RegisterManager registerManager;
+    private final RegisterValidateUtility validateUtil;
+
+    private String focusBusinessType;
+    private String sendOtpFlag;
+    private ArrayList&lt;MobileData&gt; mobileDataUsedList;
+    private String refIdCaptcha;
+
+
+    public void setMockManager(RegisterManager mockManager) {
+<span class="fc" id="L59">        registerManager = mockManager;</span>
+<span class="fc" id="L60">    }</span>
+
+    private RegisterAddMobileNumberPresenter(RegisterAddMobileNumberContractor.View view) {
+<span class="fc" id="L63">        super(view);</span>
+<span class="fc" id="L64">        registerManager = RegisterManager.getInstance();</span>
+<span class="fc" id="L65">        validateUtil = RegisterValidateUtility.getInstance();</span>
+<span class="fc" id="L66">        mobileDataUsedList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L67">    }</span>
+
+
+    public static RegisterAddMobileNumberPresenter createPresenter(RegisterAddMobileNumberContractor.View view) {
+<span class="fc" id="L71">        return new RegisterAddMobileNumberPresenter(view);</span>
+    }
+
+    @Override
+    public void restoreFocusBusinessType(String focus) {
+<span class="nc" id="L76">        focusBusinessType = focus;</span>
+<span class="nc" id="L77">    }</span>
+
+    @Override
+    public String getFocusBusinessType() {
+<span class="nc" id="L81">        return focusBusinessType;</span>
+    }
+
+    @Override
+    public void setFocusBusinessType(String focus) {
+<span class="nc" id="L86">        focusBusinessType = focus;</span>
+<span class="nc" id="L87">    }</span>
+
+    @Override
+    public void restoreRefIdCaptcha(String refIdCaptcha) {
+<span class="nc" id="L91">        this.refIdCaptcha = refIdCaptcha;</span>
+<span class="nc" id="L92">    }</span>
+
+    @Override
+    public String getRefIdCaptcha() {
+<span class="nc" id="L96">        return refIdCaptcha;</span>
+    }
+
+
+    public String getSendOtpFlag() {
+<span class="fc" id="L101">        return sendOtpFlag;</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L106">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L110">    }</span>
+
+    @Override
+    public void onViewStart() {
+
+<span class="nc" id="L115">    }</span>
+
+    @Override
+    public void onViewStop() {
+
+<span class="nc" id="L120">    }</span>
+
+    @Override
+    public void registerRx() {
+<span class="fc" id="L124">        RxBus.get().register(this);</span>
+<span class="fc" id="L125">    }</span>
+
+    @Override
+    public void unregisterRx() {
+<span class="fc" id="L129">        RxBus.get().unregister(this);</span>
+<span class="fc" id="L130">    }</span>
+
+
+    /*******************/
+    /** For view call **/
+    /*******************/
+    //&lt;editor-fold desc=&quot;For view folding&quot;&gt;
+    @Override
+    public void validateRequestVerifyIdentityAddNoConfirmNumber(String mobileNumber,
+                                                                String captcha) {
+<span class="fc" id="L140">        getView().showDefaultMobileNumberEdt();</span>
+<span class="fc" id="L141">        getView().showDefaultCaptchaEdt();</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">        switch (validateUtil.validateMobileOrInternetNumber(mobileNumber)) {</span>
+            case INVALIDATE_MOBILE_NUMBER_FORMAT:
+<span class="fc" id="L144">                getView().showDialogErrorMobileNumberEdt();</span>
+<span class="fc" id="L145">                return;</span>
+        }
+
+<span class="fc bfc" id="L148" title="All 2 branches covered.">        if (getView().isCaptchaVisible()) {</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">            switch (validateUtil.validateCaptcha(captcha)) {</span>
+                case INVALIDATE_CAPTCHA_FORMAT:
+<span class="fc" id="L151">                    getView().showDialogErrorCaptchaEdt();</span>
+<span class="fc" id="L152">                    return;</span>
+            }
+        }
+<span class="fc" id="L155">        requestVerifyIdentityAddNoConfirmNumber(mobileNumber, captcha);</span>
+<span class="fc" id="L156">    }</span>
+
+
+    @Override
+    public void requestVerifyIdentityNumberSelected(String mobileNumber) {
+<span class="fc" id="L161">        sendOtpFlag = FLAG_Y;</span>
+<span class="fc" id="L162">        getView().showLoadingNoFade();</span>
+<span class="fc" id="L163">        RegisterVerifyIdentityBody body = new RegisterVerifyIdentityBody()</span>
+<span class="fc" id="L164">                .setNumber(mobileNumber)</span>
+<span class="fc" id="L165">                .setCardId(getView().getArgumentsStringIdCard())</span>
+<span class="fc" id="L166">                .setEmail(getView().getArgumentsStringEmail())</span>
+<span class="fc" id="L167">                .setVerifyCaptchaFlag(FLAG_N)</span>
+<span class="fc" id="L168">                .setSendOtpFlag(sendOtpFlag)</span>
+<span class="fc" id="L169">                .setVerifyCaptchaFlag(null)</span>
+<span class="fc" id="L170">                .setSendOtpFlag(null);</span>
+
+<span class="fc" id="L172">        registerManager.verifyIdentityNumberSelected(</span>
+                mobileNumber,
+                body
+        );
+<span class="fc" id="L176">    }</span>
+
+    @Override
+    public void validateRequestVerifyOtpNumberSelected(String mobileNumber, String otp) {
+<span class="fc" id="L180">        getView().showDefaultOtpEdt();</span>
+<span class="fc bfc" id="L181" title="All 2 branches covered.">        switch (validateUtil.validateOtp(otp)) {</span>
+            case INVALIDATE_OTP_FORMAT:
+<span class="fc" id="L183">                getView().showDialogErrorOtpEdt();</span>
+<span class="fc" id="L184">                return;</span>
+        }
+<span class="fc" id="L186">        requestVerifyOtpNumberSelected(mobileNumber, otp);</span>
+<span class="fc" id="L187">    }</span>
+
+
+    @Override
+    public void setMobileListForCheckAlreadyUsed(ArrayList&lt;MobileData&gt; confirmPostpaid,
+                                                 ArrayList&lt;MobileData&gt; noConfirmPostpaid,
+                                                 ArrayList&lt;MobileData&gt; confirmPrepaid,
+                                                 ArrayList&lt;MobileData&gt; noConfirmPrepaid,
+                                                 ArrayList&lt;MobileData&gt; confirmFbb,
+                                                 ArrayList&lt;MobileData&gt; noConfirmFbb) {
+<span class="nc bnc" id="L197" title="All 2 branches missed.">        if (confirmPostpaid != null) mobileDataUsedList.addAll(confirmPostpaid);</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">        if (noConfirmPostpaid != null) mobileDataUsedList.addAll(noConfirmPostpaid);</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">        if (confirmPrepaid != null) mobileDataUsedList.addAll(confirmPrepaid);</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">        if (noConfirmPrepaid != null) mobileDataUsedList.addAll(noConfirmPrepaid);</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">        if (confirmFbb != null) mobileDataUsedList.addAll(confirmFbb);</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">        if (noConfirmFbb != null) mobileDataUsedList.addAll(noConfirmFbb);</span>
+<span class="nc" id="L203">    }</span>
+    //&lt;/editor-fold&gt;
+
+    @Subscribe
+    public void onReceiveIdentityResponse(RegisterVerifyIdentityResult response) {
+<span class="fc bfc" id="L208" title="All 2 branches covered.">        if (isClickAddMobileNumber()) {</span>
+<span class="pc bpc" id="L209" title="1 of 2 branches missed.">            if (response.isCanNextStep()) {</span>
+<span class="fc" id="L210">                addMobileNumberToAdapterByResponse(getView().getTextFromMobileEdt(), response);</span>
+            } else {
+<span class="nc" id="L212">                getView().showResponseException(response.getResultDescription());</span>
+            }
+        } else {
+<span class="fc bfc" id="L215" title="All 2 branches covered.">            if (response.isCanNextStep()) {</span>
+<span class="fc" id="L216">                getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L217">                clickRequestOtpAtFocusView();</span>
+            } else {
+<span class="fc" id="L219">                getView().showResponseException(response.getResultDescription());</span>
+            }
+        }
+<span class="fc" id="L222">    }</span>
+
+    @Subscribe
+    public void onReceiveVerifyOtp(RegisterVerifyOtpResult response) {
+<span class="nc bnc" id="L226" title="All 2 branches missed.">        if (response.isSSBE309()) {</span>
+<span class="nc" id="L227">            getView().showResponseException(response.getResultDescription());</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">        } else if (response.isCanNextStep()) {</span>
+<span class="nc" id="L229">            markConfirmCurrentMobileNumber();</span>
+        } else {
+<span class="nc" id="L231">            getView().showResponseException(response.getResultDescription());</span>
+        }
+<span class="nc" id="L233">    }</span>
+
+    @Subscribe
+    public void onReceiveSSBE309Exception(RegisterSSBE309Exception exception) {
+<span class="fc" id="L237">        getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L238">        refIdCaptcha = exception.getReferenceId();</span>
+<span class="fc" id="L239">        Bitmap captcha = NextzyBitmapUtility.decodeBase64Image(exception.getCaptcha());</span>
+<span class="fc" id="L240">        getView().showCaptcha(captcha);</span>
+<span class="fc" id="L241">    }</span>
+
+    @Subscribe
+    public void onReceiveIdentityResponseException(RegisterVerifyIdentityDataException exception) {
+<span class="fc" id="L245">        showResponseExceptionDismiss(exception.getMessage());</span>
+<span class="fc" id="L246">    }</span>
+
+    @Subscribe
+    public void onReceiveOtpResponseException(RegisterVerifyOtpDataException exception) {
+<span class="fc" id="L250">        showResponseExceptionDismiss(exception.getMessage());</span>
+<span class="fc" id="L251">    }</span>
+
+    /********************/
+    /** Private method **/
+    /********************/
+    //&lt;editor-fold desc=&quot;Private function folding&quot;&gt;
+    private boolean isClickAddMobileNumber() {
+<span class="fc" id="L258">        return FLAG_N.equals(getSendOtpFlag());</span>
+    }
+
+    private void clickRequestOtpAtFocusView() {
+<span class="pc bpc" id="L262" title="1 of 2 branches missed.">        if (POSTPAID.equals(focusBusinessType)) {</span>
+<span class="nc" id="L263">            getView().clickRequestOtpPostpaidFocusView();</span>
+<span class="pc bpc" id="L264" title="1 of 2 branches missed.">        } else if (PREPAID.equals(focusBusinessType)) {</span>
+<span class="nc" id="L265">            getView().clickRequestOtpPrepaidFocusView();</span>
+        } else {
+<span class="fc" id="L267">            getView().clickRequestOtpFibreFocusView();</span>
+        }
+<span class="fc" id="L269">    }</span>
+
+    private void requestVerifyOtpNumberSelected(String mobileNumber, String otp) {
+<span class="fc" id="L272">        getView().showLoadingNoFade();</span>
+<span class="fc" id="L273">        RegisterVerifyOtpBody body = new RegisterVerifyOtpBody(</span>
+<span class="fc" id="L274">                getRefIdNumberSelected(),</span>
+                otp);
+<span class="fc" id="L276">        registerManager.verifyOtpNumberSelected(</span>
+                mobileNumber,
+                body);
+<span class="fc" id="L279">    }</span>
+
+    private void requestVerifyIdentityAddNoConfirmNumber(String mobileNumber, String captcha) {
+<span class="fc" id="L282">        sendOtpFlag = FLAG_N;</span>
+<span class="fc" id="L283">        String refId = null;</span>
+<span class="fc" id="L284">        String cap = null;</span>
+<span class="fc bfc" id="L285" title="All 2 branches covered.">        if (getView().isCaptchaVisible()) {</span>
+<span class="fc" id="L286">            refId = getRefIdNoConfirmNumber();</span>
+<span class="fc" id="L287">            cap = captcha;</span>
+        }
+<span class="fc" id="L289">        getView().showLoadingNoFade();</span>
+
+<span class="fc" id="L291">        RegisterVerifyIdentityBody body = new RegisterVerifyIdentityBody()</span>
+<span class="fc" id="L292">                .setNumber(mobileNumber)</span>
+<span class="fc" id="L293">                .setCardId(&quot;&quot;)</span>
+<span class="fc" id="L294">                .setEmail(&quot;&quot;)</span>
+<span class="fc" id="L295">                .setVerifyCaptchaFlag(FLAG_Y)</span>
+<span class="fc" id="L296">                .setSendOtpFlag(sendOtpFlag)</span>
+<span class="fc" id="L297">                .setReferenceId(refId)</span>
+<span class="fc" id="L298">                .setCaptcha(cap);</span>
+
+<span class="fc" id="L300">        String mobileNumberActive = mobileNumber;</span>
+<span class="pc bpc" id="L301" title="1 of 2 branches missed.">        if (Mobile.getInstance().getMobileNumber() != null)</span>
+<span class="nc" id="L302">            mobileNumberActive = Mobile.getInstance().getMobileNumber();</span>
+
+<span class="fc" id="L304">        registerManager.verifyIdentityRegisterAddNoConfirmNumber(</span>
+                mobileNumberActive,
+                body
+        );
+<span class="fc" id="L308">    }</span>
+
+    private void addMobileNumberToAdapterByResponse(String mobileNumber, RegisterVerifyIdentityResult response) {
+<span class="pc bpc" id="L311" title="1 of 2 branches missed.">        if (isMobileNumberAlreadyUsed(mobileNumber)) {</span>
+<span class="fc bfc" id="L312" title="All 2 branches covered.">            if (response.isFibre()) {</span>
+<span class="fc" id="L313">                MobileData mobile = new MobileData();</span>
+<span class="fc" id="L314">                mobile.setNumber(mobileNumber);</span>
+<span class="fc" id="L315">                mobile.setMobileType(FIBRE);</span>
+<span class="pc bpc" id="L316" title="1 of 2 branches missed.">                if (checkIsMaxNumber(FIBRE)) { //check this because Fibre number auto confirm</span>
+<span class="fc bfc" id="L317" title="All 2 branches covered.">                    if (isActivePostpaidNumber()) {</span>
+<span class="fc" id="L318">                        getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L319">                        getView().addMarkConfirmMobileDataToFbbAdapter(mobile);</span>
+<span class="fc bfc" id="L320" title="All 2 branches covered.">                    } else if (isActivePrepaidNumber()) {</span>
+<span class="fc" id="L321">                        getView().showDialogPrepaidCannotAddFibre();</span>
+<span class="pc bpc" id="L322" title="1 of 2 branches missed.">                    } else if (isActiveFibreNumber()) {</span>
+<span class="fc" id="L323">                        getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L324">                        getView().addMarkConfirmMobileDataToFbbAdapter(mobile);</span>
+                    } else {
+<span class="nc" id="L326">                        getView().showResponseException();</span>
+                    }
+                } else {
+<span class="nc" id="L329">                    getView().showFbbLimitError(REGISTER_MAX_FBB);</span>
+                }
+<span class="fc bfc" id="L331" title="All 2 branches covered.">            } else if (response.isPostpaid()) {</span>
+<span class="fc" id="L332">                MobileData mobile = new MobileData();</span>
+<span class="fc" id="L333">                mobile.setNumber(mobileNumber);</span>
+<span class="fc" id="L334">                mobile.setChargeType(CHARGE_TYPE_POSTPAID);</span>
+<span class="fc bfc" id="L335" title="All 2 branches covered.">                if (isActivePostpaidNumber()) {</span>
+<span class="fc" id="L336">                    getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L337">                    getView().addNoConfirmMobileDataToPostpaidAdapter(mobile);</span>
+<span class="fc bfc" id="L338" title="All 2 branches covered.">                } else if (isActivePrepaidNumber()) {</span>
+<span class="fc" id="L339">                    getView().showDialogPrepaidCannotAddPostpaid();</span>
+<span class="pc bpc" id="L340" title="1 of 2 branches missed.">                } else if (isActiveFibreNumber()) {</span>
+<span class="fc" id="L341">                    getView().showDialogFbbCannotAddPostpaid();</span>
+                } else {
+<span class="nc" id="L343">                    getView().showResponseException();</span>
+                }
+<span class="pc bpc" id="L345" title="1 of 2 branches missed.">            } else if (response.isPrepaid()) {</span>
+<span class="fc" id="L346">                MobileData mobile = new MobileData();</span>
+<span class="fc" id="L347">                mobile.setNumber(mobileNumber);</span>
+<span class="fc" id="L348">                mobile.setChargeType(CHARGE_TYPE_PREPAID);</span>
+<span class="fc bfc" id="L349" title="All 2 branches covered.">                if (isActivePostpaidNumber()) {</span>
+<span class="fc" id="L350">                    getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L351">                    getView().addNoConfirmMobileDataToPrepaidAdapter(mobile);</span>
+<span class="fc bfc" id="L352" title="All 2 branches covered.">                } else if (isActivePrepaidNumber()) {</span>
+<span class="fc" id="L353">                    getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L354">                    getView().addNoConfirmMobileDataToPrepaidAdapter(mobile);</span>
+<span class="pc bpc" id="L355" title="1 of 2 branches missed.">                } else if (isActiveFibreNumber()) {</span>
+<span class="fc" id="L356">                    getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L357">                    getView().addNoConfirmMobileDataToPrepaidAdapter(mobile);</span>
+                } else {
+<span class="nc" id="L359">                    getView().showResponseException();</span>
+                }
+<span class="fc" id="L361">            } else {</span>
+<span class="nc" id="L362">                getView().showResponseException();</span>
+            }
+<span class="fc" id="L364">            getView().clearMobileEditText();</span>
+        } else {
+<span class="nc" id="L366">            getView().showDialogErrorAlreadyUseMobileNumberEdt(mobileNumber);</span>
+        }
+<span class="fc" id="L368">    }</span>
+
+    private String getMasterNumber() {
+        String mobileNumber
+<span class="fc" id="L372">                = NextzyDatabase.getInstance().findByName(</span>
+                MASTER_MOBILE_NUMBER,
+                String.class);
+<span class="pc bpc" id="L375" title="1 of 2 branches missed.">        if (mobileNumber != null) {</span>
+<span class="fc" id="L376">            return mobileNumber;</span>
+        }
+<span class="nc" id="L378">        return null;</span>
+    }
+
+    private String getRefIdNumberSelected() {
+        RegisterVerifyIdentityResult identity
+<span class="fc" id="L383">                = NextzyDatabase.getInstance().findByName(</span>
+                SERVICE_VERIFY_IDENTITY_NUMBER_SELECTED,
+                RegisterVerifyIdentityResult.class);
+<span class="fc bfc" id="L386" title="All 2 branches covered.">        if (identity != null) {</span>
+<span class="fc" id="L387">            return identity.getData().getReferenceId();</span>
+        }
+<span class="fc" id="L389">        return null;</span>
+    }
+
+    private String getRefIdNoConfirmNumber() {
+<span class="pc bpc" id="L393" title="2 of 4 branches missed.">        if (getView().isCaptchaVisible() &amp;&amp; refIdCaptcha != null) return refIdCaptcha;</span>
+
+        RegisterVerifyIdentityResult identity
+<span class="fc" id="L396">                = NextzyDatabase.getInstance().findByName(</span>
+                SERVICE_VERIFY_IDENTITY_ADD_NO_CONFIRM_NUMBER,
+                RegisterVerifyIdentityResult.class);
+<span class="fc bfc" id="L399" title="All 2 branches covered.">        if (identity != null) {</span>
+<span class="fc" id="L400">            return identity.getData().getReferenceId();</span>
+        }
+<span class="fc" id="L402">        return null;</span>
+    }
+
+
+    private boolean isMobileNumberAlreadyUsed(String mobileNumber) {
+<span class="pc bpc" id="L407" title="1 of 2 branches missed.">        if (isLogin()) {</span>
+<span class="nc bnc" id="L408" title="All 2 branches missed.">            return !NextzyUtility.getInstance().isStringEqual(mobileNumber, Mobile.getInstance().getMasterMobileNumber())</span>
+<span class="nc bnc" id="L409" title="All 2 branches missed.">                    &amp;&amp; !getView().isAdapterContain(mobileNumber)</span>
+<span class="nc bnc" id="L410" title="All 2 branches missed.">                    &amp;&amp; !isMobileDataListContain(mobileNumber);</span>
+        } else {
+<span class="pc bpc" id="L412" title="1 of 2 branches missed.">            return !NextzyUtility.getInstance().isStringEqual(mobileNumber, getMasterNumber())</span>
+<span class="pc bpc" id="L413" title="1 of 2 branches missed.">                    &amp;&amp; !getView().isAdapterContain(mobileNumber)</span>
+<span class="pc bpc" id="L414" title="1 of 2 branches missed.">                    &amp;&amp; !isMobileDataListContain(mobileNumber);</span>
+        }
+    }
+
+    private boolean isMobileDataListContain(String mobileNumber) {
+<span class="pc bpc" id="L419" title="1 of 2 branches missed.">        for (MobileData mobileData : mobileDataUsedList) {</span>
+<span class="nc bnc" id="L420" title="All 2 branches missed.">            if (mobileData.getNumber().equals(mobileNumber)) {</span>
+<span class="nc" id="L421">                return true;</span>
+            }
+<span class="nc" id="L423">        }</span>
+<span class="fc" id="L424">        return false;</span>
+    }
+
+
+    private void markConfirmCurrentMobileNumber() {
+<span class="nc bnc" id="L429" title="All 2 branches missed.">        if (POSTPAID.equals(focusBusinessType)) {</span>
+<span class="nc bnc" id="L430" title="All 2 branches missed.">            if (checkIsMaxNumber(POSTPAID)) {</span>
+<span class="nc" id="L431">                getView().dismissLoadingNoFade();</span>
+<span class="nc" id="L432">                getView().markConfirmCurrentMobileNumberPostpaid();</span>
+            } else {
+<span class="nc" id="L434">                getView().showPostpaidLimitError(REGISTER_MAX_POSTPAID);</span>
+            }
+<span class="nc bnc" id="L436" title="All 2 branches missed.">        } else if (PREPAID.equals(focusBusinessType)) {</span>
+<span class="nc bnc" id="L437" title="All 2 branches missed.">            if (checkIsMaxNumber(PREPAID)) {</span>
+<span class="nc" id="L438">                getView().dismissLoadingNoFade();</span>
+<span class="nc" id="L439">                getView().markConfirmCurrentMobileNumberPrepaid();</span>
+            } else {
+<span class="nc" id="L441">                getView().showPrepaidLimitError(REGISTER_MAX_PREPAID);</span>
+            }
+        } else {
+<span class="nc bnc" id="L444" title="All 2 branches missed.">            if (checkIsMaxNumber(FIBRE)) {</span>
+<span class="nc" id="L445">                getView().dismissLoadingNoFade();</span>
+<span class="nc" id="L446">                getView().markConfirmCurrentMobileNumberFbb();</span>
+            } else {
+<span class="nc" id="L448">                getView().showFbbLimitError(REGISTER_MAX_FBB);</span>
+            }
+        }
+<span class="nc" id="L451">    }</span>
+
+    private boolean checkIsMaxNumber(String businessType) {
+<span class="fc" id="L454">        int maxPostpaid = REGISTER_MAX_POSTPAID;</span>
+<span class="fc" id="L455">        int maxPrepaid = REGISTER_MAX_PREPAID;</span>
+<span class="fc" id="L456">        int maxFibre = REGISTER_MAX_FBB;</span>
+
+<span class="fc bfc" id="L458" title="All 2 branches covered.">        if (isActivePostpaidNumber()) {</span>
+<span class="fc" id="L459">            maxPostpaid -= 1;</span>
+<span class="fc bfc" id="L460" title="All 2 branches covered.">        } else if (isActivePrepaidNumber()) {</span>
+<span class="fc" id="L461">            maxPrepaid -= 1;</span>
+<span class="pc bpc" id="L462" title="1 of 2 branches missed.">        } else if (isActiveFibreNumber()) {</span>
+<span class="fc" id="L463">            maxFibre -= 1;</span>
+        }
+
+<span class="pc bpc" id="L466" title="1 of 2 branches missed.">        if (POSTPAID.equals(businessType)) {</span>
+<span class="nc bnc" id="L467" title="All 2 branches missed.">            if (getView().getConfirmItemUsedCountPostpaid() &lt; maxPostpaid) {</span>
+<span class="nc" id="L468">                return true;</span>
+            }
+<span class="pc bpc" id="L470" title="1 of 2 branches missed.">        } else if (PREPAID.equals(businessType)) {</span>
+<span class="nc bnc" id="L471" title="All 2 branches missed.">            if (getView().getConfirmItemUsedCountPrepaid() &lt; maxPrepaid) {</span>
+<span class="nc" id="L472">                return true;</span>
+            }
+        } else {
+<span class="pc bpc" id="L475" title="1 of 2 branches missed.">            if (getView().getConfirmItemUsedCountFbb() &lt; maxFibre) {</span>
+<span class="fc" id="L476">                return true;</span>
+            }
+        }
+<span class="nc" id="L479">        return false;</span>
+    }
+
+    //&lt;/editor-fold&gt;
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MyAisRegisterCaptchaView.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.register.widget</a> &gt; <span class="el_source">MyAisRegisterCaptchaView.java</span></div><h1>MyAisRegisterCaptchaView.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.register.widget;
+
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.os.Build;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.AttributeSet;
+import android.widget.EditText;
+import android.widget.ImageView;
+
+import com.nextzy.myais.common.widget.NextzyViewGroup;
+import com.nextzy.myais.myais.R;
+
+
+public class MyAisRegisterCaptchaView extends NextzyViewGroup {
+
+
+    private EditText edtCaptcha;
+    private ImageView imgCaptcha;
+
+    public MyAisRegisterCaptchaView(Context context ){
+<span class="nc" id="L24">        super( context );</span>
+<span class="nc" id="L25">    }</span>
+
+    public MyAisRegisterCaptchaView(Context context, AttributeSet attrs ){
+<span class="nc" id="L28">        super( context, attrs );</span>
+<span class="nc" id="L29">    }</span>
+
+    public MyAisRegisterCaptchaView(Context context, AttributeSet attrs, int defStyleAttr ){
+<span class="nc" id="L32">        super( context, attrs, defStyleAttr );</span>
+<span class="nc" id="L33">    }</span>
+
+    @TargetApi( Build.VERSION_CODES.LOLLIPOP )
+    public MyAisRegisterCaptchaView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes ){
+<span class="nc" id="L37">        super( context, attrs, defStyleAttr, defStyleRes );</span>
+<span class="nc" id="L38">    }</span>
+
+    @Override
+    protected int getLayoutRes() {
+<span class="nc" id="L42">        return R.layout.my_ais_register_view_captcha;</span>
+    }
+
+    @Override
+    protected void bindView() {
+<span class="nc" id="L47">        edtCaptcha = (EditText) findViewById( R.id.my_ais_regis_edt_password );</span>
+<span class="nc" id="L48">        imgCaptcha = (ImageView) findViewById( R.id.my_ais_regis_img_captcha );</span>
+<span class="nc" id="L49">    }</span>
+
+    @Override
+    protected void setupView() {
+
+<span class="nc" id="L54">    }</span>
+    @Override
+    protected void setupStyleables(AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+
+<span class="nc" id="L58">    }</span>
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+<span class="nc" id="L62">        Parcelable superState = super.onSaveInstanceState();</span>
+<span class="nc" id="L63">        SavedState ss = (SavedState) onSaveChildInstanceState( new SavedState( superState ) );</span>
+<span class="nc" id="L64">        return ss;</span>
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        if (!(state instanceof SavedState)) {</span>
+<span class="nc" id="L70">            super.onRestoreInstanceState(state);</span>
+<span class="nc" id="L71">            return;</span>
+        }
+<span class="nc" id="L73">        SavedState ss = (SavedState) state;</span>
+<span class="nc" id="L74">        super.onRestoreInstanceState(ss.getSuperState());</span>
+<span class="nc" id="L75">    }</span>
+
+    public String getStringFromEditText(){
+<span class="nc" id="L78">        return edtCaptcha.getText().toString();</span>
+    }
+
+    public String getCaptchaFromEditText(){
+<span class="nc" id="L82">       return edtCaptcha.getText().toString();</span>
+    }
+
+    public void showDefault(){
+<span class="nc" id="L86">        edtCaptcha.setBackgroundResource( R.drawable.my_ais_library_selector_edit_text_green );</span>
+<span class="nc" id="L87">    }</span>
+
+    public void showError(){
+<span class="nc" id="L90">        edtCaptcha.setBackgroundResource( R.drawable.my_ais_library_shape_edit_text_white_red_border );</span>
+<span class="nc" id="L91">    }</span>
+
+    public void setCaptchaBitmap( Bitmap captcha ){
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        if( captcha != null ){</span>
+<span class="nc" id="L95">            imgCaptcha.setImageBitmap( captcha );</span>
+        }
+<span class="nc" id="L97">    }</span>
+
+    private static class SavedState extends ChildSavedState {
+
+        SavedState(Parcelable superState) {
+<span class="nc" id="L102">            super(superState);</span>
+<span class="nc" id="L103">        }</span>
+
+        private SavedState(Parcel in, ClassLoader classLoader ) {
+<span class="nc" id="L106">            super(in, classLoader);</span>
+<span class="nc" id="L107">        }</span>
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+<span class="nc" id="L111">            super.writeToParcel(out, flags);</span>
+<span class="nc" id="L112">        }</span>
+
+<span class="nc" id="L114">        public static final ClassLoaderCreator&lt;SavedState&gt; CREATOR = new ClassLoaderCreator&lt;SavedState&gt;(){</span>
+            @Override
+            public SavedState createFromParcel( Parcel source, ClassLoader loader ){
+<span class="nc" id="L117">                return new SavedState( source, loader );</span>
+            }
+
+            public SavedState createFromParcel( Parcel in ){
+<span class="nc" id="L121">                return null;</span>
+            }
+
+
+            public SavedState[] newArray( int size ){
+<span class="nc" id="L126">                return new SavedState[size];</span>
+            }
+        };
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

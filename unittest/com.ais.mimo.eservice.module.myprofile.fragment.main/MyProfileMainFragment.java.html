@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MyProfileMainFragment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.myprofile.fragment.main</a> &gt; <span class="el_source">MyProfileMainFragment.java</span></div><h1>MyProfileMainFragment.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.myprofile.fragment.main;
+
+import android.graphics.Paint;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.ais.mimo.eservice.helper.myprofile.network.response.PostpaidBillingAddressData;
+import com.ais.mimo.eservice.helper.myprofile.network.response.PrepaidInfoData;
+import com.ais.mimo.eservice.module.myprofile.AddressInfoBuilder;
+import com.ais.mimo.eservice.widget.ProfileInfoView;
+import com.ais.mimo.eservice.widget.ProfileUserDetailView;
+import com.nextzy.myais.common.mvp.NextzyMvpFragment;
+import com.nextzy.myais.common.utility.NextzyUtility;
+import com.nextzy.myais.common.widget.AISTextView;
+import com.nextzy.myais.myais.R;
+
+import static com.nextzy.myais.common.delegate.FormatUtility.FORMAT_MOBILE_NUMBER;
+
+/**
+ * Created by Akexorcist on 11/21/2016 AD.
+ */
+
+public class MyProfileMainFragment extends NextzyMvpFragment&lt;MyProfileMainContractor.Presenter&gt;
+        implements MyProfileMainContractor.View {
+<span class="nc" id="L27">    public final static String TAG = MyProfileMainFragment.class.getSimpleName();</span>
+    private LinearLayout layoutChangeContactNumberContainer;
+    private LinearLayout layoutBillingCycleContainer;
+    private LinearLayout layoutBillMediaContainer;
+    private LinearLayout layoutAddressContainer;
+    private ProfileUserDetailView tvUserName;
+    private ProfileUserDetailView tvMobileNumber;
+    private ProfileUserDetailView tvBirthday;
+    private ProfileUserDetailView tvPrivilegeType;
+    private ProfileUserDetailView tvServiceYear;
+    private ProfileUserDetailView tvEmail;
+    private ProfileInfoView tvYourMobileNumber;
+    private ProfileInfoView tvBillCycleDate;
+    private ProfileInfoView tvPaymentDueDate;
+    private ProfileInfoView tvBillMediaPreference;
+    private ProfileInfoView tvBillMediaLanguage;
+    private ProfileInfoView tvAddressOwnerName;
+    private ProfileInfoView tvAddressInfo;
+    private AISTextView tvEditMobileNumber;
+
+    public MyProfileMainFragment() {
+<span class="nc" id="L48">        super();</span>
+<span class="nc" id="L49">    }</span>
+
+    public static MyProfileMainFragment newInstance() {
+<span class="nc" id="L52">        MyProfileMainFragment fragment = new MyProfileMainFragment();</span>
+<span class="nc" id="L53">        Bundle args = new Bundle();</span>
+<span class="nc" id="L54">        fragment.setArguments(args);</span>
+<span class="nc" id="L55">        return fragment;</span>
+    }
+
+    @Override
+    public int getLayoutView() {
+<span class="nc" id="L60">        return R.layout.my_ais_profile_fragment;</span>
+    }
+
+    @Override
+    protected void createPresenter() {
+<span class="nc" id="L65">        MyProfileMainPresenter.createPresenter(this);</span>
+<span class="nc" id="L66">    }</span>
+
+    @Override
+    public void bindView(View view) {
+<span class="nc" id="L70">        layoutChangeContactNumberContainer = (LinearLayout) view.findViewById(R.id.my_ais_profile_layout_change_contact_number);</span>
+<span class="nc" id="L71">        layoutBillingCycleContainer = (LinearLayout) view.findViewById(R.id.my_ais_profile_layout_billing_cycle_container);</span>
+<span class="nc" id="L72">        layoutBillMediaContainer = (LinearLayout) view.findViewById(R.id.my_ais_profile_layout_bill_media_container);</span>
+<span class="nc" id="L73">        layoutAddressContainer = (LinearLayout) view.findViewById(R.id.my_ais_profile_layout_address_container);</span>
+<span class="nc" id="L74">        tvUserName = (ProfileUserDetailView) view.findViewById(R.id.my_ais_profile_tv_user_name);</span>
+<span class="nc" id="L75">        tvMobileNumber = (ProfileUserDetailView) view.findViewById(R.id.my_ais_profile_tv_mobile_number);</span>
+<span class="nc" id="L76">        tvEditMobileNumber = (AISTextView) view.findViewById(R.id.my_ais_profile_tv_edit_mobile_number);</span>
+<span class="nc" id="L77">        tvBirthday = (ProfileUserDetailView) view.findViewById(R.id.my_ais_profile_tv_birthday);</span>
+<span class="nc" id="L78">        tvPrivilegeType = (ProfileUserDetailView) view.findViewById(R.id.my_ais_profile_tv_privilege_type);</span>
+<span class="nc" id="L79">        tvServiceYear = (ProfileUserDetailView) view.findViewById(R.id.my_ais_profile_tv_service_year);</span>
+<span class="nc" id="L80">        tvEmail = (ProfileUserDetailView) view.findViewById(R.id.my_ais_profile_tv_email);</span>
+<span class="nc" id="L81">        tvYourMobileNumber = (ProfileInfoView) view.findViewById(R.id.my_ais_profile_tv_your_mobile_number);</span>
+<span class="nc" id="L82">        tvBillCycleDate = (ProfileInfoView) view.findViewById(R.id.my_ais_profile_tv_bill_cycle_date);</span>
+<span class="nc" id="L83">        tvPaymentDueDate = (ProfileInfoView) view.findViewById(R.id.my_ais_profile_tv_payment_due_date);</span>
+<span class="nc" id="L84">        tvBillMediaPreference = (ProfileInfoView) view.findViewById(R.id.my_ais_profile_tv_bill_media_preference);</span>
+<span class="nc" id="L85">        tvBillMediaLanguage = (ProfileInfoView) view.findViewById(R.id.my_ais_profile_tv_bill_media_language);</span>
+<span class="nc" id="L86">        tvAddressOwnerName = (ProfileInfoView) view.findViewById(R.id.my_ais_profile_tv_address_owner_name);</span>
+<span class="nc" id="L87">        tvAddressInfo = (ProfileInfoView) view.findViewById(R.id.my_ais_profile_tv_address_info);</span>
+<span class="nc" id="L88">    }</span>
+
+    @Override
+    public void setupView() {
+<span class="nc" id="L92">        dismissAllDialogs();</span>
+<span class="nc" id="L93">        tvEditMobileNumber.setOnClickListener(v -&gt; clickEditMobileNumber());</span>
+<span class="nc" id="L94">        setUnderScroll(tvEditMobileNumber);</span>
+<span class="nc" id="L95">    }</span>
+
+    private void clickEditMobileNumber() {
+<span class="nc" id="L98">        getPresenter().goToChangeContactNumber(tvYourMobileNumber.getDetail());</span>
+<span class="nc" id="L99">    }</span>
+
+    @Override
+    public void restoreArgument(Bundle bundle) {
+
+<span class="nc" id="L104">    }</span>
+
+    @Override
+    public void initialize() {
+<span class="nc" id="L108">        getPresenter().getProfile();</span>
+<span class="nc" id="L109">    }</span>
+
+    @Override
+    public void restoreInstanceState(Bundle savedInstanceState) {
+
+<span class="nc" id="L114">    }</span>
+
+    @Override
+    public void restoreView() {
+
+<span class="nc" id="L119">    }</span>
+
+    @Override
+    public void saveInstanceState(Bundle outState) {
+
+<span class="nc" id="L124">    }</span>
+
+    @Override
+    public void setUserName(String name) {
+<span class="nc" id="L128">        tvUserName.setText(name);</span>
+<span class="nc" id="L129">    }</span>
+
+    @Override
+    public void setMobileNumber(String mobileNumber) {
+<span class="nc" id="L133">        tvMobileNumber.setText(mobileNumber);</span>
+<span class="nc" id="L134">    }</span>
+
+    @Override
+    public void setBirthday(String birthday) {
+<span class="nc" id="L138">        tvBirthday.setText(birthday);</span>
+<span class="nc" id="L139">    }</span>
+
+    @Override
+    public void setPrivilegeType(String privilegeType) {
+<span class="nc" id="L143">        tvPrivilegeType.setText(privilegeType);</span>
+<span class="nc" id="L144">    }</span>
+
+    @Override
+    public void setServiceYear(String date) {
+<span class="nc" id="L148">        String prefix = getString(R.string.my_ais_profile_mobile_service_prefix);</span>
+<span class="nc" id="L149">        tvServiceYear.setText(prefix + &quot; &quot; + date);</span>
+<span class="nc" id="L150">    }</span>
+
+    @Override
+    public void setEmail(String email) {
+<span class="nc" id="L154">        tvEmail.setText(email);</span>
+<span class="nc" id="L155">    }</span>
+
+    @Override
+    public void setBillCycleDate(String date) {
+<span class="nc" id="L159">        tvBillCycleDate.setDetail(date);</span>
+<span class="nc" id="L160">    }</span>
+
+    @Override
+    public void setPaymentDueDate(String date) {
+<span class="nc" id="L164">        tvPaymentDueDate.setDetail(date);</span>
+<span class="nc" id="L165">    }</span>
+
+    @Override
+    public void setBillMediaPreference(String preference) {
+<span class="nc" id="L169">        tvBillMediaPreference.setDetail(preference);</span>
+<span class="nc" id="L170">    }</span>
+
+    @Override
+    public void setBillMediaLanguage(String language) {
+<span class="nc" id="L174">        tvBillMediaLanguage.setDetail(language);</span>
+<span class="nc" id="L175">    }</span>
+
+    @Override
+    public void setAddressOwnerName(String name) {
+<span class="nc" id="L179">        tvAddressOwnerName.setDetail(name);</span>
+<span class="nc" id="L180">    }</span>
+
+    @Override
+    public void setAddressInfo(String info) {
+<span class="nc" id="L184">        tvAddressInfo.setDetail(info);</span>
+<span class="nc" id="L185">    }</span>
+
+    @Override
+    public void hideBillingCycleSection() {
+<span class="nc" id="L189">        layoutBillingCycleContainer.setVisibility(View.GONE);</span>
+<span class="nc" id="L190">    }</span>
+
+    @Override
+    public void hideBillMediaSection() {
+<span class="nc" id="L194">        layoutBillMediaContainer.setVisibility(View.GONE);</span>
+<span class="nc" id="L195">    }</span>
+
+    @Override
+    public void hideAddressSection() {
+<span class="nc" id="L199">        layoutAddressContainer.setVisibility(View.GONE);</span>
+<span class="nc" id="L200">    }</span>
+
+    @Override
+    public void showYourBillingCycleSection() {
+<span class="nc" id="L204">        layoutBillingCycleContainer.setVisibility(View.VISIBLE);</span>
+<span class="nc" id="L205">    }</span>
+
+    @Override
+    public void setContactFibreNumber(String number) {
+<span class="nc" id="L209">        layoutChangeContactNumberContainer.setVisibility(View.VISIBLE);</span>
+<span class="nc" id="L210">        tvYourMobileNumber.setDetail(NextzyUtility.getInstance().applyStringPattern(number, FORMAT_MOBILE_NUMBER));</span>
+<span class="nc" id="L211">    }</span>
+
+    @Override
+    public void showBillMediaSection() {
+<span class="nc" id="L215">        layoutBillMediaContainer.setVisibility(View.VISIBLE);</span>
+<span class="nc" id="L216">    }</span>
+
+    @Override
+    public void showAddressSection() {
+<span class="nc" id="L220">        layoutAddressContainer.setVisibility(View.VISIBLE);</span>
+<span class="nc" id="L221">    }</span>
+
+    @Override
+    public String getPostpaidFullAddress(PostpaidBillingAddressData data) {
+<span class="nc" id="L225">        return AddressInfoBuilder.create()</span>
+<span class="nc" id="L226">                .setHouseNumber(data.getHouseNumber())</span>
+<span class="nc" id="L227">                .setRoom(data.getRoom())</span>
+<span class="nc" id="L228">                .setFloor(data.getFloor())</span>
+<span class="nc" id="L229">                .setBuildingName(data.getBuildingName())</span>
+<span class="nc" id="L230">                .setRoad(data.getStreetName())</span>
+<span class="nc" id="L231">                .setAlley(data.getSoi())</span>
+<span class="nc" id="L232">                .setSubDistrict(data.getTumbolCode())</span>
+<span class="nc" id="L233">                .setDistrict(data.getCityCode())</span>
+<span class="nc" id="L234">                .setProvince(data.getProvinceCode())</span>
+<span class="nc" id="L235">                .setPostalCode(data.getPostalCode())</span>
+<span class="nc" id="L236">                .build(getActivity());</span>
+    }
+
+    @Override
+    public String getPrepaidFullAddress(PrepaidInfoData data) {
+<span class="nc" id="L241">        return AddressInfoBuilder.create()</span>
+<span class="nc" id="L242">                .setHouseNumber(data.getHouseNumber())</span>
+<span class="nc" id="L243">                .setRoad(data.getStreetName())</span>
+<span class="nc" id="L244">                .setAlley(data.getSoi())</span>
+<span class="nc" id="L245">                .setSubDistrict(data.getTumbolCode())</span>
+<span class="nc" id="L246">                .setDistrict(data.getCityCode())</span>
+<span class="nc" id="L247">                .setProvince(data.getProvinceCode())</span>
+<span class="nc" id="L248">                .setPostalCode(data.getPostalCode())</span>
+<span class="nc" id="L249">                .build(getActivity());</span>
+    }
+
+    @Override
+    public void showServiceUnavailable(String message) {
+<span class="nc" id="L254">        showAlertDialogFinishOnClick(message);</span>
+<span class="nc" id="L255">    }</span>
+
+    @Override
+    public void dismissDialog() {
+<span class="nc" id="L259">        dismissAllDialogs();</span>
+<span class="nc" id="L260">    }</span>
+
+    private void setUnderScroll(TextView view) {
+<span class="nc" id="L263">        view.setClickable(true);</span>
+<span class="nc" id="L264">        view.setPaintFlags(view.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);</span>
+<span class="nc" id="L265">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

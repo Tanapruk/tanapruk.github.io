@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegisterChangeMainNumberPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.register.step2.changeMaster</a> &gt; <span class="el_source">RegisterChangeMainNumberPresenter.java</span></div><h1>RegisterChangeMainNumberPresenter.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.register.step2.changeMaster;
+
+import com.ais.mimo.eservice.helper.register.network.RegisterManager;
+import com.ais.mimo.eservice.helper.register.network.exception.RegisterMyNumberDataException;
+import com.ais.mimo.eservice.helper.register.network.exception.RegisterSSBE309Exception;
+import com.ais.mimo.eservice.helper.register.network.exception.RegisterVerifyIdentityDataException;
+import com.ais.mimo.eservice.helper.register.network.exception.RegisterVerifyOtpDataException;
+import com.ais.mimo.eservice.helper.register.network.request.RegisterVerifyIdentityBody;
+import com.ais.mimo.eservice.helper.register.network.request.RegisterVerifyOtpBody;
+import com.ais.mimo.eservice.helper.register.network.response.RegisterMyNumberResult;
+import com.ais.mimo.eservice.helper.register.network.response.RegisterVerifyIdentityResult;
+import com.ais.mimo.eservice.helper.register.network.response.RegisterVerifyOtpResult;
+import com.ais.mimo.eservice.module.register.base.RegisterBasePresenter;
+import com.ais.mimo.eservice.module.register.event.GoToStep3FragmentNoDataEvent;
+import com.ais.mimo.eservice.module.register.utility.RegisterValidateUtility;
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.database.NextzyDatabase;
+import com.nextzy.myais.common.utility.Check;
+
+import static com.ais.mimo.eservice.helper.register.network.RegisterManager.FLAG_N;
+import static com.ais.mimo.eservice.helper.register.network.RegisterManager.FLAG_Y;
+import static com.ais.mimo.eservice.helper.register.network.RegisterManager.SERVICE_VERIFY_IDENTITY_FOR_CHANGE_MASTER;
+import static com.ais.mimo.eservice.module.register.utility.RegisterValidateUtility.INVALIDATE_OTP_FORMAT;
+
+
+/**
+ * Created by TheKhaeng on 9/20/2016.
+ */
+
+public class RegisterChangeMainNumberPresenter extends RegisterBasePresenter&lt;RegisterChangeMainNumberContractor.View&gt; implements RegisterChangeMainNumberContractor.Presenter {
+<span class="fc" id="L33">    private final static String TAG = RegisterChangeMainNumberPresenter.class.getSimpleName();</span>
+    private final RegisterValidateUtility validateUtil;
+    private RegisterManager manager;
+
+    private String currentMobileNumber;
+
+    public void setMockManager(RegisterManager mockManager) {
+<span class="fc" id="L40">        manager = mockManager;</span>
+<span class="fc" id="L41">    }</span>
+
+    protected RegisterChangeMainNumberPresenter(RegisterChangeMainNumberContractor.View view) {
+<span class="fc" id="L44">        super(view);</span>
+<span class="fc" id="L45">        manager = RegisterManager.getInstance();</span>
+<span class="fc" id="L46">        validateUtil = RegisterValidateUtility.getInstance();</span>
+<span class="fc" id="L47">    }</span>
+
+    public static RegisterChangeMainNumberPresenter createPresenter(RegisterChangeMainNumberContractor.View view) {
+<span class="fc" id="L50">        return new RegisterChangeMainNumberPresenter(view);</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L55">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L59">    }</span>
+
+    @Override
+    public void onViewStart() {
+
+<span class="nc" id="L64">    }</span>
+
+    @Override
+    public void onViewStop() {
+
+<span class="nc" id="L69">    }</span>
+
+    @Override
+    public void registerRx() {
+<span class="fc" id="L73">        RxBus.get().register(this);</span>
+<span class="fc" id="L74">    }</span>
+
+    @Override
+    public void unregisterRx() {
+<span class="fc" id="L78">        RxBus.get().unregister(this);</span>
+<span class="fc" id="L79">    }</span>
+
+
+    /*******************/
+    /** For view call **/
+    /*******************/
+    //&lt;editor-fold desc=&quot;For view folding&quot;&gt;
+    @Override
+    public void validateVerifyIdentitySelectedNumber() {
+<span class="fc bfc" id="L88" title="All 2 branches covered.">        if (Check.isNotNull(TAG, getCurrentMobileNumber())) {</span>
+<span class="fc" id="L89">            getView().showLoadingNoFade();</span>
+<span class="fc" id="L90">            requestVerifyIdentityNumberSelected();</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        } else if (getView().havePostpaidList()) {</span>
+<span class="fc" id="L92">            getView().showUserNotSelectPostpaidMobileNumber();</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        } else if (getView().haveFbbList()) {</span>
+<span class="fc" id="L94">            getView().showUserNotSelectFbbMobileNumber();</span>
+        } else {
+<span class="nc" id="L96">            throw new IllegalArgumentException(&quot;Is not Postpaid and Prepaid list.&quot;);</span>
+        }
+<span class="fc" id="L98">    }</span>
+
+    @Override
+    public void validateVerifyOtp(String otp) {
+<span class="fc bfc" id="L102" title="All 2 branches covered.">        if (Check.isNotNull(TAG, getCurrentMobileNumber())) {</span>
+<span class="fc" id="L103">            getView().showDefaultOtpEdt();</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">            switch (validateUtil.validateOtp(otp)) {</span>
+                case INVALIDATE_OTP_FORMAT:
+<span class="fc" id="L106">                    getView().showErrorOtpEdt();</span>
+<span class="fc" id="L107">                    return;</span>
+            }
+<span class="fc" id="L109">            requestVerifyOtp(otp);</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        } else if (getView().havePostpaidList()) {</span>
+<span class="fc" id="L111">            getView().showUserNotSelectPostpaidMobileNumber();</span>
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">        } else if (getView().haveFbbList()) {</span>
+<span class="fc" id="L113">            getView().showUserNotSelectFbbMobileNumber();</span>
+        } else {
+<span class="nc" id="L115">            throw new IllegalArgumentException(&quot;Is not Postpaid and Prepaid list.&quot;);</span>
+        }
+<span class="fc" id="L117">    }</span>
+
+
+    @Override
+    public void goToStep3Fragment() {
+<span class="fc" id="L122">        RxBus.get().post(new GoToStep3FragmentNoDataEvent());</span>
+<span class="fc" id="L123">    }</span>
+    //&lt;/editor-fold&gt;
+
+    @Subscribe
+    public void onReceiveIdentityResponse(RegisterVerifyIdentityResult response) {
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        if (response.isCanNextStep()) {</span>
+<span class="fc" id="L129">            getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L130">            getView().showOtp();</span>
+        } else {
+<span class="fc" id="L132">            getView().showResponseException(response.getResultDescription());</span>
+        }
+<span class="fc" id="L134">    }</span>
+
+
+    @Subscribe
+    public void onReceiveVerifyOtp(RegisterVerifyOtpResult response) {
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        if (response.isCanNextStep()) {</span>
+<span class="fc" id="L140">            getView().changeArgumentMasterNumber(getCurrentMobileNumber());</span>
+<span class="fc" id="L141">            requestGetMyNumber();</span>
+        } else {
+<span class="fc" id="L143">            getView().showResponseException(response.getResultDescription());</span>
+        }
+<span class="fc" id="L145">    }</span>
+
+    @Subscribe
+    public void onReceiveMyNumber(RegisterMyNumberResult response) {
+<span class="fc bfc" id="L149" title="All 2 branches covered.">        if (response.isCanNextStep()) {</span>
+<span class="fc" id="L150">            getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L151">            goToStep3Fragment();</span>
+        } else {
+<span class="fc" id="L153">            getView().showResponseException(response.getResultDescription());</span>
+        }
+<span class="fc" id="L155">    }</span>
+
+    @Subscribe
+    public void onReceiveSSBE309Exception(RegisterSSBE309Exception exception) {
+<span class="fc" id="L159">        getView().showResponseException(exception.getMessage());</span>
+<span class="fc" id="L160">    }</span>
+
+    @Subscribe
+    public void onReceiveIdentityResponseException(RegisterVerifyIdentityDataException exception) {
+<span class="fc" id="L164">        showResponseExceptionDismiss(exception.getMessage());</span>
+<span class="fc" id="L165">    }</span>
+
+    @Subscribe
+    public void onReceiveVerifyOtpException(RegisterVerifyOtpDataException exception) {
+<span class="fc" id="L169">        showResponseExceptionDismiss(exception.getMessage());</span>
+<span class="fc" id="L170">    }</span>
+
+    @Subscribe
+    public void onReceiveMyNumberException(RegisterMyNumberDataException exception) {
+<span class="fc" id="L174">        showResponseExceptionDismiss(exception.getMessage());</span>
+<span class="fc" id="L175">    }</span>
+    //&lt;/editor-fold&gt;
+
+    /********************/
+    /** Private method **/
+    /********************/
+    //&lt;editor-fold desc=&quot;Private function folding&quot;&gt;
+    private void requestVerifyOtp(String otp) {
+<span class="fc" id="L183">        getView().showLoadingNoFade();</span>
+<span class="fc" id="L184">        String refId = getRefIdNumberSelected();</span>
+<span class="fc" id="L185">        RegisterVerifyOtpBody body = new RegisterVerifyOtpBody(</span>
+                refId,
+                otp);
+
+        String number;
+<span class="fc bfc" id="L190" title="All 2 branches covered.">        if (isPrepaidForceChangeToFibre()) {</span>
+<span class="fc" id="L191">            number = Mobile.getInstance().getMobileNumber();</span>
+        } else {
+<span class="fc" id="L193">            number = getCurrentMobileNumber();</span>
+        }
+<span class="fc" id="L195">        manager.verifyOtpNumberSelected(</span>
+                number,
+                body
+        );
+<span class="fc" id="L199">    }</span>
+
+    private void requestVerifyIdentityNumberSelected() {
+<span class="fc" id="L202">        RegisterVerifyIdentityBody body = new RegisterVerifyIdentityBody()</span>
+<span class="fc" id="L203">                .setNumber(getCurrentMobileNumber())</span>
+<span class="fc" id="L204">                .setCardId(getView().getArgumentsStringIdCard())</span>
+<span class="fc" id="L205">                .setEmail(getView().getArgumentsStringEmail())</span>
+<span class="fc" id="L206">                .setVerifyCaptchaFlag(FLAG_N)</span>
+<span class="fc" id="L207">                .setSendOtpFlag(FLAG_Y)</span>
+<span class="fc" id="L208">                .setReferenceId(null)</span>
+<span class="fc" id="L209">                .setCaptcha(null);</span>
+
+        String number;
+<span class="fc bfc" id="L212" title="All 2 branches covered.">        if (isPrepaidForceChangeToFibre()) {</span>
+<span class="fc" id="L213">            number = Mobile.getInstance().getMobileNumber();</span>
+        } else {
+<span class="fc" id="L215">            number = getCurrentMobileNumber();</span>
+        }
+
+<span class="fc" id="L218">        manager.verifyIdentityForChangeMasterNumber(</span>
+                number,
+                body);
+<span class="fc" id="L221">    }</span>
+
+    private boolean isPrepaidForceChangeToFibre() {
+<span class="pc bpc" id="L224" title="1 of 4 branches missed.">        return isLogin() &amp;&amp; isActivePrepaidNumber()</span>
+<span class="fc bfc" id="L225" title="All 2 branches covered.">                &amp;&amp; getView().isFibreGroupFromStep2();</span>
+    }
+
+    private void requestGetMyNumber() {
+<span class="fc" id="L229">        manager.getMyNumber(</span>
+<span class="fc" id="L230">                getView().getArgumentsStringMobileNumber());</span>
+<span class="fc" id="L231">    }</span>
+
+    private String getRefIdNumberSelected() {
+        RegisterVerifyIdentityResult identity
+<span class="fc" id="L235">                = NextzyDatabase.getInstance().findByName(SERVICE_VERIFY_IDENTITY_FOR_CHANGE_MASTER, RegisterVerifyIdentityResult.class);</span>
+<span class="fc bfc" id="L236" title="All 2 branches covered.">        if (identity != null) {</span>
+<span class="fc" id="L237">            return identity.getData().getReferenceId();</span>
+        }
+<span class="fc" id="L239">        return null;</span>
+    }
+
+    //&lt;/editor-fold&gt;
+
+
+    /*******************/
+    /** Getter Setter **/
+    /*******************/
+    //&lt;editor-fold desc=&quot;Getter Setter folding&quot;&gt;
+    @Override
+    public void setCurrentMobileNumber(String mobileNumber) {
+<span class="fc" id="L251">        currentMobileNumber = mobileNumber;</span>
+<span class="fc" id="L252">    }</span>
+
+    public String getCurrentMobileNumber() {
+<span class="fc" id="L255">        return currentMobileNumber;</span>
+    }
+
+    //&lt;/editor-fold&gt;
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

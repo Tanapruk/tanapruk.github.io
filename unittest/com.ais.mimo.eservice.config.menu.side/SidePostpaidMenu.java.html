@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SidePostpaidMenu.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.config.menu.side</a> &gt; <span class="el_source">SidePostpaidMenu.java</span></div><h1>SidePostpaidMenu.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.config.menu.side;
+
+import com.nextzy.myais.common.menu.MyAisMenu;
+import com.nextzy.myais.common.widget.sidemenu.SideMenuItem;
+import com.nextzy.myais.myais.R;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by Akexorcist on 8/23/16 AD.
+ */
+<span class="fc" id="L13">public class SidePostpaidMenu {</span>
+    private static SidePostpaidMenu menu;
+
+    public static SidePostpaidMenu getInstance() {
+<span class="pc bpc" id="L17" title="1 of 2 branches missed.">        if (menu == null) {</span>
+<span class="fc" id="L18">            menu = new SidePostpaidMenu();</span>
+        }
+<span class="fc" id="L20">        return menu;</span>
+    }
+
+    public List&lt;MyAisMenu.Menu&gt; getMenu() {
+<span class="fc" id="L24">        List&lt;MyAisMenu.Menu&gt; menuList = new ArrayList&lt;&gt;();</span>
+//        menuList.add(new MyAisMenu.Menu()
+//                .setNameEn(&quot;Register&quot;)
+//                .setNameTh(&quot;Register&quot;)
+//                .setImage(R.drawable.my_ais_side_menu_ic_menu_register)
+//                .setKey(SideMenuKey.KEY_SAMPLE.toString()));
+<span class="fc" id="L30">        menuList.add(new MyAisMenu.Menu()</span>
+<span class="fc" id="L31">                .setNameEn(&quot;My Profile&quot;)</span>
+<span class="fc" id="L32">                .setNameTh(&quot;ข้อมูลของคุณ&quot;)</span>
+<span class="fc" id="L33">                .setImage(R.drawable.my_ais_side_menu_ic_menu_my_profile)</span>
+<span class="fc" id="L34">                .setKey(SideMenuKey.KEY_AIS_PROFILE.toString()));</span>
+<span class="fc" id="L35">        menuList.add(new MyAisMenu.Menu()</span>
+<span class="fc" id="L36">                .setKey(SideMenuItem.Divider.TYPE));</span>
+//        menuList.add(new MyAisMenu.Menu()
+//                .setNameEn(&quot;My Wallet&quot;)
+//                .setNameTh(&quot;My Wallet&quot;)
+//                .setImage(R.drawable.my_a/is_side_menu_ic_menu_my_wallet)
+//                .setKey(&quot;my_wallet&quot;));
+//        menuList.add(new MyAisMenu.Menu()
+//                .setNameEn(&quot;My Inbox&quot;)
+//                .setNameTh(&quot;My Inbox&quot;)
+//                .setImage(R.drawable.my_ais_side_menu_ic_menu_my_inbox)
+//                .setKey(&quot;my_inbox&quot;));
+//        menuList.add(new MyAisMenu.Menu()
+//                .setNameEn(&quot;Favourite&quot;)
+//                .setNameTh(&quot;Favourite&quot;)
+//                .setImage(R.drawable.my_ais_side_menu_ic_menu_favourite)
+//                .setKey(&quot;favourite&quot;)
+//                .addSectionMenuList(new MyAisMenu.SectionMenu()
+//                        .setNameEn(&quot;Your Current Charges&quot;)
+//                        .setNameTh(&quot;Your Current Charges&quot;)
+//                        .setKey(&quot;your_current_charges&quot;))
+//                .addSectionMenuList(new MyAisMenu.SectionMenu()
+//                        .setNameEn(&quot;Suggestion Package&quot;)
+//                        .setNameTh(&quot;Suggestion Package&quot;)
+//                        .setKey(&quot;suggestion_package&quot;))
+//                .addSectionMenuList(new MyAisMenu.SectionMenu()
+//                        .setNameEn(&quot;Roaming Service Rates&quot;)
+//                        .setNameTh(&quot;Roaming Service Rates&quot;)
+//                        .setKey(&quot;roaming_service_rates&quot;))
+//                .addSectionMenuList(new MyAisMenu.SectionMenu()
+//                        .setNameEn(&quot;Pay Bill&quot;)
+//                        .setNameTh(&quot;Pay Bill&quot;)
+//                        .setKey(&quot;pay_bill&quot;))
+//                .addSectionMenuList(new MyAisMenu.SectionMenu()
+//                        .setNameEn(&quot;Contact Call Center&quot;)
+//                        .setNameTh(&quot;Contact Call Center&quot;)
+//                        .setKey(&quot;contact_call_center&quot;)));
+//        menuList.add(new MyAisMenu.Menu()
+//                .setKey(SideMenuItem.Divider.TYPE));
+<span class="fc" id="L74">        menuList.add(new MyAisMenu.Menu()</span>
+<span class="fc" id="L75">                .setNameEn(&quot;AIS Online Store&quot;)</span>
+<span class="fc" id="L76">                .setNameTh(&quot;AIS Online Store&quot;)</span>
+<span class="fc" id="L77">                .setImage(R.drawable.my_ais_side_menu_ic_menu_ais_online_store)</span>
+<span class="fc" id="L78">                .setKey(SideMenuKey.KEY_AIS_ONLINE_STORE.toString()));</span>
+<span class="fc" id="L79">        menuList.add(new MyAisMenu.Menu()</span>
+<span class="fc" id="L80">                .setNameEn(&quot;AIS Website&quot;)</span>
+<span class="fc" id="L81">                .setNameTh(&quot;AIS Website&quot;)</span>
+<span class="fc" id="L82">                .setImage(R.drawable.my_ais_side_menu_ic_menu_ais_website)</span>
+<span class="fc" id="L83">                .setKey(SideMenuKey.KEY_AIS_WEBSITE.toString()));</span>
+<span class="fc" id="L84">        menuList.add(new MyAisMenu.Menu()</span>
+<span class="fc" id="L85">                .setNameEn(&quot;AIS Facebook&quot;)</span>
+<span class="fc" id="L86">                .setNameTh(&quot;AIS Facebook&quot;)</span>
+<span class="fc" id="L87">                .setImage(R.drawable.my_ais_side_menu_ic_menu_ais_facebook)</span>
+<span class="fc" id="L88">                .setKey(SideMenuKey.KEY_AIS_FACEBOOK_POSTPAID.toString()));</span>
+<span class="fc" id="L89">        menuList.add(new MyAisMenu.Menu()</span>
+<span class="fc" id="L90">                .setNameEn(&quot;AIS Twitter&quot;)</span>
+<span class="fc" id="L91">                .setNameTh(&quot;AIS Twitter&quot;)</span>
+<span class="fc" id="L92">                .setImage(R.drawable.my_ais_side_menu_ic_menu_ais_twitter)</span>
+<span class="fc" id="L93">                .setKey(SideMenuKey.KEY_AIS_TWITTER_POSTPAID.toString()));</span>
+<span class="fc" id="L94">        menuList.add(new MyAisMenu.Menu()</span>
+<span class="fc" id="L95">                .setNameEn(&quot;AIS Line&quot;)</span>
+<span class="fc" id="L96">                .setNameTh(&quot;AIS Line&quot;)</span>
+<span class="fc" id="L97">                .setImage(R.drawable.my_ais_side_menu_ic_menu_ais_line)</span>
+<span class="fc" id="L98">                .setKey(SideMenuKey.KEY_AIS_LINE_POSTPAID.toString()));</span>
+<span class="fc" id="L99">        menuList.add(new MyAisMenu.Menu()</span>
+<span class="fc" id="L100">                .setKey(SideMenuItem.Divider.TYPE));</span>
+<span class="fc" id="L101">        menuList.add(new MyAisMenu.Menu()</span>
+<span class="fc" id="L102">                .setNameEn(&quot;Settings&quot;)</span>
+<span class="fc" id="L103">                .setNameTh(&quot;ตั้งค่า&quot;)</span>
+<span class="fc" id="L104">                .setImage(R.drawable.my_ais_side_menu_ic_menu_setting)</span>
+<span class="fc" id="L105">                .setKey(SideMenuKey.KEY_SETTING.toString()));</span>
+<span class="fc" id="L106">        menuList.add(new MyAisMenu.Menu()</span>
+<span class="fc" id="L107">                .setNameEn(&quot;Log Out&quot;)</span>
+<span class="fc" id="L108">                .setNameTh(&quot;ออกจากระบบ&quot;)</span>
+<span class="fc" id="L109">                .setImage(R.drawable.my_ais_side_menu_ic_menu_log_out)</span>
+<span class="fc" id="L110">                .setKey(SideMenuKey.KEY_LOGOUT.toString()));</span>
+
+//        if (BuildConfig.DEV_MODE) {
+//            menuList.add(new MyAisMenu.Menu()
+//                    .setNameEn(&quot;Dev Mode&quot;)
+//                    .setNameTh(&quot;Dev Mode&quot;)
+//                    .setImage(R.drawable.my_ais_side_menu_ic_menu_setting)
+//                    .setKey(SideMenuKey.KEY_DEVMODE.toString())
+//            );
+//        }
+<span class="fc" id="L120">        return menuList;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MyAccountManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.helper.myaccount.network</a> &gt; <span class="el_source">MyAccountManager.java</span></div><h1>MyAccountManager.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.helper.myaccount.network;
+
+import com.ais.mimo.eservice.helper.myaccount.database.MyAccountSaveRealmResult;
+import com.ais.mimo.eservice.helper.myaccount.network.operator.ChangeEmailDataCheck;
+import com.ais.mimo.eservice.helper.myaccount.network.operator.ChangeLoginUserCheck;
+import com.ais.mimo.eservice.helper.myaccount.network.operator.ChangeMobileNumberDataCheck;
+import com.ais.mimo.eservice.helper.myaccount.network.operator.ChangeMyAccountPasswordDataCheck;
+import com.ais.mimo.eservice.helper.myaccount.network.operator.CheckChnageEmailDataCheck;
+import com.ais.mimo.eservice.helper.myaccount.network.operator.MyNumberDataCheck;
+import com.ais.mimo.eservice.helper.myaccount.network.operator.QueryMyAisCheck;
+import com.ais.mimo.eservice.helper.myaccount.network.operator.UpdateMyNumberDataCheck;
+import com.ais.mimo.eservice.helper.myaccount.network.request.ChangeEmailBody;
+import com.ais.mimo.eservice.helper.myaccount.network.request.ChangeLoginUserBody;
+import com.ais.mimo.eservice.helper.myaccount.network.request.ChangeMobileNumberBody;
+import com.ais.mimo.eservice.helper.myaccount.network.request.ChangePasswordBody;
+import com.ais.mimo.eservice.helper.myaccount.network.request.CheckChangeEmailBody;
+import com.ais.mimo.eservice.helper.myaccount.network.request.UpdateMyNumberBody;
+import com.ais.mimo.eservice.helper.myaccount.network.response.ChangeEmailResult;
+import com.ais.mimo.eservice.helper.myaccount.network.response.ChangeLoginUserResult;
+import com.ais.mimo.eservice.helper.myaccount.network.response.ChangeMobileNumberResult;
+import com.ais.mimo.eservice.helper.myaccount.network.response.ChangePasswordResult;
+import com.ais.mimo.eservice.helper.myaccount.network.response.CheckChangeEmailResult;
+import com.ais.mimo.eservice.helper.myaccount.network.response.MyNumberResult;
+import com.ais.mimo.eservice.helper.myaccount.network.response.QueryMyAisResult;
+import com.ais.mimo.eservice.helper.myaccount.network.response.UpdateMyNumberResult;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.network.subscriber.NextzySimpleSubscriber;
+import com.nextzy.myais.common.network.worker.GenericNetworkController;
+import com.nextzy.myais.common.network.worker.SchedulersAndErrorHandling;
+
+import rx.Single;
+
+
+/**
+ * Created by TheKhaeng on 9/14/2016 AD.
+ * Update by Royle on 01/03/2017.
+ */
+
+public class MyAccountManager extends GenericNetworkController {
+
+    public static final String SERVICE_CHECK_CHANGE_EMAIL = &quot;service_check_change_email&quot;;
+    public static final String SERVICE_CHANGE_EMAIL = &quot;service_change_email&quot;;
+    public static final String SERVICE_CHANGE_PASSWORD = &quot;service_change_password&quot;;
+    public static final String SERVICE_CHANGE_MOBILE_NUMBER_ACCOUNT = &quot;service_change_mobile_number_account&quot;;
+    public static final String SERVICE_UPDATE_MY_NUMBER = &quot;service_update_my_number&quot;;
+    public static final String SERVICE_MY_NUMBER = &quot;service_my_number&quot;;
+    public static final String SERVICE_QUERY_MY_AIS = &quot;service_query_my_ais&quot;;
+    public static final String SERVICE_CHANGE_LOGIN_USER = &quot;service_change_login_user&quot;;
+    private static MyAccountManager instance;
+    private MyAccountApi myAccountApi;
+
+    public static MyAccountManager getInstance() {
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        if (instance == null) {</span>
+<span class="fc" id="L56">            instance = new MyAccountManager();</span>
+        }
+<span class="fc" id="L58">        return instance;</span>
+    }
+
+<span class="fc" id="L61">    private MyAccountManager() {</span>
+<span class="fc" id="L62">    }</span>
+
+    public MyAccountApi getMyAccountApi() {
+<span class="fc" id="L65">        return myAccountApi;</span>
+    }
+
+    // inject for testing
+    public void setMyAccountApi(MyAccountApi mockApi) {
+<span class="fc" id="L70">        myAccountApi = mockApi;</span>
+<span class="fc" id="L71">    }</span>
+
+
+    public void requestCheckChangeEmail(String mobileNum, CheckChangeEmailBody body) {
+<span class="fc" id="L75">        String serviceName = SERVICE_CHECK_CHANGE_EMAIL;</span>
+<span class="nc" id="L76">        checkChangeEmailSingle(mobileNum, body, serviceName)</span>
+<span class="nc" id="L77">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(serviceName));</span>
+<span class="nc" id="L78">    }</span>
+
+    public void requestChangeEmail(String mobileNum, ChangeEmailBody body) {
+<span class="fc" id="L81">        String serviceName = SERVICE_CHANGE_EMAIL;</span>
+<span class="nc" id="L82">        changeEmailSingle(mobileNum, body, serviceName)</span>
+<span class="nc" id="L83">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(serviceName));</span>
+<span class="nc" id="L84">    }</span>
+
+    public void requestChangePassword(String mobileNum, ChangePasswordBody body) {
+<span class="nc" id="L87">        String serviceName = SERVICE_CHANGE_PASSWORD;</span>
+<span class="nc" id="L88">        changePasswordSingle(mobileNum, body, serviceName)</span>
+<span class="nc" id="L89">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(serviceName));</span>
+<span class="nc" id="L90">    }</span>
+
+    public void requestChangeMobileNumberAccount(String mobileNum, ChangeMobileNumberBody body) {
+<span class="nc" id="L93">        String serviceName = SERVICE_CHANGE_MOBILE_NUMBER_ACCOUNT;</span>
+<span class="nc" id="L94">        changeMobileNumberSingle(mobileNum, body, serviceName)</span>
+<span class="nc" id="L95">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(serviceName));</span>
+<span class="nc" id="L96">    }</span>
+
+    public void requestUpdateMyNumber(String mobileNum, UpdateMyNumberBody body) {
+<span class="nc" id="L99">        String serviceName = SERVICE_UPDATE_MY_NUMBER;</span>
+<span class="nc" id="L100">        updateMyNumberSingle(mobileNum, body, serviceName)</span>
+<span class="nc" id="L101">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(serviceName));</span>
+<span class="nc" id="L102">    }</span>
+
+    public void requestMyNumber(String mobileNumber) {
+<span class="nc" id="L105">        getMyNumberSingle(mobileNumber).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_MY_NUMBER));</span>
+
+<span class="nc" id="L107">    }</span>
+
+    public void changeLoginUser(ChangeLoginUserBody body) {
+<span class="nc" id="L110">        changeLoginUserSingle(body).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_CHANGE_LOGIN_USER));</span>
+<span class="nc" id="L111">    }</span>
+
+    public void queryMyAis(String mobileNumber) {
+<span class="nc" id="L114">        queryMyAisSingle(mobileNumber).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_QUERY_MY_AIS));</span>
+<span class="nc" id="L115">    }</span>
+
+    /*******************/
+    /** Create Single **/
+    /*******************/
+    //&lt;editor-fold desc=&quot;Create Single folding&quot;&gt;
+    private Single&lt;CheckChangeEmailResult&gt; checkChangeEmailSingle(String mobileNumber,
+                                                                  CheckChangeEmailBody body,
+                                                                  String serviceName) {
+<span class="pc" id="L124">        return MyAccountService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L125">                .getRxApi(getMyAccountApi())</span>
+<span class="nc" id="L126">                .getCheckChangeEmail(</span>
+<span class="nc" id="L127">                        new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(),</span>
+                        mobileNumber,
+                        body)
+<span class="nc" id="L130">                .compose(new SchedulersAndErrorHandling&lt;&gt;(CheckChangeEmailResult.class, serviceName))</span>
+<span class="nc" id="L131">                .flatMap(new CheckChnageEmailDataCheck())</span>
+<span class="nc" id="L132">                .map(new MyAccountSaveRealmResult&lt;&gt;(serviceName));</span>
+    }
+
+    Single&lt;ChangeEmailResult&gt; changeEmailSingle(String mobileNumber,
+                                                ChangeEmailBody body,
+                                                String serviceName) {
+<span class="fc" id="L138">        return MyAccountService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L139">                .getRxApi(getMyAccountApi())</span>
+<span class="fc" id="L140">                .getChangeEmail(</span>
+<span class="fc" id="L141">                        new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(),</span>
+                        mobileNumber,
+                        body)
+<span class="fc" id="L144">                .compose(new SchedulersAndErrorHandling&lt;&gt;(ChangeEmailResult.class, serviceName))</span>
+<span class="fc" id="L145">                .flatMap(new ChangeEmailDataCheck())</span>
+<span class="fc" id="L146">                .map(new MyAccountSaveRealmResult&lt;&gt;(serviceName));</span>
+    }
+
+    Single&lt;ChangePasswordResult&gt; changePasswordSingle(String mobileNumber,
+                                                      ChangePasswordBody body,
+                                                      String serviceName) {
+<span class="fc" id="L152">        return MyAccountService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L153">                .getRxApi(getMyAccountApi())</span>
+<span class="fc" id="L154">                .getChangePassword(</span>
+<span class="fc" id="L155">                        new EventLogParam(&quot;APP_CONFIRM_CHANGE_PASSWORD&quot;, &quot;5010&quot;, &quot;5117&quot;).getEventLogHeader(),</span>
+                        mobileNumber,
+                        body)
+<span class="fc" id="L158">                .compose(new SchedulersAndErrorHandling&lt;&gt;(ChangePasswordResult.class, serviceName))</span>
+<span class="fc" id="L159">                .flatMap(new ChangeMyAccountPasswordDataCheck())</span>
+<span class="fc" id="L160">                .map(new MyAccountSaveRealmResult&lt;&gt;(serviceName));</span>
+    }
+
+    Single&lt;ChangeMobileNumberResult&gt; changeMobileNumberSingle(String mobileNumber,
+                                                              ChangeMobileNumberBody body,
+                                                              String serviceName) {
+<span class="fc" id="L166">        return MyAccountService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L167">                .getRxApi(getMyAccountApi())</span>
+<span class="fc" id="L168">                .getChangeMobileNumber(</span>
+<span class="fc" id="L169">                        new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(),</span>
+                        mobileNumber,
+                        body)
+<span class="fc" id="L172">                .compose(new SchedulersAndErrorHandling&lt;&gt;(ChangeMobileNumberResult.class, serviceName))</span>
+<span class="fc" id="L173">                .flatMap(new ChangeMobileNumberDataCheck())</span>
+<span class="fc" id="L174">                .map(new MyAccountSaveRealmResult&lt;&gt;(serviceName));</span>
+    }
+
+    Single&lt;UpdateMyNumberResult&gt; updateMyNumberSingle(String mobileNumber,
+                                                      UpdateMyNumberBody body,
+                                                      String serviceName) {
+<span class="nc" id="L180">        return MyAccountService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L181">                .getRxApi(getMyAccountApi())</span>
+<span class="nc" id="L182">                .getUpdateMyNumber(</span>
+<span class="nc" id="L183">                        new EventLogParam(&quot;APP_UPDATE_MY_NUMBER&quot;, &quot;&quot;, &quot;10513&quot;).getEventLogHeader(),</span>
+                        mobileNumber,
+                        body)
+<span class="nc" id="L186">                .compose(new SchedulersAndErrorHandling&lt;&gt;(UpdateMyNumberResult.class, serviceName))</span>
+<span class="nc" id="L187">                .flatMap(new UpdateMyNumberDataCheck())</span>
+<span class="nc" id="L188">                .map(new MyAccountSaveRealmResult&lt;&gt;(serviceName));</span>
+    }
+    //&lt;/editor-fold&gt;
+
+    Single&lt;MyNumberResult&gt; getMyNumberSingle(String mobileNumber) {
+<span class="nc" id="L193">        return MyAccountService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L194">                .getRxApi(getMyAccountApi())</span>
+<span class="nc" id="L195">                .getMyNumber(new EventLogParam(&quot;APP_GET_MY_NUMBER&quot;, &quot;&quot;, &quot;10507&quot;).getEventLogHeader()</span>
+                        , mobileNumber)
+<span class="nc" id="L197">                .compose(new SchedulersAndErrorHandling&lt;&gt;(MyNumberResult.class, SERVICE_MY_NUMBER))</span>
+<span class="nc" id="L198">                .flatMap(new MyNumberDataCheck())</span>
+<span class="nc" id="L199">                .map(new MyAccountSaveRealmResult&lt;&gt;(SERVICE_MY_NUMBER));</span>
+    }
+
+    Single&lt;ChangeLoginUserResult&gt; changeLoginUserSingle(ChangeLoginUserBody body) {
+<span class="nc" id="L203">        return MyAccountService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L204">                .getRxApi(getMyAccountApi())</span>
+<span class="nc" id="L205">                .changeLoginUser(new EventLogParam(&quot;APP_CHANGE_LOGIN_USER&quot;, &quot;&quot;, &quot;10520&quot;).getEventLogHeader(),</span>
+<span class="nc" id="L206">                        Mobile.getInstance().getMobileNumber(),</span>
+                        body)
+<span class="nc" id="L208">                .compose(new SchedulersAndErrorHandling&lt;&gt;(ChangeLoginUserResult.class, SERVICE_CHANGE_LOGIN_USER))</span>
+<span class="nc" id="L209">                .flatMap(new ChangeLoginUserCheck());</span>
+    }
+
+    Single&lt;QueryMyAisResult&gt; queryMyAisSingle(String mobileNumber) {
+<span class="nc" id="L213">        return MyAccountService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L214">                .getRxApi(getMyAccountApi())</span>
+<span class="nc" id="L215">                .getQueryMyAis(new EventLogParam(&quot;APP_CHECK_EMAIL_MY_AIS&quot;, &quot;&quot;, &quot;10527&quot;).getEventLogHeader(), mobileNumber)</span>
+<span class="nc" id="L216">                .compose(new SchedulersAndErrorHandling&lt;&gt;(QueryMyAisResult.class, SERVICE_QUERY_MY_AIS))</span>
+<span class="nc" id="L217">                .flatMap(new QueryMyAisCheck());</span>
+
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

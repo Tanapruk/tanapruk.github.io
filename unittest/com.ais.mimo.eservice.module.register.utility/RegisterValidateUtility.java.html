@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegisterValidateUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.register.utility</a> &gt; <span class="el_source">RegisterValidateUtility.java</span></div><h1>RegisterValidateUtility.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.register.utility;
+
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.utility.NextzyUtility;
+
+/**
+ * Created by TheKhaeng on 12/1/2016.
+ */
+
+public class RegisterValidateUtility {
+    public static final int VALIDATE = 1;
+
+    public static final int INVALIDATE_EMAIL_FORMAT = 20;
+    public static final int INVALIDATE_EMAIL_ALREADY_USED = 21;
+
+    public static final int INVALIDATE_PASSWORD_FORMAT = 30;
+    public static final int INVALIDATE_PASSWORD_NOT_MATCH = 31;
+
+    public static final int INVALIDATE_MOBILE_NUMBER_FORMAT = 40;
+
+    public static final int INVALIDATE_ID_CARD_FORMAT = 50;
+
+    public static final int INVALIDATE_OTP_FORMAT = 60;
+
+    public static final int INVALIDATE_CAPTCHA_FORMAT = 70;
+
+    public static final int INVALIDATE_EMPTY_3 = 80;
+    public static final int INVALIDATE_EMPTY_2 = 81;
+
+    private static RegisterValidateUtility util;
+    private final NextzyUtility nextzyUtil;
+
+    public static RegisterValidateUtility getInstance() {
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        if (util == null) {</span>
+<span class="fc" id="L35">            util = new RegisterValidateUtility();</span>
+        }
+<span class="fc" id="L37">        return util;</span>
+    }
+
+<span class="fc" id="L40">    private RegisterValidateUtility() {</span>
+<span class="fc" id="L41">        nextzyUtil = NextzyUtility.getInstance();</span>
+<span class="fc" id="L42">    }</span>
+
+    public int validateEmail(String email) {
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        if (!nextzyUtil.isEmail(email)) {</span>
+<span class="fc" id="L46">            return INVALIDATE_EMAIL_FORMAT;</span>
+        }
+
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        if (nextzyUtil.isStringEqual(Mobile.getInstance().getEmail(), email)) {</span>
+<span class="nc" id="L50">            return INVALIDATE_EMAIL_ALREADY_USED;</span>
+        }
+<span class="fc" id="L52">        return VALIDATE;</span>
+    }
+
+    public int validateOtp(String otp) {
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        if (!nextzyUtil.isOTP(otp)) {</span>
+<span class="fc" id="L57">            return INVALIDATE_OTP_FORMAT;</span>
+        }
+<span class="fc" id="L59">        return VALIDATE;</span>
+    }
+
+    public int validatePassword(String password) {
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        if (!nextzyUtil.isPassword(password)) {</span>
+<span class="nc" id="L64">            return INVALIDATE_PASSWORD_FORMAT;</span>
+        }
+<span class="nc" id="L66">        return VALIDATE;</span>
+    }
+
+    public int validatePassword(String password, String rePaswword) {
+<span class="pc bpc" id="L70" title="1 of 4 branches missed.">        if (!nextzyUtil.isPassword(password) || !nextzyUtil.isPassword(rePaswword)) {</span>
+<span class="fc" id="L71">            return INVALIDATE_PASSWORD_FORMAT;</span>
+        }
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        if (!password.equals(rePaswword)) {</span>
+<span class="fc" id="L74">            return INVALIDATE_PASSWORD_NOT_MATCH;</span>
+        }
+<span class="fc" id="L76">        return VALIDATE;</span>
+    }
+
+    public int validateMobileOrInternetNumber(String mobileNumber) {
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        if (!nextzyUtil.isMobileNumberOrInternetNumber(mobileNumber)) {</span>
+<span class="fc" id="L81">            return INVALIDATE_MOBILE_NUMBER_FORMAT;</span>
+        }
+<span class="fc" id="L83">        return VALIDATE;</span>
+    }
+
+    public int validateIdCard(String idCard) {
+<span class="fc bfc" id="L87" title="All 2 branches covered.">        if (!nextzyUtil.isValidIdCard(idCard)) {</span>
+<span class="fc" id="L88">            return INVALIDATE_ID_CARD_FORMAT;</span>
+        }
+<span class="fc" id="L90">        return VALIDATE;</span>
+    }
+
+    public int validateCaptcha(String captcha) {
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        if (&quot;&quot;.equals(nextzyUtil.wrapBlank(captcha))) {</span>
+<span class="fc" id="L95">            return INVALIDATE_CAPTCHA_FORMAT;</span>
+        }
+<span class="fc" id="L97">        return VALIDATE;</span>
+    }
+
+    public int validateEmptyTwoOrThree(String str1, String str2, String str3) {
+<span class="fc" id="L101">        int emptyCount = 0;</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">        if (&quot;&quot;.equals(nextzyUtil.wrapBlank(str1))) emptyCount++;</span>
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        if (&quot;&quot;.equals(nextzyUtil.wrapBlank(str2))) emptyCount++;</span>
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">        if (&quot;&quot;.equals(nextzyUtil.wrapBlank(str3))) emptyCount++;</span>
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">        if (emptyCount == 2) return INVALIDATE_EMPTY_2;</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        if (emptyCount == 3) return INVALIDATE_EMPTY_3;</span>
+<span class="fc" id="L107">        return VALIDATE;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

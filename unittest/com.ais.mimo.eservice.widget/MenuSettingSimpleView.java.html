@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MenuSettingSimpleView.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.widget</a> &gt; <span class="el_source">MenuSettingSimpleView.java</span></div><h1>MenuSettingSimpleView.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.widget;
+
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.os.Build;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.support.annotation.RequiresApi;
+import android.util.AttributeSet;
+import android.widget.TextView;
+
+import com.nextzy.myais.common.widget.NextzyViewGroup;
+import com.nextzy.myais.myais.R;
+
+/**
+ * Created by Akexorcist on 9/13/2016 AD.
+ */
+
+public class MenuSettingSimpleView extends NextzyViewGroup {
+    private TextView tvText;
+    private int text;
+
+    public MenuSettingSimpleView(Context context, AttributeSet attrs) {
+<span class="nc" id="L24">        super(context, attrs);</span>
+<span class="nc" id="L25">    }</span>
+
+    public MenuSettingSimpleView(Context context, AttributeSet attrs, int defStyleAttr) {
+<span class="nc" id="L28">        super(context, attrs, defStyleAttr);</span>
+<span class="nc" id="L29">    }</span>
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public MenuSettingSimpleView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+<span class="nc" id="L33">        super(context, attrs, defStyleAttr, defStyleRes);</span>
+<span class="nc" id="L34">    }</span>
+
+    @Override
+    protected int getLayoutRes() {
+<span class="nc" id="L38">        return R.layout.my_ais_setting_widget_simple;</span>
+    }
+
+    @Override
+    protected void setupStyleables(AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+<span class="nc" id="L43">        TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.MenuSettingSimpleView);</span>
+<span class="nc" id="L44">        text = typedArray.getResourceId(R.styleable.MenuSettingSimpleView_msv_text, 0);</span>
+<span class="nc" id="L45">        typedArray.recycle();</span>
+<span class="nc" id="L46">    }</span>
+
+    @Override
+    protected void bindView() {
+<span class="nc" id="L50">        tvText = (TextView) findViewById(R.id.my_ais_setting_simple_tv_text);</span>
+<span class="nc" id="L51">    }</span>
+
+    @Override
+    protected void setupView() {
+<span class="nc" id="L55">        setText(text);</span>
+<span class="nc" id="L56">    }</span>
+
+    public void setText(int text) {
+<span class="nc" id="L59">        this.text = text;</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        if (text != 0) {</span>
+<span class="nc" id="L61">            tvText.setText(text);</span>
+        }
+<span class="nc" id="L63">    }</span>
+
+    @Override
+    public void setOnClickListener(OnClickListener listener) {
+<span class="nc" id="L67">        super.setOnClickListener(listener);</span>
+<span class="nc" id="L68">    }</span>
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+<span class="nc" id="L72">        Parcelable superState = super.onSaveInstanceState();</span>
+<span class="nc" id="L73">        SavedState ss = (SavedState) onSaveChildInstanceState(new SavedState(superState));</span>
+<span class="nc" id="L74">        ss.text = this.text;</span>
+<span class="nc" id="L75">        return ss;</span>
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        if (!(state instanceof SavedState)) {</span>
+<span class="nc" id="L81">            super.onRestoreInstanceState(state);</span>
+<span class="nc" id="L82">            return;</span>
+        }
+<span class="nc" id="L84">        SavedState ss = (SavedState) state;</span>
+<span class="nc" id="L85">        super.onRestoreInstanceState(ss.getSuperState());</span>
+<span class="nc" id="L86">        this.text = ss.text;</span>
+<span class="nc" id="L87">        setText(text);</span>
+<span class="nc" id="L88">    }</span>
+
+    private static class SavedState extends ChildSavedState {
+        int text;
+
+        SavedState(Parcelable superState) {
+<span class="nc" id="L94">            super(superState);</span>
+<span class="nc" id="L95">        }</span>
+
+        private SavedState(Parcel in, ClassLoader classLoader ) {
+<span class="nc" id="L98">            super(in, classLoader);</span>
+<span class="nc" id="L99">            this.text = in.readInt();</span>
+<span class="nc" id="L100">        }</span>
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+<span class="nc" id="L104">            super.writeToParcel(out, flags);</span>
+<span class="nc" id="L105">            out.writeInt(this.text);</span>
+<span class="nc" id="L106">        }</span>
+
+<span class="nc" id="L108">        public static final ClassLoaderCreator&lt;SavedState&gt; CREATOR = new ClassLoaderCreator&lt;SavedState&gt;() {</span>
+            @Override
+            public SavedState createFromParcel(Parcel source, ClassLoader loader) {
+<span class="nc" id="L111">                return new SavedState(source, loader);</span>
+            }
+
+            public SavedState createFromParcel(Parcel in) {
+<span class="nc" id="L115">                return null;</span>
+            }
+
+
+            public SavedState[] newArray(int size) {
+<span class="nc" id="L120">                return new SavedState[size];</span>
+            }
+        };
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

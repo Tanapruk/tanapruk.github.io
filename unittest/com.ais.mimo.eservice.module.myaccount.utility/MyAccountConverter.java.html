@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MyAccountConverter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.myaccount.utility</a> &gt; <span class="el_source">MyAccountConverter.java</span></div><h1>MyAccountConverter.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.myaccount.utility;
+
+import com.ais.mimo.eservice.helper.login.network.response.MobileData;
+import com.ais.mimo.eservice.module.register.utility.model.MobileTypeGroup;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.config.mobile.MobileContact;
+import com.nextzy.myais.common.config.mobile.MobileType;
+import com.nextzy.myais.common.config.mobile.MobileUtility;
+import com.nextzy.myais.common.utility.NextzyUtility;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by TheKhaeng on 11/14/2016.
+ */
+
+<span class="fc" id="L20">public class MyAccountConverter {</span>
+    public final static String STATUS_ELIGIBLE = &quot;eligible&quot;;
+    public final static String STATUS_ACTIVE = &quot;active&quot;;
+    private static MyAccountConverter util;
+
+    public static MyAccountConverter getInstance() {
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        if (util == null) {</span>
+<span class="fc" id="L27">            util = new MyAccountConverter();</span>
+        }
+<span class="fc" id="L29">        return util;</span>
+    }
+
+    public ArrayList&lt;MobileData&gt; convertToRegisterMyNumberList(ArrayList&lt;MobileContact&gt; contacts) {
+<span class="nc" id="L33">        ArrayList&lt;MobileData&gt; myNumberList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        for (MobileContact contact : contacts) {</span>
+<span class="nc" id="L35">            MobileData mobile = new MobileData();</span>
+<span class="nc" id="L36">            mobile.setNumber(contact.getMobileNo());</span>
+<span class="nc" id="L37">            myNumberList.add(mobile);</span>
+<span class="nc" id="L38">        }</span>
+<span class="nc" id="L39">        return myNumberList;</span>
+    }
+
+    public String getMasterEmailFromMobileList(List&lt;MobileData&gt; mobileDataList) {
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        for (MobileData mobileData : mobileDataList) {</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">            if (isMobileDataHasEmail(mobileData)) {</span>
+<span class="nc" id="L45">                return mobileData.getEmailMyAis();</span>
+            }
+<span class="nc" id="L47">        }</span>
+<span class="nc" id="L48">        return null;</span>
+    }
+
+
+    public MobileTypeGroup groupMobileDataListByStatus(List&lt;MobileData&gt; mobileDataList,
+                                                       @NotNull String status,
+                                                       boolean isFilterMainNumber) {
+<span class="fc" id="L55">        MobileTypeGroup model = new MobileTypeGroup();</span>
+<span class="fc" id="L56">        String currentMobileNumber = Mobile.getInstance().getMasterMobileNumber();</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        if (mobileDataList != null) {</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">            for (MobileData mobile : mobileDataList) {</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">                if (status.equalsIgnoreCase(mobile.getStatusCode())) {</span>
+<span class="fc" id="L60">                    MobileType type = MobileUtility.getInstance().getMobileTypeByMobileData(</span>
+<span class="fc" id="L61">                            mobile.getChargeType(),</span>
+<span class="fc" id="L62">                            mobile.getMobileType());</span>
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">                    if (isFilterMainNumber</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">                            &amp;&amp; NextzyUtility.getInstance().isStringEqual(currentMobileNumber, mobile.getNumber())) {</span>
+<span class="fc" id="L65">                        continue;</span>
+                    }
+<span class="fc bfc" id="L67" title="All 2 branches covered.">                    if (MobileType.FBB.equals(type)) {</span>
+<span class="fc" id="L68">                        model.addFbbMobile(mobile);</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">                    } else if (MobileType.PREPAID.equals(type)) {</span>
+<span class="fc" id="L70">                        model.addPrepaidMobile(mobile);</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">                    } else if (MobileType.POSTPAID.equals(type)) {</span>
+<span class="fc" id="L72">                        model.addPostpaidMobile(mobile);</span>
+                    }
+                }
+<span class="fc" id="L75">            }</span>
+        }
+<span class="fc" id="L77">        return model;</span>
+    }
+
+    private boolean isMobileDataHasEmail(MobileData mobileData) {
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        return mobileData.getNumber() != null</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">                &amp;&amp; mobileData.getNumber().equals(Mobile.getInstance().getMasterMobileNumber())</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">                &amp;&amp; !NextzyUtility.getInstance().isEmptyString(mobileData.getEmailMyAis());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

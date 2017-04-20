@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.helper.login.network</a> &gt; <span class="el_source">LoginManager.java</span></div><h1>LoginManager.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.helper.login.network;
+
+import android.support.annotation.NonNull;
+
+import com.ais.mimo.eservice.helper.login.event.GoToLoginSuccessEvent;
+import com.ais.mimo.eservice.helper.login.event.LoginSuccessEvent;
+import com.ais.mimo.eservice.helper.login.network.exception.SecondaryOtpExistsException;
+import com.ais.mimo.eservice.helper.login.network.operator.GetOtpResultCheck;
+import com.ais.mimo.eservice.helper.login.network.operator.LoginWithOtpResultCheck;
+import com.ais.mimo.eservice.helper.login.network.operator.LoginWithPasswordCheck;
+import com.ais.mimo.eservice.helper.login.network.operator.LoginWithTokensCheck;
+import com.ais.mimo.eservice.helper.login.network.operator.NewMSISDNResultCheck;
+import com.ais.mimo.eservice.helper.login.network.operator.RequestOtpResultCheck;
+import com.ais.mimo.eservice.helper.login.network.operator.VerifyMyAisCheck;
+import com.ais.mimo.eservice.helper.login.network.operator.VerifyMyAisEditAccountCheck;
+import com.ais.mimo.eservice.helper.login.network.request.ChangeMobileBody;
+import com.ais.mimo.eservice.helper.login.network.request.LoginWithOtpBody;
+import com.ais.mimo.eservice.helper.login.network.request.LoginWithPasswordBody;
+import com.ais.mimo.eservice.helper.login.network.request.LoginWithSecretBody;
+import com.ais.mimo.eservice.helper.login.network.request.RequestCaptchaBody;
+import com.ais.mimo.eservice.helper.login.network.request.RequestOtpBody;
+import com.ais.mimo.eservice.helper.login.network.request.VerifyMyAISBody;
+import com.ais.mimo.eservice.helper.login.network.response.AppSettingsResult;
+import com.ais.mimo.eservice.helper.login.network.response.AuthData;
+import com.ais.mimo.eservice.helper.login.network.response.ChangeMobileData;
+import com.ais.mimo.eservice.helper.login.network.response.ChangeMobileResult;
+import com.ais.mimo.eservice.helper.login.network.response.ISwopResult;
+import com.ais.mimo.eservice.helper.login.network.response.LoginWithOtpSecretData;
+import com.ais.mimo.eservice.helper.login.network.response.LoginWithOtpSecretResult;
+import com.ais.mimo.eservice.helper.login.network.response.LoginWithPasswordResult;
+import com.ais.mimo.eservice.helper.login.network.response.LoginWithSecretAndVerifyResult;
+import com.ais.mimo.eservice.helper.login.network.response.LoginWithTokensResult;
+import com.ais.mimo.eservice.helper.login.network.response.NewMSISDNData;
+import com.ais.mimo.eservice.helper.login.network.response.NewMSISDNResult;
+import com.ais.mimo.eservice.helper.login.network.response.OtpMethodData;
+import com.ais.mimo.eservice.helper.login.network.response.OtpMethodResult;
+import com.ais.mimo.eservice.helper.login.network.response.RequestCaptchaData;
+import com.ais.mimo.eservice.helper.login.network.response.RequestCaptchaResult;
+import com.ais.mimo.eservice.helper.login.network.response.RequestOtpData;
+import com.ais.mimo.eservice.helper.login.network.response.RequestOtpResult;
+import com.ais.mimo.eservice.helper.login.network.response.UserProfileData;
+import com.ais.mimo.eservice.helper.login.network.response.UserProfileResult;
+import com.ais.mimo.eservice.helper.login.network.response.VerifyMyAISEditAccountResult;
+import com.ais.mimo.eservice.helper.login.network.response.VerifyMyAISResult;
+import com.ais.mimo.eservice.module.login.LoginKey;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.config.mobile.MobileContact;
+import com.nextzy.myais.common.config.mobile.MobileType;
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.database.model.SaveRealmData;
+import com.nextzy.myais.common.database.model.SaveRealmResult;
+import com.nextzy.myais.common.eventlog.EventLogBlob;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.network.subscriber.NextzySimpleSubscriber;
+import com.nextzy.myais.common.network.subscriber.NextzyWithDataSubscriber;
+import com.nextzy.myais.common.network.worker.ContinueWithNullOnCrash;
+import com.nextzy.myais.common.network.worker.GenericNetworkController;
+import com.nextzy.myais.common.network.worker.SchedulersAndErrorHandling;
+import com.nextzy.myais.common.passcode.network.request.LoginWithTokenBody;
+import com.nextzy.myais.common.utility.NextzyLanguage;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+
+import rx.Single;
+import rx.functions.Func1;
+
+/**
+ * Created by nextzy on 8/8/2016 AD.
+ */
+<span class="fc" id="L72">public class LoginManager extends GenericNetworkController {</span>
+
+    private static LoginManager instance;
+    public static final String SERVICE_NAME_NEW_CHECK_MSISDN = &quot;new_check_msisdn&quot;;
+    public static final String SERVICE_NAME_LOGIN_WITH_SECRET = &quot;login_with_secret&quot;;
+    public static final String SERVICE_NAME_GET_OTP_METHOD = &quot;get_otp_method&quot;;
+    public static final String SERVICE_NAME_REQUEST_OTP = &quot;request_otp&quot;;
+    public static final String SERVICE_NAME_REQUEST_CAPTCHA = &quot;request_captch&quot;;
+    public static final String SERVICE_NAME_VERIFY_MYAIS = &quot;verify_myais&quot;;
+    public static final String SERVICE_NAME_VERIFY_MYAIS_EDIT_ACCOUNT = &quot;verify_myais_edit_account&quot;;
+    public static final String SERVICE_NAME_LOGIN_WITH_PASSWORD = &quot;login_with_password&quot;;
+    public static final String SERVICE_NAME_CHANGE_MOBILE = &quot;change_mobile&quot;;
+    public static final String SERVICE_LOGIN_WITH_TOKENS = &quot;service_login_with_tokens&quot;;
+
+    public static final String SERVICE_NAME_LOGIN_WITH_OTP = &quot;login_with_otp&quot;;
+    public static final String SERVICE_NAME_APP_SETTINGS = &quot;app_settings&quot;;
+    public static final String SERVICE_NAME_MOBILE_CONTACT = &quot;mobile_contact&quot;;
+    public static final String SERVICE_NAME_USER_PROFILE = &quot;user_profile&quot;;
+    public static final String SERVICE_NAME_CHECK_ISWOP = &quot;check_iswop&quot;;
+
+    private VerifyMyAISResult verifyMyAISResult;
+
+    public static LoginManager getInstance() {
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">        if (instance == null) {</span>
+<span class="nc" id="L96">            instance = new LoginManager();</span>
+        }
+<span class="fc" id="L98">        return instance;</span>
+    }
+
+    public static void setMockInstance(LoginManager mockLoginManager) {
+<span class="fc" id="L102">        instance = mockLoginManager;</span>
+<span class="fc" id="L103">    }</span>
+
+    LoginApi loginApi;
+
+    public void setLoginApi(LoginApi loginApi) {
+<span class="fc" id="L108">        this.loginApi = loginApi;</span>
+<span class="fc" id="L109">    }</span>
+
+    public LoginApi getLoginApi() {
+<span class="fc" id="L112">        return loginApi;</span>
+    }
+
+    public void setVerifyMyAISResult(VerifyMyAISResult verifyMyAISResult) {
+<span class="nc" id="L116">        this.verifyMyAISResult = verifyMyAISResult;</span>
+<span class="nc" id="L117">    }</span>
+
+
+    ///////////////////////////////////////////////////////////////////////////
+    // simple api request
+    ///////////////////////////////////////////////////////////////////////////
+
+    Single&lt;NewMSISDNData&gt; checkMsisdnSingle() {
+<span class="fc" id="L125">        return LoginApiService.newInstance(URL.EJB)</span>
+<span class="fc" id="L126">                .getRxApi(getLoginApi())</span>
+<span class="fc" id="L127">                .checkMSISDN(new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader())</span>
+<span class="fc" id="L128">                .compose(new SchedulersAndErrorHandling&lt;&gt;(NewMSISDNResult.class, SERVICE_NAME_NEW_CHECK_MSISDN))</span>
+<span class="fc" id="L129">                .flatMap(new NewMSISDNResultCheck())</span>
+<span class="fc" id="L130">                .map(new SaveRealmData&lt;&gt;(SERVICE_NAME_NEW_CHECK_MSISDN));</span>
+    }
+
+
+    Single&lt;OtpMethodData&gt; getOtpMethodSingle(String mobileNumber) {
+<span class="fc" id="L135">        Mobile.getInstance().setMobileNumber(mobileNumber);</span>
+<span class="fc" id="L136">        return LoginApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L137">                .getRxApi(getLoginApi())</span>
+<span class="fc" id="L138">                .getOtpMethod(new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(), Mobile.getInstance().getMobileNumber())</span>
+<span class="fc" id="L139">                .compose(new SchedulersAndErrorHandling&lt;&gt;(OtpMethodResult.class, SERVICE_NAME_GET_OTP_METHOD))</span>
+<span class="fc" id="L140">                .flatMap(new GetOtpResultCheck())</span>
+<span class="fc" id="L141">                .map(new SaveRealmData&lt;&gt;(SERVICE_NAME_GET_OTP_METHOD));</span>
+    }
+
+    Single&lt;RequestOtpData&gt; requestOtpSingle(String otpMethod) {
+<span class="fc" id="L145">        return LoginApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L146">                .getRxApi(getLoginApi())</span>
+<span class="fc" id="L147">                .requestOtp(new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(), Mobile.getInstance().getMobileNumber(), new RequestOtpBody(otpMethod))</span>
+<span class="fc" id="L148">                .compose(new SchedulersAndErrorHandling&lt;&gt;(RequestOtpResult.class, SERVICE_NAME_REQUEST_OTP))</span>
+<span class="fc" id="L149">                .flatMap(new RequestOtpResultCheck())</span>
+<span class="fc" id="L150">                .map(new SaveRealmData&lt;&gt;(SERVICE_NAME_REQUEST_OTP));</span>
+    }
+
+    Single&lt;RequestCaptchaData&gt; requestCaptchaSingle(String referenceId) {
+<span class="fc" id="L154">        return LoginApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L155">                .getRxApi(getLoginApi())</span>
+<span class="fc" id="L156">                .requestCaptcha(Mobile.getInstance().getMobileNumber(), new RequestCaptchaBody(referenceId))</span>
+<span class="fc" id="L157">                .compose(new SchedulersAndErrorHandling&lt;&gt;(RequestCaptchaResult.class, SERVICE_NAME_REQUEST_CAPTCHA))</span>
+<span class="fc" id="L158">                .map(new SaveRealmData&lt;&gt;(SERVICE_NAME_REQUEST_CAPTCHA));</span>
+    }
+
+
+    Single&lt;LoginWithOtpSecretData&gt; loginWithSecretSingle(String secret) {
+<span class="fc" id="L163">        return LoginApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L164">                .getRxApi(getLoginApi())</span>
+<span class="fc" id="L165">                .loginWithSecret(new EventLogParam(&quot;APP_LOGIN_BYPASS&quot;, &quot;5007&quot;, &quot;5106&quot;).getEventLogHeader(), Mobile.getInstance().getMobileNumber(), new LoginWithSecretBody(secret))</span>
+<span class="fc" id="L166">                .compose(new SchedulersAndErrorHandling&lt;&gt;(LoginWithOtpSecretResult.class, SERVICE_NAME_LOGIN_WITH_SECRET))</span>
+<span class="fc" id="L167">                .map(new SaveRealmData&lt;&gt;(SERVICE_NAME_LOGIN_WITH_SECRET));</span>
+    }
+
+    Single&lt;LoginWithOtpSecretData&gt; loginWithOtpSingle(EventLogParam eventLogParam, String referenceId, String otp, String captcha) {
+<span class="fc" id="L171">        return LoginApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L172">                .getRxApi(getLoginApi())</span>
+<span class="fc" id="L173">                .loginWithOtp(eventLogParam.getEventLogHeader(), Mobile.getInstance().getMobileNumber(), new LoginWithOtpBody(referenceId, otp, captcha))</span>
+<span class="fc" id="L174">                .compose(new SchedulersAndErrorHandling&lt;&gt;(LoginWithOtpSecretResult.class, SERVICE_NAME_LOGIN_WITH_OTP))</span>
+<span class="fc" id="L175">                .flatMap(new LoginWithOtpResultCheck())</span>
+<span class="fc" id="L176">                .map(new SaveRealmData&lt;&gt;(SERVICE_NAME_LOGIN_WITH_OTP));</span>
+    }
+
+    Single&lt;AppSettingsResult&gt; getAppSettingsSingle() {
+<span class="fc" id="L180">        String random = String.format(Locale.getDefault(), &quot;%.16f&quot;, Math.random());</span>
+<span class="fc" id="L181">        return LoginApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L182">                .getRxApi(getLoginApi())</span>
+<span class="fc" id="L183">                .appSettings(new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(), NextzyLanguage.getInstance().getCurrentLanguage(), random)</span>
+<span class="fc" id="L184">                .compose(new SchedulersAndErrorHandling&lt;&gt;(AppSettingsResult.class, SERVICE_NAME_APP_SETTINGS))</span>
+<span class="fc" id="L185">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_APP_SETTINGS));</span>
+    }
+
+    public Single&lt;UserProfileData&gt; getUserProfileSingle() {
+<span class="fc" id="L189">        return LoginApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L190">                .getRxApi(getLoginApi())</span>
+<span class="fc" id="L191">                .getUserProfile(new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(), NextzyLanguage.getInstance().getCurrentLanguage(), Mobile.getInstance().getMobileNumber())</span>
+<span class="fc" id="L192">                .compose(new SchedulersAndErrorHandling&lt;&gt;(UserProfileResult.class, SERVICE_NAME_USER_PROFILE))</span>
+<span class="fc" id="L193">                .map(new SaveRealmData&lt;&gt;(SERVICE_NAME_USER_PROFILE));</span>
+    }
+
+    Single&lt;ISwopResult&gt; checkISwopSingle() {
+<span class="fc" id="L197">        return LoginApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L198">                .getRxApi(getLoginApi())</span>
+<span class="fc" id="L199">                .checkISwop(new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(), NextzyLanguage.getInstance().getCurrentLanguage(), Mobile.getInstance().getMobileNumber())</span>
+<span class="fc" id="L200">                .compose(new SchedulersAndErrorHandling&lt;&gt;(ISwopResult.class, SERVICE_NAME_CHECK_ISWOP))</span>
+<span class="fc" id="L201">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_CHECK_ISWOP));</span>
+    }
+
+    private Single&lt;VerifyMyAISResult&gt; verifyMyAISSingleGeneric(String mobileNumber) {
+<span class="nc" id="L205">        return LoginApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L206">                .getRxApi(getLoginApi())</span>
+<span class="nc" id="L207">                .verfiyMyAIS(EventLogBlob.getInstance().getEventLog(SERVICE_NAME_VERIFY_MYAIS).getEventLogHeader(), mobileNumber, new VerifyMyAISBody(mobileNumber))</span>
+<span class="nc" id="L208">                .compose(new SchedulersAndErrorHandling&lt;&gt;(VerifyMyAISResult.class, SERVICE_NAME_VERIFY_MYAIS))</span>
+<span class="nc" id="L209">                .flatMap(new VerifyMyAisCheck());</span>
+    }
+
+    private Single&lt;VerifyMyAISEditAccountResult&gt; verifyMyAISEditAccountSingleGeneric(String mobileNumber) {
+<span class="nc" id="L213">        return LoginApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L214">                .getRxApi(getLoginApi())</span>
+<span class="nc" id="L215">                .verfiyMyAISEditAccount(EventLogBlob.getInstance().getEventLog(SERVICE_NAME_VERIFY_MYAIS).getEventLogHeader(), mobileNumber, new VerifyMyAISBody(mobileNumber))</span>
+<span class="nc" id="L216">                .compose(new SchedulersAndErrorHandling&lt;&gt;(VerifyMyAISEditAccountResult.class, SERVICE_NAME_VERIFY_MYAIS_EDIT_ACCOUNT))</span>
+<span class="nc" id="L217">                .flatMap(new VerifyMyAisEditAccountCheck());</span>
+    }
+
+    public Single&lt;VerifyMyAISResult&gt; verifyMyAISSingle(String mobileNumber) {
+<span class="nc" id="L221">        return verifyMyAISSingleGeneric(mobileNumber)</span>
+<span class="nc" id="L222">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_VERIFY_MYAIS));</span>
+    }
+
+    public Single&lt;VerifyMyAISEditAccountResult&gt; verifyMyAISEditAccountSingle(String mobileNumber) {
+<span class="nc" id="L226">        return verifyMyAISEditAccountSingleGeneric(mobileNumber)</span>
+<span class="nc" id="L227">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_VERIFY_MYAIS));</span>
+    }
+
+    public Single&lt;VerifyMyAISResult&gt; verifyMyAISSingleIgnoreCrash(String mobileNumber) {
+<span class="nc" id="L231">        return verifyMyAISSingleGeneric(mobileNumber)</span>
+<span class="nc" id="L232">                .compose(new ContinueWithNullOnCrash&lt;&gt;(VerifyMyAISResult.class))</span>
+<span class="nc" id="L233">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_VERIFY_MYAIS));</span>
+    }
+
+    Single&lt;LoginWithPasswordResult&gt; loginWithPasswordSingle(String eventLogString, String user, String password, String referenceId, String captcha) {
+<span class="fc" id="L237">        return LoginApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L238">                .getRxApi(getLoginApi())</span>
+<span class="fc" id="L239">                .loginWithPassword(eventLogString, Mobile.getInstance().getMobileNumber(), new LoginWithPasswordBody(user, password, referenceId, captcha))</span>
+<span class="fc" id="L240">                .compose(new SchedulersAndErrorHandling&lt;&gt;(LoginWithPasswordResult.class, SERVICE_NAME_LOGIN_WITH_PASSWORD))</span>
+<span class="fc" id="L241">                .flatMap(new LoginWithPasswordCheck())</span>
+<span class="fc" id="L242">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_LOGIN_WITH_PASSWORD));</span>
+    }
+
+    Single&lt;LoginWithOtpSecretData&gt; loginWithTokensSingle(String eventLogString,
+                                                         String mobileNum,
+                                                         String user,
+                                                         String token,
+                                                         String privateId,
+                                                         String referenceId,
+                                                         String captcha) {
+<span class="nc" id="L252">        return LoginApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L253">                .getRxApi(getLoginApi())</span>
+<span class="nc" id="L254">                .loginWithTokens(</span>
+                        eventLogString,
+                        mobileNum,
+                        new LoginWithTokenBody(
+                                user,
+                                token,
+                                privateId,
+                                referenceId,
+                                captcha))
+<span class="nc" id="L263">                .compose(new SchedulersAndErrorHandling&lt;&gt;(</span>
+                        LoginWithTokensResult.class,
+                        SERVICE_LOGIN_WITH_TOKENS))
+<span class="nc" id="L266">                .flatMap(new LoginWithTokensCheck())</span>
+<span class="nc" id="L267">                .map(new SaveRealmData&lt;&gt;(SERVICE_LOGIN_WITH_TOKENS));</span>
+    }
+
+    Single&lt;ChangeMobileData&gt; changeMobileDataSingle(String mobileNumber) {
+<span class="nc" id="L271">        return LoginApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L272">                .getRxApi(getLoginApi())</span>
+<span class="nc" id="L273">                .changeMobileByCA(new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(), Mobile.getInstance().getMobileNumber(), new ChangeMobileBody(mobileNumber))</span>
+<span class="nc" id="L274">                .compose(new SchedulersAndErrorHandling&lt;&gt;(ChangeMobileResult.class, SERVICE_NAME_CHANGE_MOBILE))</span>
+<span class="nc" id="L275">                .map(new SaveRealmData&lt;&gt;(SERVICE_NAME_CHANGE_MOBILE));</span>
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // chainMethod
+    ///////////////////////////////////////////////////////////////////////////
+
+    private Single&lt;LoginWithSecretAndVerifyResult&gt; shotVerifyMyAisAndKeepLoginWithOtpSecretData(LoginWithOtpSecretData loginWithOtpSecretData) {
+<span class="nc" id="L283">        return Single.zip(Single.just(loginWithOtpSecretData), verifyMyAISSingleIgnoreCrash(Mobile.getInstance().getMobileNumber()), LoginWithSecretAndVerifyResult::new);</span>
+    }
+
+
+    private Single&lt;LoginWithOtpSecretData&gt; saveVerifyMyAisResultAndReturnLoginWithOtpSecretData(LoginWithSecretAndVerifyResult result) {
+
+<span class="nc" id="L289">        saveIsMyAisIsMasterFlag(result.getVerifyMyAISResult());</span>
+<span class="nc" id="L290">        return Single.just(result.getLoginWithOtpSecretData());</span>
+    }
+
+    private Single.Transformer&lt;LoginWithOtpSecretData, LoginWithOtpSecretData&gt; callVerifyMyAisForMsisdn() {
+<span class="nc" id="L294">        return single -&gt; single</span>
+<span class="nc" id="L295">                .flatMap(this::shotVerifyMyAisAndKeepLoginWithOtpSecretData)</span>
+<span class="nc" id="L296">                .flatMap(this::saveVerifyMyAisResultAndReturnLoginWithOtpSecretData);</span>
+    }
+
+    private Single.Transformer&lt;LoginWithOtpSecretData, LoginWithOtpSecretData&gt; callVerifyMyAisForLoginWithToken() {
+<span class="nc" id="L300">        return single -&gt; single</span>
+<span class="nc" id="L301">                .flatMap(this::shotVerifyMyAisAndKeepLoginWithOtpSecretData)</span>
+<span class="nc" id="L302">                .flatMap(this::saveVerifyMyAisResultAndReturnLoginWithOtpSecretData);</span>
+    }
+
+    public Single&lt;LoginWithOtpSecretData&gt; setMobileNumberAndLoginWithSecret(NewMSISDNData newMSISDNData) {
+<span class="fc" id="L306">        Mobile.getInstance().setMobileNumber(newMSISDNData.getMobileNo());</span>
+<span class="fc" id="L307">        return loginWithSecretSingle(newMSISDNData.getSecret());</span>
+    }
+
+    public Single&lt;LoginWithOtpSecretData&gt; setNetworkTypeIfUnavailable(LoginWithOtpSecretData data) {
+        // Fallback code for nType and mobile contact if verifyMyAis unavailable or failed
+<span class="nc" id="L312">        String networkType = Mobile.getInstance().getNetworkType();</span>
+<span class="nc bnc" id="L313" title="All 4 branches missed.">        if (networkType == null || networkType.isEmpty()) {</span>
+<span class="nc" id="L314">            Mobile.getInstance().setNetworkType(data.getnType());</span>
+<span class="nc" id="L315">            MobileContact mobileContact = new MobileContact();</span>
+<span class="nc" id="L316">            mobileContact.setMobileNo(Mobile.getInstance().getMobileNumber());</span>
+<span class="nc" id="L317">            MobileType mobileType = null;</span>
+<span class="nc bnc" id="L318" title="All 2 branches missed.">            if (Mobile.getInstance().isPrepaid()) {</span>
+<span class="nc" id="L319">                mobileType = MobileType.PREPAID;</span>
+<span class="nc bnc" id="L320" title="All 2 branches missed.">            } else if (Mobile.getInstance().isPostpaid()) {</span>
+<span class="nc" id="L321">                mobileType = MobileType.POSTPAID;</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">            } else if (Mobile.getInstance().isFibre()) {</span>
+<span class="nc" id="L323">                mobileType = MobileType.FBB;</span>
+            }
+<span class="nc bnc" id="L325" title="All 2 branches missed.">            if (mobileType != null) {</span>
+<span class="nc" id="L326">                mobileContact.setMobileType(mobileType);</span>
+            }
+<span class="nc" id="L328">            List&lt;MobileContact&gt; mobileContactList = Collections.singletonList(mobileContact);</span>
+<span class="nc" id="L329">            Mobile.getInstance().setMobileContactList(mobileContactList);</span>
+        }
+<span class="nc" id="L331">        return Single.just(data);</span>
+    }
+
+    public Single&lt;AppSettingsResult&gt; setMobileDataGetAppSettings(LoginWithOtpSecretData data) {
+<span class="fc" id="L335">        Mobile.getInstance().setLoggedIn(true);</span>
+<span class="fc" id="L336">        Mobile.getInstance().setNetworkType(data.getnType());</span>
+<span class="fc" id="L337">        Mobile.getInstance().setTermAcceptFlag(data.getTermAcceptFlag());</span>
+<span class="fc" id="L338">        Mobile.getInstance().setAuditLogId(data.getAuditLogId());</span>
+<span class="fc" id="L339">        Mobile.getInstance().setCorpType(data.getCorpType());</span>
+<span class="fc" id="L340">        return getAppSettingsSingle();</span>
+    }
+
+    private Single&lt;AuthData&gt; setApiKeyGetAuthData(AppSettingsResult result) {
+<span class="nc" id="L344">        Mobile.getInstance().setApiKey(result.getApiKey());</span>
+
+<span class="nc" id="L346">        return Single.zip(</span>
+<span class="nc" id="L347">                getUserProfileSingle(),</span>
+<span class="nc" id="L348">                checkISwopSingle(),</span>
+                AuthData::new);
+    }
+
+    private void setMobileAuthData(AuthData authData) {
+<span class="nc" id="L353">        Mobile.getInstance().setMasterMobileNumber(Mobile.getInstance().getMobileNumber());</span>
+<span class="nc" id="L354">        setMobileContactList();</span>
+
+<span class="nc" id="L356">        final UserProfileData userProfileData = authData.getUserProfileData();</span>
+<span class="nc bnc" id="L357" title="All 2 branches missed.">        if (userProfileData != null) {</span>
+<span class="nc" id="L358">            Mobile.getInstance().setUserProfile(</span>
+<span class="nc" id="L359">                    userProfileData.getWelcomeName(),</span>
+<span class="nc" id="L360">                    userProfileData.getNumberData().getPrivilegeType(),</span>
+<span class="nc" id="L361">                    userProfileData.getNumberData().getRegisteredOn(),</span>
+<span class="nc" id="L362">                    userProfileData.getNumberData().getMobileServiceYear(),</span>
+<span class="nc" id="L363">                    userProfileData.getNumberData().getEmailAddress());</span>
+        }
+<span class="nc bnc" id="L365" title="All 2 branches missed.">        if (authData.getiSwopResult().getData() != null) {</span>
+<span class="nc" id="L366">            Mobile.getInstance().setIswop(authData.getiSwopResult().getData().hasISwop());</span>
+        } else {
+<span class="nc" id="L368">            Mobile.getInstance().setIswop(false);</span>
+        }
+<span class="nc" id="L370">    }</span>
+
+    private void setMobileContactList() {
+        //this must be set after finishing authorization else some values of Mobile.getInstance() doesn't initialize
+<span class="nc bnc" id="L374" title="All 2 branches missed.">        if (verifyMyAISResult == null) {</span>
+<span class="nc" id="L375">            return;</span>
+        }
+
+<span class="nc" id="L378">        Mobile.getInstance().setMobileContactList(verifyMyAISResult.toMobileContactList());</span>
+<span class="nc" id="L379">        setVerifyMyAISResult(null);</span>
+<span class="nc" id="L380">    }</span>
+
+    public void saveIsMyAisIsMasterFlag(VerifyMyAISResult verifyMyAISResult) {
+<span class="nc bnc" id="L383" title="All 4 branches missed.">        if (verifyMyAISResult == null || verifyMyAISResult.getData() == null) {</span>
+<span class="nc" id="L384">            return;</span>
+        }
+
+        //keep verifyMyAisResult for later use
+<span class="nc" id="L388">        setVerifyMyAISResult(verifyMyAISResult);</span>
+
+<span class="nc" id="L390">        Mobile.getInstance().setMyAis(verifyMyAISResult.getData().getIsMyAisBoolean());</span>
+<span class="nc" id="L391">        Mobile.getInstance().setMaster(verifyMyAISResult.getData().getIsMyMasterBoolean());</span>
+<span class="nc" id="L392">    }</span>
+
+    private Single&lt;LoginSuccessEvent&gt; setAuthDataGetLoginSuccess(AuthData authData) {
+<span class="nc" id="L395">        setMobileAuthData(authData);</span>
+<span class="nc" id="L396">        return Single.just(new LoginSuccessEvent());</span>
+    }
+
+    private Single.Transformer&lt;LoginWithOtpSecretData, LoginSuccessEvent&gt; getAuthDataAfterLoginValidation() {
+<span class="nc" id="L400">        return single -&gt; single</span>
+<span class="nc" id="L401">                .flatMap(this::setNetworkTypeIfUnavailable)</span>
+<span class="nc" id="L402">                .flatMap(this::setMobileDataGetAppSettings)</span>
+<span class="nc" id="L403">                .flatMap(this::setApiKeyGetAuthData)</span>
+<span class="nc" id="L404">                .flatMap(this::setAuthDataGetLoginSuccess);</span>
+    }
+
+    private Single.Transformer&lt;LoginWithPasswordResult, LoginWithOtpSecretData&gt; extractLoginWithPasswordData() {
+<span class="nc" id="L408">        return single -&gt; single</span>
+<span class="nc" id="L409">                .flatMap(new Func1&lt;LoginWithPasswordResult, Single&lt;LoginWithOtpSecretData&gt;&gt;() {</span>
+                    @Override
+                    public Single&lt;LoginWithOtpSecretData&gt; call(LoginWithPasswordResult result) {
+<span class="nc" id="L412">                        return Single.just(result.getData());</span>
+                    }
+                });
+    }
+
+    private Single&lt;RequestOtpData&gt; checkSecondaryRequestOtp(OtpMethodData otpMethodData) {
+<span class="nc bnc" id="L418" title="All 4 branches missed.">        if (otpMethodData.isSecondaryMobile() &amp;&amp; !otpMethodData.isEmail()) {</span>
+<span class="nc" id="L419">            return Single.error(new SecondaryOtpExistsException(LoginKey.TYPE_DEVICE_SECONDARY));</span>
+        }
+
+<span class="nc bnc" id="L422" title="All 4 branches missed.">        if (otpMethodData.isEmail() &amp;&amp; !otpMethodData.isSecondaryMobile()) {</span>
+<span class="nc" id="L423">            return Single.error(new SecondaryOtpExistsException(LoginKey.VERIFICATION_TYPE_EMAIL));</span>
+        }
+<span class="nc" id="L425">        return requestOtpSingle(LoginKey.TYPE_DEVICE_PRIMARY);</span>
+    }
+
+    /**
+     * this is for msisdnByPass only.
+     * I have to do this because LoginSuccessEvent is subscribed in LoginFragmentPresenter only
+     * Below method is to flatmap to GoToLoginSuccessEvent
+     *
+     * @return
+     */
+    @NonNull
+    private Func1&lt;LoginSuccessEvent, Single&lt;GoToLoginSuccessEvent&gt;&gt; bypassFragmentPresenterLoginSuccess() {
+<span class="nc" id="L437">        return loginSuccessEvent -&gt; Single.just(new GoToLoginSuccessEvent());</span>
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // chained services
+    ///////////////////////////////////////////////////////////////////////////
+
+    public void msisdnBypass() {
+<span class="nc" id="L445">        String[] serviceList = {</span>
+                SERVICE_NAME_NEW_CHECK_MSISDN,
+                SERVICE_NAME_LOGIN_WITH_SECRET,
+                SERVICE_NAME_APP_SETTINGS,
+                SERVICE_NAME_MOBILE_CONTACT,
+                SERVICE_NAME_USER_PROFILE,
+                SERVICE_NAME_CHECK_ISWOP
+        };
+
+<span class="nc" id="L454">        callServiceWithCache(GoToLoginSuccessEvent.class, checkMsisdnChain())</span>
+<span class="nc" id="L455">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(serviceList));</span>
+<span class="nc" id="L456">    }</span>
+
+    private Single&lt;GoToLoginSuccessEvent&gt; checkMsisdnChain() {
+<span class="nc" id="L459">        return checkMsisdnSingle()</span>
+<span class="nc" id="L460">                .flatMap(this::setMobileNumberAndLoginWithSecret)</span>
+<span class="nc" id="L461">                .compose(callVerifyMyAisForMsisdn())</span>
+<span class="nc" id="L462">                .compose(getAuthDataAfterLoginValidation())</span>
+<span class="nc" id="L463">                .flatMap(bypassFragmentPresenterLoginSuccess());</span>
+    }
+
+
+    public void verifyMyAis(String mobileNumber) {
+<span class="nc" id="L468">        Mobile.getInstance().setMobileNumber(mobileNumber);</span>
+<span class="nc" id="L469">        verifyMyAISSingle(mobileNumber).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_VERIFY_MYAIS));</span>
+<span class="nc" id="L470">    }</span>
+
+    public void verifyMyAisEditAccount(String mobileNumber) {
+<span class="nc" id="L473">        Mobile.getInstance().setMobileNumber(mobileNumber);</span>
+<span class="nc" id="L474">        verifyMyAISEditAccountSingle(mobileNumber).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_VERIFY_MYAIS));</span>
+<span class="nc" id="L475">    }</span>
+
+    public void checkOtpMethodAndRequestIfPrimaryOtp(String mobileNumber) {
+<span class="nc" id="L478">        String[] serviceList = {</span>
+                SERVICE_NAME_GET_OTP_METHOD,
+                SERVICE_NAME_REQUEST_OTP
+        };
+<span class="nc" id="L482">        getOtpMethodSingle(mobileNumber)</span>
+<span class="nc" id="L483">                .flatMap(this::checkSecondaryRequestOtp)</span>
+<span class="nc" id="L484">                .subscribe(new NextzyWithDataSubscriber&lt;&gt;(serviceList));</span>
+<span class="nc" id="L485">    }</span>
+
+    public void requestSecondaryOtp(String otpMethod) {
+<span class="nc" id="L488">        requestOtpSingle(otpMethod)</span>
+<span class="nc" id="L489">                .subscribe(new NextzyWithDataSubscriber&lt;&gt;(SERVICE_NAME_REQUEST_OTP));</span>
+<span class="nc" id="L490">    }</span>
+
+    public void loginWithOtp(EventLogParam eventLogParam, String referenceId, String otp, String captcha) {
+<span class="nc" id="L493">        String[] serviceList = {</span>
+                SERVICE_NAME_LOGIN_WITH_OTP,
+                SERVICE_NAME_APP_SETTINGS,
+                SERVICE_NAME_MOBILE_CONTACT,
+                SERVICE_NAME_USER_PROFILE,
+                SERVICE_NAME_CHECK_ISWOP
+        };
+<span class="nc" id="L500">        loginWithOtpSingle(eventLogParam, referenceId, otp, captcha)</span>
+<span class="nc" id="L501">                .compose(getAuthDataAfterLoginValidation())</span>
+<span class="nc" id="L502">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(serviceList));</span>
+<span class="nc" id="L503">    }</span>
+
+
+    public void setMobileNumberAndLoginWithTokens(String eventLogString,
+                                                  String mobileNumber,
+                                                  String user,
+                                                  String token,
+                                                  String privateId,
+                                                  String referenceId,
+                                                  String captcha) {
+<span class="nc" id="L513">        Mobile.getInstance().setMobileNumber(mobileNumber);</span>
+<span class="nc" id="L514">        loginWithTokensSingle(eventLogString, mobileNumber, user, token, privateId, referenceId, captcha)</span>
+<span class="nc" id="L515">                .compose(callVerifyMyAisForLoginWithToken())</span>
+<span class="nc" id="L516">                .compose(getAuthDataAfterLoginValidation())</span>
+<span class="nc" id="L517">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_LOGIN_WITH_TOKENS));</span>
+<span class="nc" id="L518">    }</span>
+
+    public void loginWithPassword(String eventLogString, String user, String password, String referenceId, String captcha) {
+<span class="nc" id="L521">        loginWithPasswordSingle(eventLogString, user, password, referenceId, captcha)</span>
+<span class="nc" id="L522">                .compose(extractLoginWithPasswordData())</span>
+<span class="nc" id="L523">                .compose(getAuthDataAfterLoginValidation())</span>
+<span class="nc" id="L524">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_LOGIN_WITH_PASSWORD));</span>
+<span class="nc" id="L525">    }</span>
+
+    public void changeMobileData(String mobileNumber) {
+<span class="nc" id="L528">        changeMobileDataSingle(mobileNumber)</span>
+<span class="nc" id="L529">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_CHANGE_MOBILE));</span>
+<span class="nc" id="L530">    }</span>
+
+    public void getUserProfile() {
+<span class="nc" id="L533">        getUserProfileSingle()</span>
+<span class="nc" id="L534">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_USER_PROFILE));</span>
+<span class="nc" id="L535">    }</span>
+
+    public void requestCaptcha(String referenceId) {
+<span class="nc" id="L538">        requestCaptchaSingle(referenceId).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_REQUEST_CAPTCHA));</span>
+<span class="nc" id="L539">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MainSettingFragment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.setting.fragment.main</a> &gt; <span class="el_source">MainSettingFragment.java</span></div><h1>MainSettingFragment.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.setting.fragment.main;
+
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.view.View;
+import android.widget.TextView;
+
+import com.ais.mimo.eservice.module.passcode.ValidatePasscodeActivity;
+import com.ais.mimo.eservice.module.setting.activity.SettingActivity;
+import com.ais.mimo.eservice.module.term.TermActivity;
+import com.ais.mimo.eservice.widget.MenuSettingLanguageView;
+import com.ais.mimo.eservice.widget.MenuSettingSimpleView;
+import com.ais.mimo.eservice.widget.MenuSettingSwitchView;
+import com.nextzy.myais.common.mvp.NextzyMvpFragment;
+import com.nextzy.myais.common.passcode.manager.NextzyFingerprintManager;
+import com.nextzy.myais.common.utility.DefaultPreference;
+import com.nextzy.myais.common.utility.NextzyAndroidUtility;
+import com.nextzy.myais.common.utility.NextzyLanguage;
+import com.nextzy.myais.common.widget.TermAndConditionView;
+import com.nextzy.myais.myais.R;
+
+import java.util.Map;
+
+import static com.ais.mimo.eservice.module.passcode.ValidatePasscodeActivity.KEY_PASSCODE_FOR_VALIDATE;
+import static com.ais.mimo.eservice.module.passcode.ValidatePasscodeActivity.RESULT_MATCH_PASSCODE;
+import static com.nextzy.myais.common.utility.DefaultPreference.KEY_MASTER_NUMBER;
+import static com.nextzy.myais.common.utility.DefaultPreference.KEY_PASSCODE;
+import static com.nextzy.myais.common.utility.DefaultPreference.KEY_PRIVATE_ID;
+import static com.nextzy.myais.common.utility.DefaultPreference.KEY_TOKEN;
+
+public class MainSettingFragment extends NextzyMvpFragment&lt;MainSettingContractor.Presenter&gt;
+        implements MainSettingContractor.View,
+        View.OnClickListener,
+        MenuSettingLanguageView.OnCheckedChangeListener,
+        MenuSettingSwitchView.OnCheckedChangeListener {
+    public static final String KEY_NOTIFICATION_TOGGLE = &quot;NOTIFICATION_TOGGLE&quot;;
+    private static final int REQUEST_PASSCODE = 0;
+    private final DefaultPreference preference;
+    private final NextzyFingerprintManager fingerManager;
+    private MenuSettingLanguageView msLanguage;
+    private MenuSettingSimpleView msPasscode;
+    private MenuSettingSwitchView msNotification;
+    private MenuSettingSimpleView msAccount;
+    private MenuSettingSimpleView msFavourite;
+    private TextView tvAppVersion;
+    private TermAndConditionView btnTermCondition;
+
+    public MainSettingFragment() {
+<span class="nc" id="L51">        super();</span>
+<span class="nc" id="L52">        preference = DefaultPreference.getInstance();</span>
+<span class="nc" id="L53">        fingerManager = NextzyFingerprintManager.getInstance();</span>
+<span class="nc" id="L54">    }</span>
+
+    public static MainSettingFragment newInstance() {
+<span class="nc" id="L57">        MainSettingFragment fragment = new MainSettingFragment();</span>
+<span class="nc" id="L58">        Bundle args = new Bundle();</span>
+<span class="nc" id="L59">        fragment.setArguments(args);</span>
+<span class="nc" id="L60">        return fragment;</span>
+    }
+
+    /*************************/
+    /** Fragment life cycle **/
+    /*************************/
+    //&lt;editor-fold desc=&quot;Life cycle folding&quot;&gt;
+
+    /**
+     * onCreateView
+     **/
+    @Override
+    public int getLayoutView() {
+<span class="nc" id="L73">        return R.layout.my_ais_setting_fragment_main;</span>
+    }
+
+
+    /**
+     * onCreate()
+     **/
+    @Override
+    protected void createPresenter() {
+<span class="nc" id="L82">        MainSettingPresenter.createPresenter(this);</span>
+<span class="nc" id="L83">    }</span>
+
+    @Override
+    public void restoreArgument(Bundle bundle) {
+
+<span class="nc" id="L88">    }</span>
+
+    /**
+     * onViewCreated()
+     **/
+    @Override
+    public void bindView(View view) {
+<span class="nc" id="L95">        msLanguage = (MenuSettingLanguageView) view.findViewById(R.id.my_ais_setting_ms_language);</span>
+<span class="nc" id="L96">        msPasscode = (MenuSettingSimpleView) view.findViewById(R.id.my_ais_setting_ms_passcode);</span>
+<span class="nc" id="L97">        msNotification = (MenuSettingSwitchView) view.findViewById(R.id.my_ais_setting_ms_notification);</span>
+<span class="nc" id="L98">        msAccount = (MenuSettingSimpleView) view.findViewById(R.id.my_ais_setting_ms_account);</span>
+<span class="nc" id="L99">        msFavourite = (MenuSettingSimpleView) view.findViewById(R.id.my_ais_setting_ms_favourite);</span>
+<span class="nc" id="L100">        tvAppVersion = (TextView) view.findViewById(R.id.my_ais_setting_app_version);</span>
+<span class="nc" id="L101">        btnTermCondition = (TermAndConditionView) view.findViewById(R.id.my_ais_btn_term_and_condition);</span>
+<span class="nc" id="L102">    }</span>
+
+    @Override
+    public void setupView() {
+<span class="nc" id="L106">        msLanguage.setOnCheckedChangeListener(this);</span>
+<span class="nc" id="L107">        msLanguage.setEnabled(false);</span>
+<span class="nc" id="L108">        msPasscode.setOnClickListener(this);</span>
+<span class="nc" id="L109">        msNotification.setOnCheckedChangeListener(this);</span>
+<span class="nc" id="L110">        msAccount.setOnClickListener(this);</span>
+<span class="nc" id="L111">        msFavourite.setOnClickListener(this);</span>
+<span class="nc" id="L112">        tvAppVersion.setText(NextzyAndroidUtility.getInstance().getAppVersion(getContext()));</span>
+<span class="nc" id="L113">        btnTermCondition.setOnClickListener(this);</span>
+<span class="nc" id="L114">        setupToolbarTitle();</span>
+<span class="nc" id="L115">        setupPasscodeSettingView();</span>
+<span class="nc" id="L116">    }</span>
+
+    private void setupPasscodeSettingView() {
+<span class="nc bnc" id="L119" title="All 2 branches missed.">        if (fingerManager.isFingerprintSupported(getContext())</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">                &amp;&amp; fingerManager.isFingerprintEnrolled(getContext())) {</span>
+<span class="nc" id="L121">            msPasscode.setText(R.string.my_ais_setting_passcode_and_touch_id);</span>
+        } else {
+<span class="nc" id="L123">            msPasscode.setText(R.string.my_ais_setting_passcode);</span>
+        }
+<span class="nc" id="L125">    }</span>
+
+    private void setupToolbarTitle() {
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        if (getActivity() instanceof SettingActivity) {</span>
+<span class="nc" id="L129">            ((SettingActivity) getActivity()).setToolbarTitle(getString(R.string.my_ais_setting_title));</span>
+        }
+<span class="nc" id="L131">    }</span>
+
+    @Override
+    public void initialize() {
+<span class="nc" id="L135">        updateToggleButtonLanguage();</span>
+<span class="nc" id="L136">        updateNotificationButton();</span>
+<span class="nc" id="L137">    }</span>
+
+    private void updateNotificationButton() {
+<span class="nc" id="L140">        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());</span>
+<span class="nc" id="L141">        msNotification.setChecked(sharedPreferences.getBoolean(KEY_NOTIFICATION_TOGGLE, false));</span>
+<span class="nc" id="L142">    }</span>
+
+    private void updateToggleButtonLanguage() {
+<span class="nc" id="L145">        msLanguage.setChecked(NextzyLanguage.getInstance().isThai());</span>
+<span class="nc" id="L146">    }</span>
+
+
+    @Override
+    public void restoreView() {
+<span class="nc" id="L151">    }</span>
+
+
+    /**
+     * State
+     **/
+    @Override
+    public void saveInstanceState(Bundle outState) {
+        // Save Instance State here
+<span class="nc" id="L160">    }</span>
+
+    @Override
+    public void restoreInstanceState(Bundle savedInstanceState) {
+        // Restore instance state here
+
+<span class="nc" id="L166">    }</span>
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+<span class="nc bnc" id="L170" title="All 2 branches missed.">        switch (requestCode) {</span>
+            case REQUEST_PASSCODE:
+<span class="nc bnc" id="L172" title="All 2 branches missed.">                if (resultCode == RESULT_MATCH_PASSCODE) {</span>
+<span class="nc" id="L173">                    getPresenter().openPasscodeSettingFragment();</span>
+                }
+                break;
+        }
+<span class="nc" id="L177">    }</span>
+
+    //&lt;/editor-fold&gt;
+
+    @Override
+    public void onClick(View view) {
+<span class="nc bnc" id="L183" title="All 2 branches missed.">        if (view == msAccount) {</span>
+<span class="nc" id="L184">            onAccountClick();</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        } else if (view == msFavourite) {</span>
+<span class="nc" id="L186">            onFavouriteClick();</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">        } else if (view == msPasscode) {</span>
+<span class="nc" id="L188">            onPasscodeSettingClick();</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">        } else if (view == btnTermCondition) {</span>
+<span class="nc" id="L190">            onTermConditionClick();</span>
+        }
+<span class="nc" id="L192">    }</span>
+
+
+    @Override
+    public void onCheckedChanged(View view, boolean isChecked) {
+<span class="nc bnc" id="L197" title="All 2 branches missed.">        if (view == msLanguage) {</span>
+<span class="nc" id="L198">            onLanguageChanged(isChecked);</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">        } else if (view == msNotification) {</span>
+<span class="nc" id="L200">            onNotificationChanged(isChecked);</span>
+        }
+<span class="nc" id="L202">    }</span>
+
+    private void onLanguageChanged(boolean isChecked) {
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        if (isChecked) {</span>
+<span class="nc" id="L206">            getPresenter().setLanguage(NextzyLanguage.THAI);</span>
+        } else {
+<span class="nc" id="L208">            getPresenter().setLanguage(NextzyLanguage.ENGLISH);</span>
+        }
+<span class="nc" id="L210">    }</span>
+
+    /********************/
+    /** Private method **/
+    /********************/
+    //&lt;editor-fold desc=&quot;Private function folding&quot;&gt;
+    private void onNotificationChanged(boolean isChecked) {
+//        getPresenter().pushSubscriber(isChecked);
+<span class="nc" id="L218">    }</span>
+
+    private void onAccountClick() {
+//        Toast.makeText(this, &quot;Account Setting Clicked&quot;, Toast.LENGTH_SHORT).show();
+<span class="nc" id="L222">    }</span>
+
+    private void onFavouriteClick() {
+//        Toast.makeText(this, &quot;Favourite Setting Clicked&quot;, Toast.LENGTH_SHORT).show();
+<span class="nc" id="L226">    }</span>
+
+    private void onTermConditionClick() {
+<span class="nc" id="L229">        openActivity(TermActivity.class);</span>
+<span class="nc" id="L230">    }</span>
+
+    private void onPasscodeSettingClick() {
+<span class="nc bnc" id="L233" title="All 2 branches missed.">        if (preference.loadPasscodeSwitchSetting()) {</span>
+<span class="nc" id="L234">            Map&lt;String, String&gt; result = preference.loadPasscodeMasterNumberAndPrivateIdAndToken();</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">            if (isNotEmptyAll(result)) {</span>
+<span class="nc" id="L236">                Bundle bundle = new Bundle();</span>
+<span class="nc" id="L237">                bundle.putString(KEY_MASTER_NUMBER, result.get(KEY_MASTER_NUMBER));</span>
+<span class="nc" id="L238">                bundle.putString(KEY_PASSCODE_FOR_VALIDATE, result.get(KEY_PASSCODE));</span>
+<span class="nc" id="L239">                bundle.putString(KEY_PRIVATE_ID, result.get(KEY_PRIVATE_ID));</span>
+<span class="nc" id="L240">                bundle.putString(KEY_TOKEN, result.get(KEY_TOKEN));</span>
+<span class="nc" id="L241">                openActivityOnResult(ValidatePasscodeActivity.class, REQUEST_PASSCODE, bundle);</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">            } else if (isPasscodeEmpty(result)) {</span>
+<span class="nc" id="L243">                getPresenter().openFirstNewPasscodeActivity();</span>
+            } else {
+<span class="nc" id="L245">                getPresenter().openPasscodeSettingFragment();</span>
+            }
+<span class="nc" id="L247">        } else {</span>
+<span class="nc" id="L248">            getPresenter().openPasscodeSettingFragment();</span>
+        }
+<span class="nc" id="L250">    }</span>
+
+    private boolean isPasscodeEmpty(Map&lt;String, String&gt; result) {
+<span class="nc bnc" id="L253" title="All 4 branches missed.">        return result != null &amp;&amp; result.get(KEY_PASSCODE) != null;</span>
+    }
+
+    private boolean isNotEmptyAll(Map&lt;String, String&gt; result) {
+<span class="nc bnc" id="L257" title="All 2 branches missed.">        return result != null</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">                &amp;&amp; result.get(KEY_MASTER_NUMBER) != null</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">                &amp;&amp; result.get(KEY_PASSCODE) != null</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">                &amp;&amp; result.get(KEY_PRIVATE_ID) != null</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">                &amp;&amp; result.get(KEY_TOKEN) != null;</span>
+    }
+    //&lt;/editor-fold&gt;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

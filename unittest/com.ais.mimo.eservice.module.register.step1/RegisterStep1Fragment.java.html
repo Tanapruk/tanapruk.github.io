@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegisterStep1Fragment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.register.step1</a> &gt; <span class="el_source">RegisterStep1Fragment.java</span></div><h1>RegisterStep1Fragment.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.register.step1;
+
+import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.text.InputType;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+
+import com.ais.mimo.eservice.module.login.fragment.LoginBaseFragment;
+import com.ais.mimo.eservice.module.register.base.RegisterBaseFragment;
+import com.ais.mimo.eservice.module.register.widget.MyAisRegister2ButtonView;
+import com.ais.mimo.eservice.module.register.widget.MyAisRegisterCaptchaView;
+import com.ais.mimo.eservice.module.register.widget.MyAisRegisterEditText;
+import com.ais.mimo.eservice.utility.AnimationViewUtils;
+import com.akexorcist.library.flexystepindicator.FlexyStepIndicator;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.mvp.NextzyMvpActivity;
+import com.nextzy.myais.common.utility.Check;
+import com.nextzy.myais.myais.BuildConfig;
+import com.nextzy.myais.myais.R;
+
+
+public class RegisterStep1Fragment extends RegisterBaseFragment&lt;RegisterStep1Contractor.Presenter&gt; implements RegisterStep1Contractor.View {
+<span class="nc" id="L25">    public final static String TAG = RegisterStep1Fragment.class.getSimpleName();</span>
+    public static final String KEY_REF_ID_CAPTCHA = &quot;key_ref_id_captcha&quot;;
+    private FlexyStepIndicator indicator;
+    private MyAisRegisterEditText vMobileNumber;
+    private MyAisRegisterEditText vIdCard;
+    private MyAisRegisterCaptchaView vCaptcha;
+    private MyAisRegister2ButtonView vBtnCancelNext;
+    private MyAisRegisterEditText vEmail;
+    private LinearLayout baseLayout;
+    private LinearLayout subLayout;
+
+    public RegisterStep1Fragment() {
+<span class="nc" id="L37">        super();</span>
+<span class="nc" id="L38">    }</span>
+
+    public static RegisterStep1Fragment newInstance(Bundle extras) {
+<span class="nc" id="L41">        RegisterStep1Fragment fragment = new RegisterStep1Fragment();</span>
+        Bundle args;
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if (!Check.isNull(TAG, extras)) {</span>
+<span class="nc" id="L44">            args = extras;</span>
+        } else {
+<span class="nc" id="L46">            args = new Bundle();</span>
+        }
+<span class="nc" id="L48">        fragment.setArguments(args);</span>
+<span class="nc" id="L49">        return fragment;</span>
+    }
+
+    /*************************/
+    /** Fragment life cycle **/
+    /*************************/
+    //&lt;editor-fold desc=&quot;Life cycle folding&quot;&gt;
+
+    /**
+     * onCreate()
+     **/
+    @Override
+    protected void createPresenter() {
+<span class="nc" id="L62">        RegisterStep1Presenter.createPresenter(this);</span>
+<span class="nc" id="L63">    }</span>
+
+    @Override
+    public void restoreArgument(Bundle bundle) {
+
+<span class="nc" id="L68">    }</span>
+
+    /**
+     * onViewCreated()
+     **/
+    @Override
+    public void bindView(View view) {
+<span class="nc" id="L75">        baseLayout = (LinearLayout) view.findViewById(R.id.my_ais_register_base_layout);</span>
+<span class="nc" id="L76">        subLayout = (LinearLayout) view.findViewById(R.id.my_ais_register_sub_layout);</span>
+<span class="nc" id="L77">        indicator = (FlexyStepIndicator) view.findViewById(R.id.my_ais_regis_indicator);</span>
+<span class="nc" id="L78">        vMobileNumber = (MyAisRegisterEditText) view.findViewById(R.id.my_ais_regis_edt_mobile_number);</span>
+<span class="nc" id="L79">        vIdCard = (MyAisRegisterEditText) view.findViewById(R.id.my_ais_regis_edt_id_card);</span>
+<span class="nc" id="L80">        vEmail = (MyAisRegisterEditText) view.findViewById(R.id.my_ais_regis_edt_email);</span>
+<span class="nc" id="L81">        vCaptcha = (MyAisRegisterCaptchaView) view.findViewById(R.id.my_ais_regis_captcha);</span>
+<span class="nc" id="L82">        vCaptcha.setVisibility(View.GONE);</span>
+<span class="nc" id="L83">        vBtnCancelNext = (MyAisRegister2ButtonView) view.findViewById(R.id.my_ais_register_btn_next_cancel);</span>
+
+        // TODO1: 10/13/2016 delete fill mock to Edt
+<span class="nc" id="L86">        mockFillEditText(view);</span>
+<span class="nc" id="L87">    }</span>
+
+<span class="nc" id="L89">    private int countMockNumber = 0;</span>
+<span class="nc" id="L90">    private String[] numbers = new String[]{&quot;0933304046&quot;, &quot;0926621664&quot;, &quot;8850003478&quot;, &quot;0932081651&quot;, &quot;0932083552&quot;, &quot;0923106210&quot;, &quot;0926621664&quot;, &quot;0624215298&quot;};</span>
+<span class="nc" id="L91">    private String[] idCards = new String[]{&quot;4125818195980&quot;, &quot;4125818195980&quot;, &quot;5394990514651&quot;, &quot;1609192651278&quot;, &quot;1609192873408&quot;, &quot;1609192708521&quot;, &quot;1609192708521&quot;, &quot;1609192708521&quot;};</span>
+
+    public void mockFillEditText(View view) {
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        if (BuildConfig.DEBUG) {</span>
+<span class="nc" id="L95">            Button btnMock = (Button) view.findViewById(R.id.mock_number);</span>
+<span class="nc" id="L96">            btnMock.setVisibility(View.VISIBLE);</span>
+<span class="nc" id="L97">            btnMock.setOnClickListener(view1 -&gt; {</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">                if (countMockNumber &gt;= numbers.length) {</span>
+<span class="nc" id="L99">                    countMockNumber = 0;</span>
+                }
+<span class="nc" id="L101">                vMobileNumber.setText(numbers[countMockNumber]);</span>
+<span class="nc" id="L102">                vIdCard.setText(idCards[countMockNumber]);</span>
+<span class="nc" id="L103">                vEmail.setText(&quot;nonthawit@gmail.com&quot;);</span>
+<span class="nc" id="L104">                countMockNumber += 1;</span>
+<span class="nc" id="L105">            });</span>
+        }
+<span class="nc" id="L107">    }</span>
+
+
+    @Override
+    public void setupView() {
+<span class="nc" id="L112">        dismissDialog();</span>
+<span class="nc" id="L113">        setupClickHideKeyboard(baseLayout);</span>
+<span class="nc" id="L114">        setIndexIndicator(0);</span>
+<span class="nc" id="L115">        setBackgroundWhite();</span>
+<span class="nc" id="L116">        vEmail.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);</span>
+<span class="nc" id="L117">        vBtnCancelNext.setBtnFirstText(getContext().getString(R.string.my_ais_register_back));</span>
+<span class="nc" id="L118">        vBtnCancelNext.setBtnSecondText(getContext().getString(R.string.my_ais_register_next_request_otp));</span>
+<span class="nc" id="L119">        vBtnCancelNext.setOnFirstButtonClickListener(v -&gt; clickCancel());</span>
+<span class="nc" id="L120">        vBtnCancelNext.setOnSecondButtonClickListener(v -&gt; clickNext());</span>
+
+<span class="nc bnc" id="L122" title="All 2 branches missed.">        if(LoginBaseFragment.TAG.equals(getArguments().getString(KEY_COME_FROM_TAG))){</span>
+<span class="nc" id="L123">            vMobileNumber.setText(getArguments().getString(KEY_MOBILE_NUMBER));</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">        } else if(getPresenter().isLogin()){</span>
+<span class="nc" id="L125">            vMobileNumber.setText(Mobile.getInstance().getMobileNumber());</span>
+<span class="nc" id="L126">            vMobileNumber.setEditable(false);</span>
+        }
+<span class="nc" id="L128">    }</span>
+
+
+    @Override
+    public void initialize() {
+<span class="nc" id="L133">    }</span>
+
+
+    @Override
+    public void restoreView() {
+<span class="nc" id="L138">    }</span>
+
+    /**
+     * onCreateView
+     **/
+    @Override
+    public int getLayoutView() {
+<span class="nc" id="L145">        return R.layout.my_ais_register_fragment_step1;</span>
+    }
+
+    /**
+     * State
+     **/
+    @Override
+    public void saveInstanceState(Bundle outState) {
+        // Save Instance State here
+<span class="nc" id="L154">        outState.putString(KEY_REF_ID_CAPTCHA, getPresenter().getRefIdCaptcha());</span>
+<span class="nc" id="L155">    }</span>
+
+    @Override
+    public void restoreInstanceState(Bundle savedInstanceState) {
+        // Restore instance state here
+<span class="nc" id="L160">        String refIdCaptcha = savedInstanceState.getString(KEY_REF_ID_CAPTCHA);</span>
+<span class="nc" id="L161">        getPresenter().restoreRefIdCaptcha(refIdCaptcha);</span>
+<span class="nc" id="L162">    }</span>
+    //&lt;/editor-fold&gt;
+
+
+    @Override
+    public void showCaptcha(Bitmap captcha) {
+<span class="nc" id="L168">        AnimationViewUtils.getInstance().expand(vCaptcha);</span>
+<span class="nc" id="L169">        vCaptcha.setCaptchaBitmap(captcha);</span>
+<span class="nc" id="L170">    }</span>
+
+
+    @Override
+    public boolean isCaptchaVisible() {
+<span class="nc bnc" id="L175" title="All 2 branches missed.">        return vCaptcha.getVisibility() == View.VISIBLE;</span>
+    }
+
+
+    @Override
+    public void showDefaultMobileNumber() {
+<span class="nc" id="L181">        vMobileNumber.showDefault();</span>
+<span class="nc" id="L182">    }</span>
+
+    @Override
+    public void showDefaultIdCard() {
+<span class="nc" id="L186">        vIdCard.showDefault();</span>
+<span class="nc" id="L187">    }</span>
+
+    @Override
+    public void showDefaultEmail() {
+<span class="nc" id="L191">        vEmail.showDefault();</span>
+<span class="nc" id="L192">    }</span>
+
+
+    @Override
+    public void showDefaultCaptchaEdt() {
+<span class="nc" id="L197">        vCaptcha.showDefault();</span>
+<span class="nc" id="L198">    }</span>
+
+
+    @Override
+    public void showDialogInvalidateMobileNumber() {
+<span class="nc" id="L203">        vMobileNumber.showError();</span>
+        String error;
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        if (vMobileNumber.getStringFromEditText().isEmpty()) {</span>
+<span class="nc" id="L206">            error = getString(R.string.my_ais_register_dialog_mobile_number_none);</span>
+        } else {
+<span class="nc" id="L208">            error = getString(R.string.my_ais_register_dialog_mobile_number_format_fault);</span>
+        }
+<span class="nc" id="L210">        ((NextzyMvpActivity) getActivity())</span>
+<span class="nc" id="L211">                .showAlertDialogDismissOnClick(error);</span>
+<span class="nc" id="L212">    }</span>
+
+
+    @Override
+    public void showDialogInvalidateIdCard() {
+<span class="nc" id="L217">        vIdCard.showError();</span>
+        String error;
+<span class="nc bnc" id="L219" title="All 2 branches missed.">        if (vIdCard.getStringFromEditText().isEmpty()) {</span>
+<span class="nc" id="L220">            error = getString(R.string.my_ais_register_dialog_id_card_none);</span>
+        } else {
+<span class="nc" id="L222">            error = getString(R.string.my_ais_register_dialog_id_card_format_fault);</span>
+        }
+<span class="nc" id="L224">        ((NextzyMvpActivity) getActivity())</span>
+<span class="nc" id="L225">                .showAlertDialogDismissOnClick(error);</span>
+<span class="nc" id="L226">    }</span>
+
+    @Override
+    public void showDialogInvalidateEmail() {
+<span class="nc" id="L230">        vEmail.showError();</span>
+        String error;
+<span class="nc bnc" id="L232" title="All 2 branches missed.">        if (vEmail.getStringFromEditText().isEmpty()) {</span>
+<span class="nc" id="L233">            error = getString(R.string.my_ais_register_dialog_email_none);</span>
+        } else {
+<span class="nc" id="L235">            error = getString(R.string.my_ais_register_dialog_email_format_fault);</span>
+        }
+<span class="nc" id="L237">        ((NextzyMvpActivity) getActivity())</span>
+<span class="nc" id="L238">                .showAlertDialogDismissOnClick(error);</span>
+<span class="nc" id="L239">    }</span>
+
+    @Override
+    public void showDialogInvalidateCaptchaEdt() {
+<span class="nc" id="L243">        vCaptcha.showError();</span>
+<span class="nc" id="L244">        String error = getString(R.string.my_ais_register_dialog_captcha_empty);</span>
+<span class="nc" id="L245">        ((NextzyMvpActivity) getActivity())</span>
+<span class="nc" id="L246">                .showAlertDialogDismissOnClick(error);</span>
+<span class="nc" id="L247">    }</span>
+    @Override
+    public void showDialogInvalidateEmpty() {
+<span class="nc" id="L250">        String error = getString(R.string.my_ais_register_dialog_invalidate_empty);</span>
+<span class="nc" id="L251">        ((NextzyMvpActivity) getActivity())</span>
+<span class="nc" id="L252">                .showAlertDialogDismissOnClick(error);</span>
+<span class="nc" id="L253">    }</span>
+
+    @Override
+    public void fillParameterAndRequestVerifyIdentity() {
+<span class="nc" id="L257">        getPresenter().validateRequestVerifyIdentity(</span>
+<span class="nc" id="L258">                vMobileNumber.getStringFromEditText(),</span>
+<span class="nc" id="L259">                vIdCard.getStringFromEditText(),</span>
+<span class="nc" id="L260">                vEmail.getStringFromEditText(),</span>
+<span class="nc" id="L261">                vCaptcha.getStringFromEditText()</span>
+        );
+<span class="nc" id="L263">    }</span>
+
+    @Override
+    public void showDialogErrorVerifyMyAis() {
+<span class="nc" id="L267">        String error = getString(R.string.my_ais_register_dialog_account_already_used);</span>
+<span class="nc" id="L268">        ((NextzyMvpActivity) getActivity())</span>
+<span class="nc" id="L269">                .showAlertDialogDismissOnClick(error);</span>
+<span class="nc" id="L270">    }</span>
+
+    @Override
+    public String getMobileNumberFromEditText() {
+<span class="nc" id="L274">        return vMobileNumber.getStringFromEditText();</span>
+    }
+
+    @Override
+    public String getIdCardFromEditText() {
+<span class="nc" id="L279">        return vIdCard.getStringFromEditText();</span>
+    }
+
+    @Override
+    public String getEmailFromEditText() {
+<span class="nc" id="L284">        return vEmail.getStringFromEditText();</span>
+    }
+
+
+
+    /********************/
+    /** Private method **/
+    /********************/
+    //&lt;editor-fold desc=&quot;Private function folding&quot;&gt;
+    private void clickNext() {
+<span class="nc" id="L294">        getPresenter().validateRequestVerifyMyAis(</span>
+<span class="nc" id="L295">                vMobileNumber.getStringFromEditText(),</span>
+<span class="nc" id="L296">                vIdCard.getStringFromEditText(),</span>
+<span class="nc" id="L297">                vEmail.getStringFromEditText(),</span>
+<span class="nc" id="L298">                vCaptcha.getStringFromEditText()</span>
+        );
+<span class="nc" id="L300">    }</span>
+    //&lt;/editor-fold&gt;
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

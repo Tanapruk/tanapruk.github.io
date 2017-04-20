@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AddMobileConverter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.register.step4.addmobilenumber.adapter</a> &gt; <span class="el_source">AddMobileConverter.java</span></div><h1>AddMobileConverter.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.register.step4.addmobilenumber.adapter;
+
+import com.ais.mimo.eservice.helper.login.network.response.MobileData;
+import com.ais.mimo.eservice.module.register.step4.addmobilenumber.model.AddMobileModel;
+
+import java.util.ArrayList;
+
+/**
+ * Created by TheKhaeng on 12/7/2016.
+ */
+
+<span class="nc" id="L12">public class AddMobileConverter {</span>
+
+    private static AddMobileConverter converter;
+
+    public static AddMobileConverter getInstance() {
+<span class="nc bnc" id="L17" title="All 2 branches missed.">        if (converter == null) {</span>
+<span class="nc" id="L18">            converter = new AddMobileConverter();</span>
+        }
+<span class="nc" id="L20">        return converter;</span>
+    }
+
+    public ArrayList&lt;AddMobileModel&gt; convertMobileDataListToAddMobileModelList(ArrayList&lt;MobileData&gt; mobileList) {
+<span class="nc" id="L24">        ArrayList&lt;AddMobileModel&gt; modelList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L25" title="All 2 branches missed.">        for (MobileData mobile : mobileList) {</span>
+<span class="nc" id="L26">            modelList.add(convertMobileDataToAddMobileModel(mobile));</span>
+<span class="nc" id="L27">        }</span>
+<span class="nc" id="L28">        return modelList;</span>
+    }
+
+    public AddMobileModel convertMobileDataToAddMobileModel(MobileData mobile) {
+<span class="nc" id="L32">        return new AddMobileModel(mobile, false);</span>
+    }
+
+    public ArrayList&lt;MobileData&gt; convertAddMobileListToMobileDataList(ArrayList&lt;AddMobileModel&gt; modelList) {
+<span class="nc" id="L36">        ArrayList&lt;MobileData&gt; mobileDataList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L37" title="All 2 branches missed.">        for (AddMobileModel model : modelList) {</span>
+<span class="nc" id="L38">            mobileDataList.add(convertAddMobileModelToMobileData(model));</span>
+<span class="nc" id="L39">        }</span>
+<span class="nc" id="L40">        return mobileDataList;</span>
+    }
+
+    public MobileData convertAddMobileModelToMobileData(AddMobileModel model) {
+<span class="nc" id="L44">        return model.getMobileData();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

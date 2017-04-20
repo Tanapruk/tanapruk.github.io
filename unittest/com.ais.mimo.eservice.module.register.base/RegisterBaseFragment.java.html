@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegisterBaseFragment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.register.base</a> &gt; <span class="el_source">RegisterBaseFragment.java</span></div><h1>RegisterBaseFragment.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.register.base;
+
+import android.os.Handler;
+import android.support.v4.widget.NestedScrollView;
+import android.view.View;
+
+import com.ais.mimo.eservice.helper.register.network.RegisterApi;
+import com.ais.mimo.eservice.module.register.main.RegisterActivity;
+import com.nextzy.myais.common.mvp.NextzyMvpActivity;
+import com.nextzy.myais.common.mvp.NextzyMvpFragment;
+import com.nextzy.myais.common.utility.NextzyAndroidUtility;
+import com.nextzy.myais.myais.R;
+
+/**
+ * Created by TheKhaeng on 10/15/2016.
+ */
+
+<span class="nc" id="L18">public abstract class RegisterBaseFragment&lt;CP extends RegisterBaseMvpContractorPresenter&gt;</span>
+        extends NextzyMvpFragment&lt;CP&gt; {
+
+    public static final String KEY_MOBILE_NUMBER = &quot;key_mobile_number&quot;;
+    public static final String KEY_COME_FROM_TAG = &quot;key_COME_FROM&quot;;
+    public static final String KEY_ID_CARD = &quot;key_id_card&quot;;
+    public static final String KEY_EMAIL = &quot;key_email&quot;;
+    public static final String KEY_PASS = &quot;key_pass&quot;;
+    public static final String KEY_REPASS = &quot;key_repass&quot;;
+
+    private RegisterApi regisApi;
+
+    /*************************/
+    /** Fragment life cycle **/
+    /*************************/
+    //&lt;editor-fold desc=&quot;Life cycle folding&quot;&gt;
+    @Override
+    public void onResume() {
+<span class="nc" id="L36">        super.onResume();</span>
+<span class="nc" id="L37">        getPresenter().registerRx();</span>
+<span class="nc" id="L38">    }</span>
+
+    @Override
+    public void onPause() {
+<span class="nc" id="L42">        super.onPause();</span>
+<span class="nc" id="L43">        getPresenter().unregisterRx();</span>
+<span class="nc" id="L44">    }</span>
+    //&lt;/editor-fold&gt;
+
+
+    public void setIndexIndicator(int index) {
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        if (getActivity() instanceof RegisterActivity) {</span>
+<span class="nc" id="L50">            ((RegisterActivity) getActivity()).setIndexIndicator(index);</span>
+        }
+<span class="nc" id="L52">    }</span>
+
+    public void hindIndicator() {
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        if (getActivity() instanceof RegisterActivity) {</span>
+<span class="nc" id="L56">            ((RegisterActivity) getActivity()).hindIndicator();</span>
+        }
+<span class="nc" id="L58">    }</span>
+
+    public void setBackgroundWhite() {
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        if (getActivity() instanceof RegisterActivity) {</span>
+<span class="nc" id="L62">            ((RegisterActivity) getActivity()).setBackground(R.color.my_ais_white);</span>
+        }
+<span class="nc" id="L64">    }</span>
+
+    public void setBackgroundLightGray() {
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        if (getActivity() instanceof RegisterActivity) {</span>
+<span class="nc" id="L68">            ((RegisterActivity) getActivity()).setBackground(R.color.my_ais_extra_light_gray);</span>
+        }
+<span class="nc" id="L70">    }</span>
+
+    public void showLoadingNoFade() {
+<span class="nc" id="L73">        showLoadingDialog();</span>
+<span class="nc" id="L74">    }</span>
+
+    public void dismissLoadingNoFade() {
+<span class="nc" id="L77">        final Handler handler = new Handler();</span>
+<span class="nc" id="L78">        handler.postDelayed(this::dismissDialog, 400);</span>
+<span class="nc" id="L79">    }</span>
+
+    public void dismissLoadingNoFade(int delay) {
+<span class="nc" id="L82">        final Handler handler = new Handler();</span>
+<span class="nc" id="L83">        handler.postDelayed(this::dismissDialog, delay);</span>
+<span class="nc" id="L84">    }</span>
+
+    public void clickCancel() {
+<span class="nc" id="L87">        getActivity().onBackPressed();</span>
+<span class="nc" id="L88">    }</span>
+
+    public void setupClickHideKeyboard(View v) {
+<span class="nc bnc" id="L91" title="All 2 branches missed.">        if (v != null) {</span>
+<span class="nc" id="L92">            v.setOnClickListener(</span>
+<span class="nc" id="L93">                    view -&gt; hindKeyboard());</span>
+        }
+<span class="nc" id="L95">    }</span>
+
+
+    public void showResponseException() {
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        if (getActivity() instanceof NextzyMvpActivity) {</span>
+<span class="nc" id="L100">            ((NextzyMvpActivity) getActivity())</span>
+<span class="nc" id="L101">                    .showAlertDialogDismissOnClick(R.string.my_ais_server_unavailable);</span>
+        }
+<span class="nc" id="L103">    }</span>
+
+    public void showResponseException(String resultDescription) {
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        if (getActivity() instanceof NextzyMvpActivity) {</span>
+<span class="nc" id="L107">            ((NextzyMvpActivity) getActivity())</span>
+<span class="nc" id="L108">                    .showAlertDialogDismissOnClick(resultDescription);</span>
+        }
+<span class="nc" id="L110">    }</span>
+
+
+    public void scrollToEnd(NestedScrollView scrollView, int delay) {
+<span class="nc bnc" id="L114" title="All 2 branches missed.">        if (getActivity() instanceof NextzyMvpActivity) {</span>
+<span class="nc" id="L115">            final Handler handler = new Handler();</span>
+<span class="nc" id="L116">            handler.postDelayed(() -&gt; {</span>
+<span class="nc" id="L117">                scrollView.fullScroll(View.FOCUS_DOWN);</span>
+<span class="nc" id="L118">            }, delay);</span>
+        }
+<span class="nc" id="L120">    }</span>
+
+    public void hindKeyboard() {
+<span class="nc" id="L123">        NextzyAndroidUtility.getInstance().hideKeyboard(getActivity());</span>
+<span class="nc" id="L124">    }</span>
+
+
+    public String getArgumentsStringMobileNumber(){
+<span class="nc" id="L128">        return getArguments().getString(KEY_MOBILE_NUMBER);</span>
+    }
+
+    public String getArgumentsStringIdCard(){
+<span class="nc" id="L132">        return getArguments().getString(KEY_ID_CARD);</span>
+    }
+
+    public String getArgumentsStringEmail(){
+<span class="nc" id="L136">        return getArguments().getString(KEY_EMAIL);</span>
+    }
+
+    public String getArgumentsStringPassword(){
+<span class="nc" id="L140">        return getArguments().getString(KEY_PASS);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

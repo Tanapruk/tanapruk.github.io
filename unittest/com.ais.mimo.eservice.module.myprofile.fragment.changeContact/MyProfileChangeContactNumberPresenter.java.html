@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MyProfileChangeContactNumberPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.myprofile.fragment.changeContact</a> &gt; <span class="el_source">MyProfileChangeContactNumberPresenter.java</span></div><h1>MyProfileChangeContactNumberPresenter.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.myprofile.fragment.changeContact;
+
+import com.ais.mimo.eservice.helper.myprofile.network.MyProfileManager;
+import com.ais.mimo.eservice.helper.myprofile.network.exception.UpdateContactMobileNumberException;
+import com.ais.mimo.eservice.helper.myprofile.network.request.UpdateContactFibreNumberBody;
+import com.ais.mimo.eservice.helper.myprofile.network.response.UpdateContactMobileNumberResult;
+import com.ais.mimo.eservice.module.register.utility.RegisterValidateUtility;
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.mvp.NextzyPresenter;
+import com.nextzy.myais.common.utility.NextzyUtility;
+
+import static com.ais.mimo.eservice.helper.myprofile.network.response.QueryContactMobileNumberData.OUT_STATUS_SUCCESS;
+
+/**
+ * Created by TheKhaeng on 11/16/2016.
+ */
+
+public class MyProfileChangeContactNumberPresenter extends NextzyPresenter&lt;MyProfileChangeContactNumberContractor.View&gt; implements MyProfileChangeContactNumberContractor.Presenter {
+
+    private final RegisterValidateUtility validateUtil;
+    private MyProfileManager manager;
+
+    public MyProfileChangeContactNumberPresenter(MyProfileChangeContactNumberContractor.View view) {
+<span class="fc" id="L26">        super(view);</span>
+<span class="fc" id="L27">        validateUtil = RegisterValidateUtility.getInstance();</span>
+<span class="fc" id="L28">        manager = MyProfileManager.getInstance();</span>
+<span class="fc" id="L29">    }</span>
+
+    public void injectManager(MyProfileManager manager) {
+<span class="fc" id="L32">        this.manager = manager;</span>
+<span class="fc" id="L33">    }</span>
+
+    public static MyProfileChangeContactNumberPresenter createPresenter(MyProfileChangeContactNumberContractor.View view) {
+<span class="fc" id="L36">        return new MyProfileChangeContactNumberPresenter(view);</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="fc" id="L41">        RxBus.get().register(this);</span>
+<span class="fc" id="L42">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="fc" id="L46">        RxBus.get().unregister(this);</span>
+<span class="fc" id="L47">    }</span>
+
+    @Override
+    public void onViewStart() {
+<span class="nc" id="L51">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L55">    }</span>
+
+    /*******************/
+    /** For view call **/
+    /*******************/
+    //&lt;editor-fold desc=&quot;For view folding&quot;&gt;
+    @Override
+    public boolean validateMobileNumber(String oldNumber, String newNumber) {
+<span class="fc" id="L63">        getView().showDefaultNewNumberEdt();</span>
+
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if (!NextzyUtility.getInstance().isMobileNumberOnly(newNumber)) {</span>
+<span class="fc" id="L66">            getView().showInvalidateMobileNumberDialog();</span>
+<span class="fc" id="L67">            return false;</span>
+        }
+
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        if (NextzyUtility.getInstance().isStringEqual(oldNumber, newNumber)) {</span>
+<span class="fc" id="L71">            getView().showRedundantMobileNumberDialog();</span>
+<span class="fc" id="L72">            return false;</span>
+        }
+<span class="fc" id="L74">        return true;</span>
+    }
+
+    @Override
+    public void requestUpdateContactMobileNumber(String oldNumber, String newNumber) {
+<span class="fc" id="L79">        getView().showLoadingDialog();</span>
+<span class="fc" id="L80">        UpdateContactFibreNumberBody body = new UpdateContactFibreNumberBody();</span>
+<span class="fc" id="L81">        body.setFbbId(Mobile.getInstance().getMobileNumber());</span>
+<span class="fc" id="L82">        body.setFbbContactNo(newNumber);</span>
+<span class="fc" id="L83">        manager.getUpdateContactFibreNumber(body);</span>
+<span class="fc" id="L84">    }</span>
+    //&lt;/editor-fold&gt;
+
+    @Subscribe
+    public void onContactMobileNumberResult(UpdateContactMobileNumberResult result) {
+<span class="fc" id="L89">        getView().dismissAllDialogs();</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        if (isResultSuccess(result)) {</span>
+<span class="fc" id="L91">            getView().showChangeContactNumberSuccessDialog();</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        } else if (isResultHasErrorMessage(result)) {</span>
+<span class="fc" id="L93">            getView().showServiceUnavailable(result.getData().getOutErrorMessage());</span>
+        } else {
+<span class="fc" id="L95">            getView().showServiceUnavailable();</span>
+        }
+<span class="fc" id="L97">    }</span>
+
+    @Subscribe
+    public void onUpdateContactMobileNumberException(UpdateContactMobileNumberException exception) {
+<span class="fc" id="L101">        getView().dismissAllDialogs();</span>
+<span class="fc" id="L102">        getView().showServiceUnavailable(exception.getMessage());</span>
+<span class="fc" id="L103">    }</span>
+
+    private boolean isResultHasErrorMessage(UpdateContactMobileNumberResult result) {
+<span class="fc" id="L106">        NextzyUtility utility = NextzyUtility.getInstance();</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        return result != null</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">                &amp;&amp; result.getData() != null</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">                &amp;&amp; !utility.wrapBlank(result.getData().getOutErrorMessage()).isEmpty();</span>
+    }
+
+    private boolean isResultSuccess(UpdateContactMobileNumberResult result) {
+<span class="fc" id="L113">        NextzyUtility utility = NextzyUtility.getInstance();</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">        return result != null</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">                &amp;&amp; result.getData() != null</span>
+<span class="fc bfc" id="L116" title="All 2 branches covered.">                &amp;&amp; OUT_STATUS_SUCCESS.equals(utility.wrapBlank(result.getData().getOutStatus()));</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

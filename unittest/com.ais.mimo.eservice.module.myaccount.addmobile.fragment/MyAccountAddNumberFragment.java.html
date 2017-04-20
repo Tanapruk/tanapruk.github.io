@@ -1,0 +1,664 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MyAccountAddNumberFragment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.ais.mimo.eservice.module.myaccount.addmobile.fragment</a> &gt; <span class="el_source">MyAccountAddNumberFragment.java</span></div><h1>MyAccountAddNumberFragment.java</h1><pre class="source lang-java linenums">package com.ais.mimo.eservice.module.myaccount.addmobile.fragment;
+
+import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+
+import com.ais.mimo.eservice.helper.login.network.response.MobileData;
+import com.ais.mimo.eservice.module.register.step4.addmobilenumber.adapter.RegisterMobileNumberWithRequestOtpAdapter;
+import com.ais.mimo.eservice.module.register.step4.addmobilenumber.adapter.holder.MobileRequestWithRequestOtpItemHolder;
+import com.ais.mimo.eservice.module.register.widget.MyAisRegister2ButtonView;
+import com.ais.mimo.eservice.utility.AnimationViewUtils;
+import com.nextzy.myais.common.constant.BusinessType;
+import com.nextzy.myais.common.mvp.NextzyMvpActivity;
+import com.nextzy.myais.common.mvp.NextzyMvpFragment;
+import com.nextzy.myais.common.utility.NextzyAndroidUtility;
+import com.nextzy.myais.common.utility.NextzyUtility;
+import com.nextzy.myais.common.widget.AISButton;
+import com.nextzy.myais.common.widget.AISEditText;
+import com.nextzy.myais.common.widget.dialog.AisDialog;
+import com.nextzy.myais.common.widget.dialog.listener.ChoiceDialogClickListener;
+import com.nextzy.myais.common.widget.manager.MyAisLinearManager;
+import com.nextzy.myais.myais.R;
+
+import java.util.ArrayList;
+
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+import static com.ais.mimo.eservice.module.myaccount.addmobile.fragment.MyAccountAddNumberFragmentPresenter.KEY_GROUP_FOCUS;
+import static com.ais.mimo.eservice.module.register.base.RegisterBaseFragment.KEY_EMAIL;
+import static com.ais.mimo.eservice.module.register.base.RegisterBaseFragment.KEY_MOBILE_NUMBER;
+import static com.nextzy.myais.common.delegate.FormatUtility.FORMAT_MOBILE_NUMBER;
+
+
+public class MyAccountAddNumberFragment extends NextzyMvpFragment&lt;MyAccountAddNumberFragmentContractor.Presenter&gt; implements MyAccountAddNumberFragmentContractor.View {
+    public final static String TAG = MyAccountAddNumberFragment.class.getSimpleName();
+    public static final String EXTRA_DATA_ADD_MOBILE_NUMBER = &quot;extra_data_add_mobile_number&quot;;
+    public static final String KEY_CONFIRM_POSTPAID_LIST_FOR_CHECK_USED = &quot;key_confirm_postpaid_list&quot;;
+    public static final String KEY_CONFIRM_PREPAID_LIST_FOR_CHECK_USED = &quot;key_confirm_prepaid_list&quot;;
+    public static final String KEY_CONFIRM_FBB_LIST_FOR_CHECK_USED = &quot;key_confirm_fbb_list&quot;;
+    public static final String KEY_NO_CONFIRM_POSTPAID_LIST_FOR_CHECK_USED = &quot;key_no_confirm_postpaid_list&quot;;
+    public static final String KEY_NO_CONFIRM_PREPAID_LIST_FOR_CHECK_USED = &quot;key_no_confirm_prepaid_list&quot;;
+    public static final String KEY_NO_CONFIRM_FBB_LIST_FOR_CHECK_USED = &quot;key_no_confirm_fbb_list&quot;;
+    public static final String KEY_REF_ID_CAPTCHA = &quot;key_ref_id_captcha&quot;;
+
+    public static final int FLAG_NO_MOBILE_LIST = 10;
+
+    private RecyclerView rvPost;
+    private RecyclerView rvPre;
+    private RecyclerView rvFbb;
+    private LinearLayout llPost;
+    private LinearLayout llPre;
+    private LinearLayout llFbb;
+    private AISButton btnAdd;
+    private AISEditText edtMobileNumber;
+    private AISEditText edtCaptcha;
+    private RegisterMobileNumberWithRequestOtpAdapter fbbAdapter;
+    private RegisterMobileNumberWithRequestOtpAdapter preAdapter;
+    private RegisterMobileNumberWithRequestOtpAdapter postAdapter;
+    private MyAisRegister2ButtonView btnCancelOk;
+    private LinearLayout containerCaptcha;
+    private ImageView imgCaptcha;
+    private LinearLayout containerMobileNumberList;
+    private MobileRequestWithRequestOtpItemHolder focusView;
+    private LinearLayout baseLayout;
+    private View dividerAddButton;
+
+    public MyAccountAddNumberFragment() {
+        super();
+    }
+
+    public static MyAccountAddNumberFragment newInstance(Bundle data) {
+        MyAccountAddNumberFragment fragment = new MyAccountAddNumberFragment();
+        fragment.setArguments(data);
+        return fragment;
+    }
+
+    /*************************/
+    /** Fragment life cycle **/
+    /*************************/
+    //&lt;editor-fold desc=&quot;Life cycle folding&quot;&gt;
+
+    /**
+     * onCreate()
+     **/
+    @Override
+    protected void createPresenter() {
+        MyAccountAddNumberFragmentPresenter.createPresenter(this);
+    }
+
+    @Override
+    public void restoreArgument(Bundle bundle) {
+
+    }
+
+    /**
+     * onViewCreated()
+     **/
+    @Override
+    public void bindView(View view) {
+        baseLayout = (LinearLayout) view.findViewById(R.id.my_ais_account_base_layout);
+        containerMobileNumberList = (LinearLayout) view.findViewById(R.id.my_ais_account_container_list_mobile_number);
+        containerMobileNumberList.setVisibility(GONE);
+        llPost = (LinearLayout) view.findViewById(R.id.my_ais_regis_ll_post_group);
+        llPost.setVisibility(GONE);
+        llPre = (LinearLayout) view.findViewById(R.id.my_ais_regis_ll_pre_group);
+        llPre.setVisibility(GONE);
+        llFbb = (LinearLayout) view.findViewById(R.id.my_ais_regis_ll_fbb_group);
+        llFbb.setVisibility(GONE);
+        rvPost = (RecyclerView) view.findViewById(R.id.my_ais_regis_rv_post_list);
+        rvPre = (RecyclerView) view.findViewById(R.id.my_ais_regis_rv_pre_list);
+        rvFbb = (RecyclerView) view.findViewById(R.id.my_ais_regis_rv_fbb_list);
+        edtMobileNumber = (AISEditText) view.findViewById(R.id.my_ais_account_edt_mobile_number);
+        edtMobileNumber.setDashFormat(FORMAT_MOBILE_NUMBER);
+
+        containerCaptcha = (LinearLayout) view.findViewById(R.id.my_ais_account_container_captcha);
+        containerCaptcha.setVisibility(GONE);
+        imgCaptcha = (ImageView) view.findViewById(R.id.my_ais_account_img_captcha);
+        edtCaptcha = (AISEditText) view.findViewById(R.id.my_ais_account_edt_captcha);
+        btnAdd = (AISButton) view.findViewById(R.id.my_ais_account_btn_add);
+        btnCancelOk = (MyAisRegister2ButtonView) view.findViewById(R.id.my_ais_account_btn_ok_cancel);
+
+        dividerAddButton = view.findViewById(R.id.my_ais_account_divider_add_button);
+
+        btnCancelOk.setBtnFirstText(getContext().getString(R.string.cancel));
+        btnCancelOk.setBtnSecondText(getContext().getString(R.string.ok));
+    }
+
+
+    @Override
+    public void setupView() {
+        if (getArgumentsStringMobileNumber() == null)
+            throw new NullPointerException(&quot;You must send KEY_MOBILE_NUMBER to this fragment&quot;);
+
+        baseLayout.setOnClickListener(view -&gt; hindKeyboard());
+
+        getPresenter().setMobileListForCheckAlreadyUsed(
+                getArguments().getParcelableArrayList(KEY_CONFIRM_POSTPAID_LIST_FOR_CHECK_USED),
+                getArguments().getParcelableArrayList(KEY_NO_CONFIRM_POSTPAID_LIST_FOR_CHECK_USED),
+                getArguments().getParcelableArrayList(KEY_CONFIRM_PREPAID_LIST_FOR_CHECK_USED),
+                getArguments().getParcelableArrayList(KEY_NO_CONFIRM_PREPAID_LIST_FOR_CHECK_USED),
+                getArguments().getParcelableArrayList(KEY_CONFIRM_FBB_LIST_FOR_CHECK_USED),
+                getArguments().getParcelableArrayList(KEY_NO_CONFIRM_FBB_LIST_FOR_CHECK_USED)
+        );
+        btnAdd.setOnClickListener(v -&gt; clickAdd());
+        btnCancelOk.setOnFirstButtonClickListener(v -&gt; clickCancel());
+        btnCancelOk.setOnSecondButtonClickListener(v -&gt; clickOk());
+        getPresenter().setTitle(getString(R.string.my_ais_register_add_mobile_number));
+    }
+
+
+    @Override
+    public void initialize() {
+        setUpAdapter();
+        getPresenter().requestMyNumberEligible();
+    }
+
+    @Override
+    public void restoreView() {
+        updateMobileDataView(postAdapter, preAdapter, fbbAdapter);
+    }
+
+    /**
+     * onCreateView
+     **/
+    @Override
+    public int getLayoutView() {
+        return R.layout.my_ais_account_fragment_add_number;
+    }
+
+
+    /**
+     * State
+     **/
+    @Override
+    public void saveInstanceState(Bundle outState) {
+        // Save Instance State here
+        outState.putString(KEY_GROUP_FOCUS, getPresenter().getFocusBusinessType());
+        outState.putString(KEY_REF_ID_CAPTCHA, getPresenter().getRefIdCaptcha());
+        outState.putParcelableArrayList(KEY_CONFIRM_POSTPAID_LIST_FOR_CHECK_USED, postAdapter.getConfirmMobileList());
+        outState.putParcelableArrayList(KEY_NO_CONFIRM_POSTPAID_LIST_FOR_CHECK_USED, postAdapter.getNoConfirmMobileList());
+        outState.putParcelableArrayList(KEY_CONFIRM_PREPAID_LIST_FOR_CHECK_USED, preAdapter.getConfirmMobileList());
+        outState.putParcelableArrayList(KEY_NO_CONFIRM_PREPAID_LIST_FOR_CHECK_USED, preAdapter.getNoConfirmMobileList());
+        outState.putParcelableArrayList(KEY_CONFIRM_FBB_LIST_FOR_CHECK_USED, fbbAdapter.getConfirmMobileList());
+        outState.putParcelableArrayList(KEY_NO_CONFIRM_FBB_LIST_FOR_CHECK_USED, fbbAdapter.getNoConfirmMobileList());
+    }
+
+    @Override
+    public void restoreInstanceState(Bundle savedInstanceState) {
+        // Restore instance state here
+        String restoreGroupFocus = savedInstanceState.getString(KEY_GROUP_FOCUS);
+        String refIdCaptcha = savedInstanceState.getString(KEY_REF_ID_CAPTCHA);
+        getPresenter().restoreFocusBusinessType(restoreGroupFocus);
+        getPresenter().restoreRefIdCaptcha(refIdCaptcha);
+
+        postAdapter = new RegisterMobileNumberWithRequestOtpAdapter(
+                savedInstanceState.getParcelableArrayList(KEY_CONFIRM_POSTPAID_LIST_FOR_CHECK_USED),
+                savedInstanceState.getParcelableArrayList(KEY_NO_CONFIRM_POSTPAID_LIST_FOR_CHECK_USED)
+        );
+        preAdapter = new RegisterMobileNumberWithRequestOtpAdapter(
+                savedInstanceState.getParcelableArrayList(KEY_CONFIRM_PREPAID_LIST_FOR_CHECK_USED),
+                savedInstanceState.getParcelableArrayList(KEY_NO_CONFIRM_PREPAID_LIST_FOR_CHECK_USED)
+        );
+        fbbAdapter = new RegisterMobileNumberWithRequestOtpAdapter(
+                savedInstanceState.getParcelableArrayList(KEY_CONFIRM_FBB_LIST_FOR_CHECK_USED),
+                savedInstanceState.getParcelableArrayList(KEY_NO_CONFIRM_FBB_LIST_FOR_CHECK_USED)
+        );
+    }
+    //&lt;/editor-fold&gt;
+
+    @Override
+    public void updateMobileListToAdapter(
+            @Nullable ArrayList&lt;MobileData&gt; noConfirmPostpaid,
+            @Nullable ArrayList&lt;MobileData&gt; noConfirmPrepaid,
+            @Nullable ArrayList&lt;MobileData&gt; noConfirmFbb,
+            @Nullable ArrayList&lt;MobileData&gt; markConfirmPostpaid,
+            @Nullable ArrayList&lt;MobileData&gt; markConfirmPrepaid,
+            @Nullable ArrayList&lt;MobileData&gt; markConfirmFbb) {
+        postAdapter.addAllNoConfirmMobileNumber(noConfirmPostpaid);
+        postAdapter.addAllMarkConfirmMobileNumber(markConfirmPostpaid);
+        preAdapter.addAllNoConfirmMobileNumber(noConfirmPrepaid);
+        preAdapter.addAllMarkConfirmMobileNumber(markConfirmPrepaid);
+        fbbAdapter.addAllNoConfirmMobileNumber(noConfirmFbb);
+        fbbAdapter.addAllMarkConfirmMobileNumber(markConfirmFbb);
+        updateView();
+    }
+
+
+    @Override
+    public void clearMobileEditText() {
+        edtMobileNumber.setText(&quot;&quot;);
+    }
+
+
+    /**
+     * Every time you call method like &quot;add...&quot; you must concern to &quot;show view&quot; method
+     * &lt;p&gt;
+     * {@link #setVisibleIfCan(View v, int arraySize)}
+     * {@link #updateView()}
+     */
+    @Override
+    public void addNoConfirmMobileDataToFbbAdapter(MobileData mobileNumber) {
+        fbbAdapter.addNoConfirmMobileNumber(mobileNumber);
+        fbbAdapter.notifyDataSetChanged();
+        updateView();
+    }
+
+    @Override
+    public void addNoConfirmMobileDataToPostpaidAdapter(MobileData mobileNumber) {
+        postAdapter.addNoConfirmMobileNumber(mobileNumber);
+        postAdapter.notifyDataSetChanged();
+        updateView();
+    }
+
+    @Override
+    public void addNoConfirmMobileDataToPrepaidAdapter(MobileData mobileNumber) {
+        preAdapter.addNoConfirmMobileNumber(mobileNumber);
+        preAdapter.notifyDataSetChanged();
+        updateView();
+    }
+
+    @Override
+    public void addMarkConfirmMobileDataToFbbAdapter(MobileData mobileNumber) {
+        fbbAdapter.addNoConfirmMobileNumber(mobileNumber);
+        fbbAdapter.addMarkConfirmMobileNumber(mobileNumber);
+        fbbAdapter.notifyDataSetChanged();
+        updateView();
+    }
+
+    @Override
+    public void addMarkConfirmMobileDataToPostpaidAdapter(MobileData mobileNumber) {
+        postAdapter.addNoConfirmMobileNumber(mobileNumber);
+        postAdapter.addMarkConfirmMobileNumber(mobileNumber);
+        postAdapter.notifyDataSetChanged();
+        updateView();
+    }
+
+    @Override
+    public void addMarkConfirmMobileDataToPrepaidAdapter(MobileData mobileNumber) {
+        preAdapter.addNoConfirmMobileNumber(mobileNumber);
+        preAdapter.addMarkConfirmMobileNumber(mobileNumber);
+        preAdapter.notifyDataSetChanged();
+        updateView();
+    }
+
+    @Override
+    public boolean isAdapterContain(String mobileNumber) {
+        return fbbAdapter.isContains(mobileNumber)
+                || postAdapter.isContains(mobileNumber)
+                || preAdapter.isContains(mobileNumber);
+    }
+
+    @Override
+    public String getTextFromMobileEdt() {
+        return edtMobileNumber.getTextNoDash();
+    }
+
+
+    @Override
+    public int getConfirmItemUsedCountPostpaid() {
+        return postAdapter.getMarkConfirmItemCount();
+    }
+
+    @Override
+    public int getConfirmItemUsedCountPrepaid() {
+        return preAdapter.getMarkConfirmItemCount();
+    }
+
+    @Override
+    public int getConfirmItemUsedCountFbb() {
+        return fbbAdapter.getMarkConfirmItemCount();
+    }
+
+    @Override
+    public void showCaptcha(Bitmap captcha) {
+        AnimationViewUtils.getInstance().expand(containerCaptcha);
+        imgCaptcha.setImageBitmap(captcha);
+    }
+
+    @Override
+    public void showDefaultMobileNumberEdt() {
+        edtMobileNumber.setBackgroundResource(R.drawable.my_ais_library_selector_edit_text_green);
+    }
+
+    @Override
+    public void showDefaultCaptchaEdt() {
+        edtCaptcha.setBackgroundResource(R.drawable.my_ais_library_selector_edit_text_green);
+    }
+
+    @Override
+    public void showConfirmChangeAccountNumberDialog(String mobileNumber) {
+        AisDialog.getInstance().showChoiceDialog(getFragmentManager(),
+                null,
+                String.format(
+                        getString(R.string.my_ais_account_add_number_dialog_confirm_change_number),
+                        NextzyUtility.getInstance().applyAisNumberPattern(mobileNumber)),
+                getString(R.string.ok),
+                getString(R.string.cancel),
+                true,
+<span class="nc" id="L343">                new ChoiceDialogClickListener() {</span>
+                    @Override
+                    public void onDialogPositiveButtonClick(@Nullable Bundle data) {
+<span class="nc" id="L346">                        getPresenter().setTitle(getString(R.string.my_ais_account_title));</span>
+<span class="nc" id="L347">                        getPresenter().goToEditAccountFragment(edtMobileNumber.getTextNoDash());</span>
+<span class="nc" id="L348">                    }</span>
+
+                    @Override
+                    public void onDialogNegativeButtonClick(@Nullable Bundle data) {
+<span class="nc" id="L352">                    }</span>
+                });
+    }
+
+    @Override
+    public void showDialogErrorMobileNumberEdt() {
+        edtMobileNumber.setBackgroundResource(R.drawable.my_ais_library_shape_edit_text_white_red_border);
+        String error;
+        if (edtMobileNumber.getTextNoDash().isEmpty()) {
+            error = getString(R.string.my_ais_register_dialog_mobile_number_none);
+        } else {
+            error = getString(R.string.my_ais_register_dialog_mobile_number_format_fault);
+        }
+        ((NextzyMvpActivity) getActivity())
+                .showAlertDialogDismissOnClick(error);
+    }
+
+    @Override
+    public void showDefaultOtpEdt() {
+        if (focusView != null) {
+            focusView.showDefaultEdt();
+        }
+    }
+
+    @Override
+    public void showDialogErrorOtpEdt() {
+        if (focusView != null) {
+            focusView.showErrorCaptchaEdt();
+            String error;
+            if (focusView.getOtp().isEmpty()) {
+                error = getString(R.string.my_ais_register_dialog_otp_none);
+            } else {
+                error = getString(R.string.my_ais_register_dialog_otp_fault);
+            }
+            focusView.emptyOtp();
+            ((NextzyMvpActivity) getActivity())
+                    .showAlertDialogDismissOnClick(error);
+        }
+    }
+
+
+    @Override
+    public void showDialogErrorCaptchaEdt() {
+        edtCaptcha.setBackgroundResource(R.drawable.my_ais_library_shape_edit_text_white_red_border);
+        String error = getString(R.string.my_ais_register_dialog_captcha_empty);
+        ((NextzyMvpActivity) getActivity())
+                .showAlertDialogDismissOnClick(error);
+    }
+
+    @Override
+    public void showPostpaidLimitError(int limit) {
+        String error = String.format(
+                getString(R.string.my_ais_register_dialog_limit_postpaid),
+                limit);
+        ((NextzyMvpActivity) getActivity())
+                .showAlertDialogDismissOnClick(error);
+    }
+
+    @Override
+    public void showPrepaidLimitError(int limit) {
+        String error = String.format(
+                getString(R.string.my_ais_register_dialog_limit_prepaid),
+                limit);
+        ((NextzyMvpActivity) getActivity())
+                .showAlertDialogDismissOnClick(error);
+    }
+
+    @Override
+    public void showFbbLimitError(int limit) {
+        String error = String.format(
+                getString(R.string.my_ais_register_dialog_limit_fbb),
+                limit);
+        ((NextzyMvpActivity) getActivity())
+                .showAlertDialogDismissOnClick(error);
+    }
+
+
+    @Override
+    public void showDialogErrorAlreadyUseMobileNumberEdt(String mobileNumber) {
+        String mobileNumberPattern = NextzyUtility.getInstance().applyAisNumberPattern(mobileNumber);
+        String error = String.format(
+                getString(R.string.my_ais_register_dialog_mobile_number_already_used),
+                mobileNumberPattern);
+        ((NextzyMvpActivity) getActivity())
+                .showAlertDialogDismissOnClick(error);
+    }
+
+    @Override
+    public void finish() {
+        getActivity().finish();
+    }
+
+
+    @Override
+    public boolean isCaptchaVisible() {
+        return containerCaptcha.getVisibility() == VISIBLE;
+    }
+
+    @Override
+    public void markConfirmCurrentMobileNumberPrepaid() {
+        preAdapter.markConfirmCurrentMobileNumber();
+    }
+
+    @Override
+    public void markConfirmCurrentMobileNumberPostpaid() {
+        postAdapter.markConfirmCurrentMobileNumber();
+    }
+
+    @Override
+    public void markConfirmCurrentMobileNumberFbb() {
+        fbbAdapter.markConfirmCurrentMobileNumber();
+    }
+
+    @Override
+    public void clickRequestOtpPostpaidFocusView() {
+        if (focusView != null) {
+            postAdapter.clickRequestOtpAt(focusView.getPos());
+            fbbAdapter.setNoClickAll();
+            preAdapter.setNoClickAll();
+        }
+    }
+
+    @Override
+    public void clickRequestOtpFibreFocusView() {
+        if (focusView != null) {
+            postAdapter.setNoClickAll();
+            fbbAdapter.clickRequestOtpAt(focusView.getPos());
+            preAdapter.setNoClickAll();
+        }
+    }
+
+    @Override
+    public void clickRequestOtpPrepaidFocusView() {
+        if (focusView != null) {
+            postAdapter.setNoClickAll();
+            fbbAdapter.setNoClickAll();
+            preAdapter.clickRequestOtpAt(focusView.getPos());
+        }
+    }
+
+    public void requestVerifyIdentityPostpaidNumberSelectedForMarkConfirm(String mobileNumber) {
+        getPresenter().setFocusBusinessType(BusinessType.POSTPAID);
+        getPresenter().requestVerifyIdentityNumberSelected(mobileNumber);
+    }
+
+    public void requestVerifyIdentityPrepaidNumberSelectedForMarkConfirm(String mobileNumber) {
+        getPresenter().setFocusBusinessType(BusinessType.PREPAID);
+        getPresenter().requestVerifyIdentityNumberSelected(mobileNumber);
+    }
+
+    public void requestVerifyIdentityFibreNumberSelectedForMarkConfirm(String mobileNumber) {
+        getPresenter().setFocusBusinessType(BusinessType.FIBRE);
+        getPresenter().requestVerifyIdentityNumberSelected(mobileNumber);
+    }
+
+    //&lt;/editor-fold&gt;
+
+    /********************/
+    /** Private method **/
+    /********************/
+    //&lt;editor-fold desc=&quot;Private function folding&quot;&gt;
+    private void setUpAdapter() {
+        postAdapter = new RegisterMobileNumberWithRequestOtpAdapter();
+        postAdapter.addAllMarkConfirmMobileNumber(
+                getArguments().getParcelableArrayList(KEY_CONFIRM_POSTPAID_LIST_FOR_CHECK_USED)
+        );
+        preAdapter = new RegisterMobileNumberWithRequestOtpAdapter();
+        preAdapter.addAllMarkConfirmMobileNumber(
+                getArguments().getParcelableArrayList(KEY_CONFIRM_PREPAID_LIST_FOR_CHECK_USED)
+        );
+        fbbAdapter = new RegisterMobileNumberWithRequestOtpAdapter();
+        fbbAdapter.addAllMarkConfirmMobileNumber(
+                getArguments().getParcelableArrayList(KEY_CONFIRM_FBB_LIST_FOR_CHECK_USED)
+        );
+        updateMobileDataView(postAdapter, preAdapter, fbbAdapter);
+    }
+
+    private void updateMobileDataView(
+            RegisterMobileNumberWithRequestOtpAdapter postAdapter,
+            RegisterMobileNumberWithRequestOtpAdapter preAdapter,
+            RegisterMobileNumberWithRequestOtpAdapter fbbAdapter) {
+        postAdapter.setListener(postAdapterListener);
+        preAdapter.setListener(preAdapterListener);
+        fbbAdapter.setListener(fbbAdapterListener);
+
+        rvPost.setLayoutManager(new MyAisLinearManager(getContext()));
+        rvPre.setLayoutManager(new MyAisLinearManager(getContext()));
+        rvFbb.setLayoutManager(new MyAisLinearManager(getContext()));
+
+        rvPost.setAdapter(postAdapter);
+        rvPre.setAdapter(preAdapter);
+        rvFbb.setAdapter(fbbAdapter);
+
+        updateView();
+    }
+
+    private void clickOk() {
+        hindKeyboard();
+        getPresenter().requestUpdateMyNumber(
+                postAdapter.getConfirmMobileList(),
+                preAdapter.getConfirmMobileList(),
+                fbbAdapter.getConfirmMobileList()
+        );
+    }
+
+    private void clickAdd() {
+        getPresenter().validateRequestVerifyIdentityAddNoConfirmNumber(
+                edtMobileNumber.getTextNoDash(),
+                edtCaptcha.getText().toString());
+        setNoClickAll();
+    }
+
+    private void clickCancel() {
+        getActivity().onBackPressed();
+    }
+
+    private void hindKeyboard() {
+        NextzyAndroidUtility.getInstance().hideKeyboard(getActivity());
+    }
+
+    private void setNoClickAll() {
+        postAdapter.setNoClickAll();
+        fbbAdapter.setNoClickAll();
+        preAdapter.setNoClickAll();
+    }
+
+
+    private void setVisibleIfCan(View v, int arraySize) {
+        if (arraySize == 0) {
+            v.setVisibility(GONE);
+        } else {
+            v.setVisibility(VISIBLE);
+        }
+    }
+
+    private void updateView() {
+        if ((preAdapter != null &amp;&amp; postAdapter.getItemCount() &gt; 0)
+                || (preAdapter != null &amp;&amp; preAdapter.getItemCount() &gt; 0)
+                || (fbbAdapter != null &amp;&amp; fbbAdapter.getItemCount() &gt; 0)) {
+            containerMobileNumberList.setVisibility(VISIBLE);
+        } else {
+            containerMobileNumberList.setVisibility(GONE);
+        }
+        setVisibleIfCan(llPost, postAdapter.getItemCount());
+        setVisibleIfCan(llPre, preAdapter.getItemCount());
+        setVisibleIfCan(llFbb, fbbAdapter.getItemCount());
+    }
+    //&lt;/editor-fold&gt;
+
+    /*************************/
+    /** CallBack &amp; Listener **/
+    /*************************/
+    //&lt;editor-fold desc=&quot;CallBack &amp; Listener folding&quot;&gt;
+<span class="nc" id="L605">    private MobileRequestWithRequestOtpItemHolder.OnClickItemListener postAdapterListener = new MobileRequestWithRequestOtpItemHolder.OnClickItemListener() {</span>
+        @Override
+        public void onClick(MobileRequestWithRequestOtpItemHolder h, View v, String mobileNumber, String otp, int pos) {
+<span class="nc bnc" id="L608" title="All 3 branches missed.">            switch (v.getId()) {</span>
+                case R.id.my_ais_register_tv_request_otp:
+<span class="nc" id="L610">                    requestVerifyIdentityPostpaidNumberSelectedForMarkConfirm(mobileNumber);</span>
+<span class="nc" id="L611">                    focusView = h;</span>
+<span class="nc" id="L612">                    break;</span>
+                case R.id.my_ais_register_btn_ok:
+<span class="nc" id="L614">                    getPresenter().validateRequestVerifyOtpNumberSelected(mobileNumber, otp);</span>
+<span class="nc" id="L615">                    focusView = h;</span>
+                    break;
+            }
+<span class="nc" id="L618">        }</span>
+    };
+
+
+<span class="nc" id="L622">    private MobileRequestWithRequestOtpItemHolder.OnClickItemListener preAdapterListener = new MobileRequestWithRequestOtpItemHolder.OnClickItemListener() {</span>
+        @Override
+        public void onClick(MobileRequestWithRequestOtpItemHolder h, View v, String mobileNumber, String otp, int pos) {
+<span class="nc bnc" id="L625" title="All 3 branches missed.">            switch (v.getId()) {</span>
+                case R.id.my_ais_register_tv_request_otp:
+<span class="nc" id="L627">                    requestVerifyIdentityPrepaidNumberSelectedForMarkConfirm(mobileNumber);</span>
+<span class="nc" id="L628">                    focusView = h;</span>
+<span class="nc" id="L629">                    break;</span>
+                case R.id.my_ais_register_btn_ok:
+<span class="nc" id="L631">                    getPresenter().validateRequestVerifyOtpNumberSelected(mobileNumber, otp);</span>
+<span class="nc" id="L632">                    focusView = h;</span>
+                    break;
+            }
+<span class="nc" id="L635">        }</span>
+    };
+
+<span class="nc" id="L638">    private MobileRequestWithRequestOtpItemHolder.OnClickItemListener fbbAdapterListener = new MobileRequestWithRequestOtpItemHolder.OnClickItemListener() {</span>
+        @Override
+        public void onClick(MobileRequestWithRequestOtpItemHolder h, View v, String mobileNumber, String otp, int pos) {
+<span class="nc bnc" id="L641" title="All 3 branches missed.">            switch (v.getId()) {</span>
+                case R.id.my_ais_register_tv_request_otp:
+<span class="nc" id="L643">                    requestVerifyIdentityFibreNumberSelectedForMarkConfirm(mobileNumber);</span>
+<span class="nc" id="L644">                    focusView = h;</span>
+<span class="nc" id="L645">                    break;</span>
+                case R.id.my_ais_register_btn_ok:
+<span class="nc" id="L647">                    getPresenter().validateRequestVerifyOtpNumberSelected(mobileNumber, otp);</span>
+<span class="nc" id="L648">                    focusView = h;</span>
+                    break;
+            }
+<span class="nc" id="L651">        }</span>
+    };
+    //&lt;/editor-fold&gt;
+
+    public String getArgumentsStringMobileNumber() {
+        return getArguments().getString(KEY_MOBILE_NUMBER);
+    }
+
+
+    public String getArgumentsStringEmail() {
+        return getArguments().getString(KEY_EMAIL);
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>
