@@ -409,7 +409,7 @@ import rx.functions.Func1;
 <span class="nc" id="L409">                .flatMap(new Func1&lt;LoginWithPasswordResult, Single&lt;LoginWithOtpSecretData&gt;&gt;() {</span>
                     @Override
                     public Single&lt;LoginWithOtpSecretData&gt; call(LoginWithPasswordResult result) {
-<span class="nc" id="L412">                        return Single.just(result.getData());</span>
+                        return Single.just(result.getData());
                     }
                 });
     }
