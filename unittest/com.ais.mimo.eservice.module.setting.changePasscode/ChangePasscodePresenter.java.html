@@ -3,42 +3,41 @@
 
 import com.hwangjr.rxbus.RxBus;
 import com.nextzy.myais.common.mvp.NextzyActivityPresenter;
-import com.nextzy.myais.common.utility.DefaultPreference;
 
 /**
  * Created by nextzy on 8/5/2016 AD.
  */
 public class ChangePasscodePresenter extends NextzyActivityPresenter&lt;ChangePasscodeContractor.View&gt; implements ChangePasscodeContractor.Presenter {
-<span class="nc" id="L12">    private static String TAG = ChangePasscodePresenter.class.getSimpleName();</span>
-    private static DefaultPreference securePreference;
 
     public static ChangePasscodePresenter createPresenter(ChangePasscodeContractor.View view) {
-<span class="nc" id="L16">        return new ChangePasscodePresenter(view);</span>
+<span class="nc" id="L13">        return new ChangePasscodePresenter(view);</span>
     }
 
     public ChangePasscodePresenter(ChangePasscodeContractor.View view) {
-<span class="nc" id="L20">        super(view);</span>
-<span class="nc" id="L21">    }</span>
+<span class="nc" id="L17">        super(view);</span>
+<span class="nc" id="L18">    }</span>
 
     @Override
     public void onViewCreate() {
-<span class="nc" id="L25">    }</span>
+        // Do nothing.
+<span class="nc" id="L23">    }</span>
 
     @Override
     public void onViewDestroy() {
-<span class="nc" id="L29">    }</span>
+        // Do nothing.
+<span class="nc" id="L28">    }</span>
 
     @Override
     public void onViewStart() {
-<span class="nc" id="L33">        super.onViewStart();</span>
-<span class="nc" id="L34">        RxBus.get().register(this);</span>
-<span class="nc" id="L35">    }</span>
+<span class="nc" id="L32">        super.onViewStart();</span>
+<span class="nc" id="L33">        RxBus.get().register(this);</span>
+<span class="nc" id="L34">    }</span>
 
     @Override
     public void onViewStop() {
-<span class="nc" id="L39">        super.onViewStop();</span>
-<span class="nc" id="L40">        RxBus.get().unregister(this);</span>
-<span class="nc" id="L41">    }</span>
+<span class="nc" id="L38">        super.onViewStop();</span>
+<span class="nc" id="L39">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L40">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

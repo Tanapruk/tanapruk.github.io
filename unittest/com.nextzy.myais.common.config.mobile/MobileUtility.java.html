@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MobileUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.common.config.mobile</a> &gt; <span class="el_source">MobileUtility.java</span></div><h1>MobileUtility.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.common.config.mobile;
+
+import android.support.annotation.NonNull;
+
+import com.nextzy.myais.common.constant.BusinessType;
+import com.nextzy.myais.common.constant.NetworkType;
+
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Created by Akexorcist on 9/7/2016 AD.
+ */
+
+@SuppressWarnings(&quot;unused&quot;)
+<span class="nc" id="L16">public class MobileUtility {</span>
+    private static MobileUtility mobileUtility;
+
+    public static MobileUtility getInstance() {
+<span class="nc bnc" id="L20" title="All 2 branches missed.">        if (mobileUtility == null) {</span>
+<span class="nc" id="L21">            mobileUtility = new MobileUtility();</span>
+        }
+<span class="nc" id="L23">        return mobileUtility;</span>
+    }
+
+    public String getBusinessTypeByNetworkType(String networkType) {
+<span class="nc" id="L27">        String businessType = &quot;&quot;;</span>
+<span class="nc bnc" id="L28" title="All 2 branches missed.">        if (getPrepaidList().contains(networkType)) {</span>
+<span class="nc" id="L29">            businessType += BusinessType.PREPAID;</span>
+        }
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        if (getPostpaidList().contains(networkType)) {</span>
+<span class="nc" id="L32">            businessType += BusinessType.POSTPAID;</span>
+        }
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        if (get2GList().contains(networkType)) {</span>
+<span class="nc" id="L35">            businessType += BusinessType.OLD_2G;</span>
+        }
+<span class="nc bnc" id="L37" title="All 2 branches missed.">        if (getCorporateList().contains(networkType)) {</span>
+<span class="nc" id="L38">            businessType += BusinessType.CORPORATE;</span>
+        }
+<span class="nc bnc" id="L40" title="All 2 branches missed.">        if (getBosList().contains(networkType)) {</span>
+<span class="nc" id="L41">            businessType += BusinessType.BOS;</span>
+        }
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if (getInterstellarList().contains(networkType)) {</span>
+<span class="nc" id="L44">            businessType += BusinessType.INTERSTELLAR;</span>
+        }
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        if (getUnknownList().contains(networkType)) {</span>
+<span class="nc" id="L47">            businessType = BusinessType.UNKNOWN;</span>
+        }
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        if (businessType.isEmpty()) {</span>
+<span class="nc" id="L50">            businessType = BusinessType.FIBRE;</span>
+        }
+<span class="nc" id="L52">        return businessType;</span>
+    }
+
+    public MobileType getMobileTypeByNetworkType(String networkType) {
+<span class="nc" id="L56">        String businessType = getBusinessTypeByNetworkType(networkType);</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if (businessType.contains(BusinessType.POSTPAID)) {</span>
+<span class="nc" id="L58">            return MobileType.POSTPAID;</span>
+<span class="nc bnc" id="L59" title="All 4 branches missed.">        }else if (businessType.equalsIgnoreCase(NetworkType.FIBRE_FBB) || businessType.equalsIgnoreCase(NetworkType.FIBRE_FBO)){</span>
+<span class="nc" id="L60">            return MobileType.FBB;</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        }else if (businessType.contains(BusinessType.PREPAID)) {</span>
+<span class="nc" id="L62">            return MobileType.PREPAID;</span>
+        }
+<span class="nc" id="L64">        return null;</span>
+    }
+
+    public boolean isNTypeIsPostpaid(String nType) {
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        return MobileType.POSTPAID == getMobileTypeByNetworkType(nType);</span>
+    }
+
+    public boolean isNTypeIsPrepaid(String nType) {
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        return MobileType.PREPAID == getMobileTypeByNetworkType(nType);</span>
+    }
+
+    public boolean isNTypeIsFbb(String nType) {
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        return MobileType.FBB == getMobileTypeByNetworkType(nType);</span>
+    }
+
+    public MobileType getMobileTypeByMobileData(String chargeType, String mobileType) {
+<span class="nc bnc" id="L80" title="All 4 branches missed.">        if (&quot;FBB&quot;.equalsIgnoreCase(mobileType) || &quot;FBO&quot;.equalsIgnoreCase(mobileType)) {</span>
+<span class="nc" id="L81">            return MobileType.FBB;</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        } else if (chargeType.toLowerCase().contains(&quot;post&quot;)) {</span>
+<span class="nc" id="L83">            return MobileType.POSTPAID;</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        } else if (chargeType.toLowerCase().contains(&quot;pre&quot;)) {</span>
+<span class="nc" id="L85">            return MobileType.PREPAID;</span>
+        }
+
+<span class="nc" id="L88">        return null;</span>
+    }
+
+    boolean getSwopByNetworkType(String networkType) {
+<span class="nc" id="L92">        return getBosList().contains(networkType);</span>
+    }
+
+    @NonNull
+    public List&lt;String&gt; getPrepaidList() {
+<span class="nc" id="L97">        return Arrays.asList(</span>
+                NetworkType.PREPAID_2G_CORP,
+                NetworkType.PREPAID_2G,
+                NetworkType.PREPAID_3G_CORP,
+                NetworkType.PREPAID_3G,
+                NetworkType.PREPAID_3G_BOS,
+                NetworkType.PREPAID_3G_BOS2,
+                NetworkType.PREPAID_INTERSTALLAR,
+                NetworkType.PREPAID_INTERSTALLAR_2
+        );
+    }
+
+    @NonNull
+    public List&lt;String&gt; getPostpaidList() {
+<span class="nc" id="L111">        return Arrays.asList(</span>
+                NetworkType.POSTPAID_3G_BOS_CORP,
+                NetworkType.POSTPAID_3G_BOS,
+                NetworkType.POSTPAID_3G_CORP,
+                NetworkType.POSTPAID_3G,
+                NetworkType.POSTPAID_3G_BOS_CORP_HYBRID,
+                NetworkType.POSTPAID_INTERSTALLAR,
+                NetworkType.POSTPAID_INTERSTALLAR_CORP,
+                NetworkType.POSTPAID_2G_CORP,
+                NetworkType.POSTPAID_2G,
+                NetworkType.POSTPAID_2G_1800
+        );
+    }
+
+    @NonNull
+    private List&lt;String&gt; get3GList() {
+<span class="nc" id="L127">        return Arrays.asList(</span>
+                NetworkType.PREPAID_3G_CORP,
+                NetworkType.PREPAID_3G,
+                NetworkType.PREPAID_3G_BOS,
+                NetworkType.PREPAID_3G_BOS2,
+                NetworkType.POSTPAID_3G_BOS_CORP,
+                NetworkType.POSTPAID_3G_BOS,
+                NetworkType.POSTPAID_3G_CORP,
+                NetworkType.POSTPAID_3G,
+                NetworkType.POSTPAID_3G_BOS_CORP_HYBRID
+        );
+    }
+
+    private List&lt;String&gt; get2GList() {
+<span class="nc" id="L141">        return Arrays.asList(</span>
+                NetworkType.PREPAID_2G_CORP,
+                NetworkType.PREPAID_2G,
+                NetworkType.POSTPAID_2G_CORP,
+                NetworkType.POSTPAID_2G,
+                NetworkType.POSTPAID_2G_1800
+        );
+    }
+
+    @NonNull
+    private List&lt;String&gt; getBosList() {
+<span class="nc" id="L152">        return Arrays.asList(</span>
+                NetworkType.PREPAID_3G_BOS,
+                NetworkType.PREPAID_3G_BOS2,
+                NetworkType.POSTPAID_3G_BOS_CORP,
+                NetworkType.POSTPAID_3G_BOS,
+                NetworkType.POSTPAID_3G_BOS_CORP_HYBRID
+        );
+    }
+
+    @NonNull
+    private List&lt;String&gt; getCorporateList() {
+<span class="nc" id="L163">        return Arrays.asList(</span>
+                NetworkType.PREPAID_2G_CORP,
+                NetworkType.PREPAID_3G_CORP,
+                NetworkType.POSTPAID_3G_BOS_CORP,
+                NetworkType.POSTPAID_3G_CORP,
+                NetworkType.POSTPAID_3G_BOS_CORP_HYBRID,
+                NetworkType.POSTPAID_INTERSTALLAR_CORP,
+                NetworkType.POSTPAID_2G_CORP
+        );
+    }
+
+    @NonNull
+    private List&lt;String&gt; getInterstellarList() {
+<span class="nc" id="L176">        return Arrays.asList(</span>
+                NetworkType.POSTPAID_INTERSTALLAR,
+                NetworkType.POSTPAID_INTERSTALLAR_CORP,
+                NetworkType.PREPAID_INTERSTALLAR,
+                NetworkType.PREPAID_INTERSTALLAR_2
+        );
+    }
+
+    @NonNull
+    private List&lt;String&gt; getUnknownList() {
+<span class="nc" id="L186">        return Arrays.asList(</span>
+                NetworkType.UNKOWN_1
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -45,28 +45,29 @@ public class SettingPresenter extends NextzyActivityPresenter&lt;SettingContract
 
     @Override
     public void onViewStop() {
-<span class="nc" id="L48">    }</span>
+        // Do nothing.
+<span class="nc" id="L49">    }</span>
 
 
     @Subscribe
     public void onSetLanguageEvent(SetLanguageEvent event) {
-<span class="nc" id="L53">        getView().setLanguage(event.getLanguage());</span>
-<span class="nc" id="L54">    }</span>
+<span class="nc" id="L54">        getView().setLanguage(event.getLanguage());</span>
+<span class="nc" id="L55">    }</span>
 
     @Subscribe
     public void onGoToPasscodeSettingFragmentEvent(GoToPasscodeSettingFragmentEvent event) {
-<span class="nc" id="L58">        getView().openPasscodeSettingFragment();</span>
-<span class="nc" id="L59">    }</span>
+<span class="nc" id="L59">        getView().openPasscodeSettingFragment();</span>
+<span class="nc" id="L60">    }</span>
 
     @Subscribe
     public void onGoToChangePasscodeFragmentEvent(GoToChangePasscodeFragmentEvent event) {
-<span class="nc" id="L63">        getView().openChangePasscodeFragment(event.getOldPasscode());</span>
-<span class="nc" id="L64">    }</span>
+<span class="nc" id="L64">        getView().openChangePasscodeFragment(event.getOldPasscode());</span>
+<span class="nc" id="L65">    }</span>
 
     @Subscribe
     public void onGoToFirstNewPasscodeActivityEvent(GoToFirstNewPasscodeFragmentEvent event) {
-<span class="nc" id="L68">        getView().openFirstNewPasscodeActivity();</span>
-<span class="nc" id="L69">    }</span>
+<span class="nc" id="L69">        getView().openFirstNewPasscodeActivity();</span>
+<span class="nc" id="L70">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

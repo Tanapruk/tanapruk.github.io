@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChangePackagePackageDetailPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.promotion.module.changepackage.fragment.packagedetail</a> &gt; <span class="el_source">ChangePackagePackageDetailPresenter.java</span></div><h1>ChangePackagePackageDetailPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.promotion.module.changepackage.fragment.packagedetail;
+
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.utility.NextzyUtility;
+import com.nextzy.myais.promotion.helper.changepackage.network.ChangePackageManager;
+import com.nextzy.myais.promotion.helper.changepackage.request.CheckPackageBody;
+import com.nextzy.myais.promotion.helper.changepackage.response.BillingCycleResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.CheckPackageData;
+import com.nextzy.myais.promotion.helper.changepackage.response.CheckPackageResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.PackageData;
+import com.nextzy.myais.promotion.helper.changepackage.response.PackageGroupData;
+import com.nextzy.myais.promotion.helper.changepackage.response.PackageGroupResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.PackageResult;
+import com.nextzy.myais.promotion.module.changepackage.ChangePackageUtility;
+import com.nextzy.myais.promotion.module.changepackage.common.BaseChangePackagePresenter;
+import com.nextzy.myais.promotion.module.changepackage.constant.EffectiveOptionType;
+import com.nextzy.myais.promotion.module.changepackage.event.GoToApplyPackageEvent;
+import com.nextzy.myais.promotion.module.changepackage.event.GoToEffectiveOptionEvent;
+import com.nextzy.myais.promotion.module.changepackage.event.GoToOnSpotPaymentEvent;
+import com.nextzy.myais.promotion.module.changepackage.model.BaseChangePackageItem;
+import com.nextzy.myais.promotion.module.changepackage.model.DividerItem;
+import com.nextzy.myais.promotion.module.changepackage.model.EffectiveResultItem;
+import com.nextzy.myais.promotion.module.changepackage.model.PackageDetailItem;
+import com.nextzy.myais.promotion.module.changepackage.model.SpecialNumberItem;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Created by Akexorcist on 9/29/2016 AD.
+ */
+
+public class ChangePackagePackageDetailPresenter extends BaseChangePackagePresenter&lt;ChangePackagePackageDetailContractor.View&gt; implements ChangePackagePackageDetailContractor.Presenter {
+    private static final String RESULT_SUCCESS = &quot;SUCCESS&quot;;
+    private String tabTitle;
+    private String packageId;
+    private String fee;
+    private String accessNumber;
+    private List&lt;String&gt; specialNumberList;
+    private int categoryColor;
+
+    public static ChangePackagePackageDetailPresenter createPresenter(ChangePackagePackageDetailContractor.View view) {
+<span class="nc" id="L46">        return new ChangePackagePackageDetailPresenter(view);</span>
+    }
+
+    private ChangePackagePackageDetailPresenter(ChangePackagePackageDetailContractor.View view) {
+<span class="nc" id="L50">        super(view);</span>
+<span class="nc" id="L51">    }</span>
+
+    @Override
+    public void setBillingCycleResult(BillingCycleResult billingCycleResult) {
+<span class="nc" id="L55">        setBillingCycle(ChangePackageUtility.getInstance().getBillingCycleText(billingCycleResult));</span>
+<span class="nc" id="L56">    }</span>
+
+    @Override
+    public void setTabTitle(String tabTitle) {
+<span class="nc" id="L60">        this.tabTitle = tabTitle;</span>
+<span class="nc" id="L61">    }</span>
+
+    @Override
+    public String getTabTitle() {
+<span class="nc" id="L65">        return tabTitle;</span>
+    }
+
+    @Override
+    public void setPackageId(String packageId) {
+<span class="nc" id="L70">        this.packageId = packageId;</span>
+<span class="nc" id="L71">    }</span>
+
+    @Override
+    public String getPackageId() {
+<span class="nc" id="L75">        return packageId;</span>
+    }
+
+    @Override
+    public void setFee(String fee) {
+<span class="nc" id="L80">        this.fee = fee;</span>
+<span class="nc" id="L81">    }</span>
+
+    @Override
+    public String getFee() {
+<span class="nc" id="L85">        return fee;</span>
+    }
+
+    @Override
+    public void setAccessNumber(String accessNumber) {
+<span class="nc" id="L90">        this.accessNumber = accessNumber;</span>
+<span class="nc" id="L91">    }</span>
+
+    @Override
+    public String getAccessNumber() {
+<span class="nc" id="L95">        return accessNumber;</span>
+    }
+
+    @Override
+    public void setCategoryColor(int categoryColor) {
+<span class="nc" id="L100">        this.categoryColor = categoryColor;</span>
+<span class="nc" id="L101">    }</span>
+
+    @Override
+    public int getCategoryColor() {
+<span class="nc" id="L105">        return categoryColor;</span>
+    }
+
+    // Create layout here with recycler view item
+    @Override
+    public void initPackageDetail() {
+<span class="nc" id="L111">        List&lt;BaseChangePackageItem&gt; itemList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L112">        itemList.addAll(createTitleItem());</span>
+<span class="nc" id="L113">        itemList.addAll(createStepIndicatorItem(getView().getStepDescriptionList(getGroupCode()), getStepIndex()));</span>
+<span class="nc" id="L114">        itemList.addAll(createPackageTitleItem());</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">        if(!Mobile.getInstance().isCorporate()) {</span>
+            // Corporate on spot doesn't has special number
+<span class="nc" id="L117">            itemList.addAll(createSpecialNumberItem());</span>
+        }
+<span class="nc bnc" id="L119" title="All 2 branches missed.">        if (Mobile.getInstance().isCorporate()) {</span>
+            // For corporate on spot
+<span class="nc" id="L121">            itemList.add(createEffectiveResultItem());</span>
+        }
+<span class="nc" id="L123">        itemList.add(createButtonNextItem());</span>
+<span class="nc" id="L124">        itemList.add(createTermAndConditionItem(getTermAndCondition()));</span>
+<span class="nc" id="L125">        itemList.add(createEmptyItem());</span>
+<span class="nc" id="L126">        getView().setItemList(itemList);</span>
+<span class="nc" id="L127">    }</span>
+
+    @Override
+    public void callCheckPackage() {
+<span class="nc" id="L131">        getView().showLoading();</span>
+<span class="nc" id="L132">        CheckPackageBody body = new CheckPackageBody();</span>
+<span class="nc" id="L133">        body.setEffectiveOption(EffectiveOptionType.IMMEDIATELY);</span>
+<span class="nc" id="L134">        body.setTypeCode(getGroupCode());</span>
+<span class="nc" id="L135">        body.setTabCode(getTabCode());</span>
+<span class="nc" id="L136">        CheckPackageBody.PackageItem packageItem = new CheckPackageBody.PackageItem();</span>
+<span class="nc" id="L137">        packageItem.setId(getPackageId());</span>
+<span class="nc" id="L138">        packageItem.setPrice(getFee());</span>
+<span class="nc" id="L139">        packageItem.setAccessNumber(getAccessNumber());</span>
+<span class="nc" id="L140">        body.setPackageList(Collections.singletonList(packageItem));</span>
+<span class="nc" id="L141">        ChangePackageManager.getInstance().checkPackage(getGroupCode(), body);</span>
+<span class="nc" id="L142">    }</span>
+
+    @Override
+    protected List&lt;BaseChangePackageItem&gt; createTitleItem() {
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        if (Mobile.getInstance().isCorporate()) {</span>
+<span class="nc" id="L147">            return Collections.singletonList(createCorporateTitleItem());</span>
+        }
+<span class="nc" id="L149">        return super.createTitleItem();</span>
+    }
+
+    @Override
+    public void onNextStep() {
+<span class="nc" id="L154">        List&lt;String&gt; specialNumberList = getView().getSpecialNumberList();</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">        if (isAllSpecialNumberEmpty(specialNumberList)) {</span>
+<span class="nc" id="L156">            getView().showSpecialNumberEmpty();</span>
+<span class="nc" id="L157">            return;</span>
+        }
+<span class="nc bnc" id="L159" title="All 2 branches missed.">        if (isSpecialNumberValidated(specialNumberList)) {</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">            if (Mobile.getInstance().isCorporate()) {</span>
+<span class="nc" id="L161">                goToCorporateNextStep();</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">            } else if (Mobile.getInstance().isPostpaid()) {</span>
+<span class="nc" id="L163">                goToPostpaidNextStep();</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">            } else if (Mobile.getInstance().isPrepaid()) {</span>
+<span class="nc" id="L165">                goToPrepaidNextStep();</span>
+            }
+<span class="nc" id="L167">            return;</span>
+        }
+<span class="nc" id="L169">        getView().showSpecialNumberInvalid();</span>
+<span class="nc" id="L170">    }</span>
+
+    @Subscribe
+    public void onCheckPackageResult(CheckPackageResult result) {
+<span class="nc" id="L174">        getView().hideLoading();</span>
+<span class="nc" id="L175">        initPackageDetail();</span>
+<span class="nc bnc" id="L176" title="All 4 branches missed.">        if (result != null &amp;&amp; result.hasData()) {</span>
+<span class="nc" id="L177">            CheckPackageData checkPackageData = result.getData();</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">            if (isApplicationResultAvailable(checkPackageData)) {</span>
+<span class="nc" id="L179">                return;</span>
+            } else {
+<span class="nc" id="L181">                String resultDescription = getApplicationResultUnavailableDescription(checkPackageData);</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">                if (resultDescription != null) {</span>
+<span class="nc" id="L183">                    getView().showPackageUnavailable(resultDescription);</span>
+<span class="nc" id="L184">                    getView().hideConfirmPackageButton();</span>
+<span class="nc" id="L185">                    return;</span>
+                }
+            }
+        }
+<span class="nc" id="L189">        getView().showServiceUnavailableDialog();</span>
+<span class="nc" id="L190">        getView().hideConfirmPackageButton();</span>
+<span class="nc" id="L191">    }</span>
+
+    private boolean isApplicationResultAvailable(CheckPackageData checkPackageData) {
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        if (checkPackageData == null) {</span>
+<span class="nc" id="L195">            return false;</span>
+        }
+<span class="nc" id="L197">        List&lt;CheckPackageData.ApplicationResult&gt; applicationResultList = checkPackageData.getApplicationResultList();</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">        return applicationResultList != null &amp;&amp;</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">                !applicationResultList.isEmpty() &amp;&amp;</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">                applicationResultList.size() == 1 &amp;&amp;</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">                applicationResultList.get(0).getStatus().equalsIgnoreCase(RESULT_SUCCESS);</span>
+    }
+
+    private String getApplicationResultUnavailableDescription(CheckPackageData checkPackageData) {
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        if (checkPackageData != null) {</span>
+<span class="nc" id="L206">            List&lt;CheckPackageData.ApplicationResult&gt; applicationResultList = checkPackageData.getApplicationResultList();</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">            if (applicationResultList != null &amp;&amp;</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">                    !applicationResultList.isEmpty() &amp;&amp;</span>
+<span class="nc bnc" id="L209" title="All 2 branches missed.">                    applicationResultList.size() == 1) {</span>
+<span class="nc" id="L210">                return applicationResultList.get(0).getResultDescription();</span>
+            }
+        }
+<span class="nc" id="L213">        return null;</span>
+    }
+
+    private void goToPrepaidNextStep() {
+<span class="nc" id="L217">        GoToApplyPackageEvent event = new GoToApplyPackageEvent();</span>
+<span class="nc" id="L218">        event.setGroupCode(getGroupCode());</span>
+<span class="nc" id="L219">        event.setTabCode(getTabCode());</span>
+<span class="nc" id="L220">        event.setPackageId(packageId);</span>
+<span class="nc" id="L221">        event.setEffectiveOption(EffectiveOptionType.IMMEDIATELY);</span>
+<span class="nc" id="L222">        event.setSpecialNumberList(getView().getSpecialNumberList());</span>
+<span class="nc" id="L223">        event.setTermAndCondition(getTermAndCondition());</span>
+<span class="nc" id="L224">        RxBus.get().post(event);</span>
+<span class="nc" id="L225">    }</span>
+
+    private void goToCorporateNextStep() {
+<span class="nc" id="L228">        GoToOnSpotPaymentEvent event = new GoToOnSpotPaymentEvent();</span>
+<span class="nc" id="L229">        event.setGroupCode(getGroupCode());</span>
+<span class="nc" id="L230">        event.setTabCode(getTabCode());</span>
+<span class="nc" id="L231">        event.setPackageId(packageId);</span>
+<span class="nc" id="L232">        event.setFee(getFee());</span>
+<span class="nc" id="L233">        event.setTermAndCondition(getTermAndCondition());</span>
+<span class="nc" id="L234">        event.setSpecialNumberList(getView().getSpecialNumberList());</span>
+<span class="nc" id="L235">        RxBus.get().post(event);</span>
+<span class="nc" id="L236">    }</span>
+
+    private void goToPostpaidNextStep() {
+<span class="nc" id="L239">        GoToEffectiveOptionEvent event = new GoToEffectiveOptionEvent();</span>
+<span class="nc" id="L240">        event.setGroupCode(getGroupCode());</span>
+<span class="nc" id="L241">        event.setTabCode(getTabCode());</span>
+<span class="nc" id="L242">        event.setPackageId(packageId);</span>
+<span class="nc" id="L243">        event.setTermAndCondition(getTermAndCondition());</span>
+<span class="nc" id="L244">        event.setSpecialNumberList(getView().getSpecialNumberList());</span>
+<span class="nc" id="L245">        RxBus.get().post(event);</span>
+<span class="nc" id="L246">    }</span>
+
+    private boolean isSpecialNumberValidated(List&lt;String&gt; specialNumberList) {
+<span class="nc bnc" id="L249" title="All 2 branches missed.">        if (specialNumberList != null) {</span>
+<span class="nc bnc" id="L250" title="All 2 branches missed.">            for (String specialNumber : specialNumberList) {</span>
+<span class="nc bnc" id="L251" title="All 4 branches missed.">                if (specialNumber != null &amp;&amp; !specialNumber.isEmpty()) {</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">                    if (!NextzyUtility.getInstance().isMobileNumberOrInternetNumber(specialNumber)) {</span>
+<span class="nc" id="L253">                        return false;</span>
+                    }
+                }
+<span class="nc" id="L256">            }</span>
+        }
+<span class="nc" id="L258">        return true;</span>
+    }
+
+    private boolean isAllSpecialNumberEmpty(List&lt;String&gt; specialNumberList) {
+<span class="nc bnc" id="L262" title="All 4 branches missed.">        if (specialNumberList != null &amp;&amp; specialNumberList.size() &gt; 0) {</span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">            for (String specialNumber : specialNumberList) {</span>
+<span class="nc bnc" id="L264" title="All 2 branches missed.">                if (!specialNumber.isEmpty()) {</span>
+<span class="nc" id="L265">                    return false;</span>
+                }
+<span class="nc" id="L267">            }</span>
+<span class="nc" id="L268">            return true;</span>
+        }
+<span class="nc" id="L270">        return false;</span>
+    }
+
+    private List&lt;BaseChangePackageItem&gt; createPackageTitleItem() {
+<span class="nc" id="L274">        List&lt;BaseChangePackageItem&gt; itemList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L275">        PackageGroupResult packageGroupResult = getView().getPackageGroupResult();</span>
+<span class="nc" id="L276">        PackageResult packageResult = getView().getPackageResult(getTabCode());</span>
+<span class="nc" id="L277">        PackageGroupData packageGroupData = ChangePackageUtility.getInstance().getCategoryByTabCode(getTabCode(), packageGroupResult);</span>
+<span class="nc" id="L278">        PackageData.PackageDetail packageDetail = ChangePackageUtility.getInstance().getPackageDetailById(getPackageId(), packageResult);</span>
+<span class="nc bnc" id="L279" title="All 4 branches missed.">        if (packageGroupData != null &amp;&amp; packageDetail != null) {</span>
+<span class="nc" id="L280">            PackageDetailItem item = new PackageDetailItem();</span>
+<span class="nc" id="L281">            item.setCategoryName(getTabTitle());</span>
+<span class="nc" id="L282">            item.setCategoryIcon(ChangePackageUtility.getInstance().getPackageIconResourceByTitle(getTabTitle()));</span>
+<span class="nc" id="L283">            item.setCategoryColor(getCategoryColor());</span>
+<span class="nc" id="L284">            item.setPackageName(packageDetail.getName());</span>
+<span class="nc" id="L285">            item.setPackageDescription(packageDetail.getDescription());</span>
+<span class="nc" id="L286">            itemList.add(item);</span>
+        }
+<span class="nc" id="L288">        return itemList;</span>
+    }
+
+    private List&lt;BaseChangePackageItem&gt; createSpecialNumberItem() {
+<span class="nc" id="L292">        List&lt;BaseChangePackageItem&gt; itemList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L293">        PackageResult packageResult = getView().getPackageResult(getTabCode());</span>
+<span class="nc" id="L294">        PackageData.PackageDetail packageDetail = ChangePackageUtility.getInstance().getPackageDetailById(packageId, packageResult);</span>
+<span class="nc" id="L295">        List&lt;String&gt; specialNumberTitleList = getSpecialNumberList(packageDetail);</span>
+<span class="nc bnc" id="L296" title="All 4 branches missed.">        if (specialNumberTitleList != null &amp;&amp; specialNumberTitleList.size() &gt; 0) {</span>
+<span class="nc" id="L297">            itemList.add(new DividerItem());</span>
+<span class="nc" id="L298">            SpecialNumberItem specialNumberItem = new SpecialNumberItem();</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">            if (specialNumberTitleList.size() &gt;= 1) {</span>
+<span class="nc" id="L300">                specialNumberItem.setTitle1(specialNumberTitleList.get(0));</span>
+            }
+<span class="nc bnc" id="L302" title="All 2 branches missed.">            if (specialNumberTitleList.size() &gt;= 2) {</span>
+<span class="nc" id="L303">                specialNumberItem.setTitle2(specialNumberTitleList.get(1));</span>
+            }
+<span class="nc bnc" id="L305" title="All 2 branches missed.">            if (specialNumberTitleList.size() &gt;= 3) {</span>
+<span class="nc" id="L306">                specialNumberItem.setTitle3(specialNumberTitleList.get(2));</span>
+            }
+<span class="nc bnc" id="L308" title="All 2 branches missed.">            if (specialNumberTitleList.size() &gt;= 4) {</span>
+<span class="nc" id="L309">                specialNumberItem.setTitle4(specialNumberTitleList.get(3));</span>
+            }
+<span class="nc bnc" id="L311" title="All 2 branches missed.">            if (specialNumberTitleList.size() &gt;= 5) {</span>
+<span class="nc" id="L312">                specialNumberItem.setTitle5(specialNumberTitleList.get(4));</span>
+            }
+<span class="nc" id="L314">            itemList.add(specialNumberItem);</span>
+        }
+<span class="nc" id="L316">        return itemList;</span>
+    }
+
+    private EffectiveResultItem createEffectiveResultItem() {
+<span class="nc" id="L320">        EffectiveResultItem effectiveResultItem = new EffectiveResultItem();</span>
+<span class="nc" id="L321">        effectiveResultItem.setEffectiveDate(getView().getOnSpotEffectiveResultDescription());</span>
+<span class="nc" id="L322">        return effectiveResultItem;</span>
+    }
+
+    private List&lt;String&gt; getSpecialNumberList(PackageData.PackageDetail packageDetail) {
+<span class="nc bnc" id="L326" title="All 4 branches missed.">        if (packageDetail != null &amp;&amp; packageDetail.getSpecialNumberList() != null) {</span>
+<span class="nc" id="L327">            List&lt;PackageData.SpecialNumber&gt; specialNumberList = packageDetail.getSpecialNumberList();</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">            if (specialNumberList != null) {</span>
+<span class="nc" id="L329">                List&lt;String&gt; specialNumberTitleList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L330" title="All 2 branches missed.">                for (PackageData.SpecialNumber specialNumber : specialNumberList) {</span>
+<span class="nc" id="L331">                    specialNumberTitleList.add(specialNumber.getLabel());</span>
+<span class="nc" id="L332">                }</span>
+<span class="nc" id="L333">                return specialNumberTitleList;</span>
+            }
+        }
+<span class="nc" id="L336">        return null;</span>
+    }
+
+    @Override
+    public void onViewStart() {
+<span class="nc" id="L341">        super.onViewStart();</span>
+<span class="nc" id="L342">        RxBus.get().register(this);</span>
+<span class="nc" id="L343">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L347">        super.onViewStop();</span>
+<span class="nc" id="L348">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L349">    }</span>
+
+    private int getStepIndex() {
+<span class="nc bnc" id="L352" title="All 2 branches missed.">        if (Mobile.getInstance().isCorporate()) {</span>
+<span class="nc" id="L353">            return 1;</span>
+<span class="nc bnc" id="L354" title="All 2 branches missed.">        } else if (Mobile.getInstance().isPostpaid()) {</span>
+<span class="nc" id="L355">            return 0;</span>
+<span class="nc bnc" id="L356" title="All 2 branches missed.">        } else if (Mobile.getInstance().isPrepaid()) {</span>
+<span class="nc" id="L357">            return 0;</span>
+        }
+<span class="nc" id="L359">        return -1;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

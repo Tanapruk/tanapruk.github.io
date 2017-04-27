@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IswopPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.home.module.summaryinfo.iswop</a> &gt; <span class="el_source">IswopPresenter.java</span></div><h1>IswopPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.home.module.summaryinfo.iswop;
+
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.event.GotoIswopAcitivtyEvent;
+import com.nextzy.myais.common.iswop.http.IswopManager;
+import com.nextzy.myais.common.iswop.http.exception.IswopDataException;
+import com.nextzy.myais.common.iswop.http.exception.IswopParameterResultException;
+import com.nextzy.myais.common.iswop.http.exception.IswopTransformResultException;
+import com.nextzy.myais.common.iswop.http.model.IswopParameterResult;
+import com.nextzy.myais.common.iswop.http.model.IswopResult;
+import com.nextzy.myais.common.iswop.http.model.IswopTransformResult;
+import com.nextzy.myais.common.iswop.model.IswopInfo;
+import com.nextzy.myais.common.mvp.NextzyPresenter;
+import com.nextzy.myais.common.utility.NextzyUtility;
+import com.nextzy.myais.home.module.summaryinfo.event.DetachIswopEvent;
+import com.nextzy.myais.home.module.summaryinfo.event.DisableViewScrollingEvent;
+import com.nextzy.myais.home.module.summaryinfo.event.DisableViewSwipeableEvent;
+import com.nextzy.myais.home.module.summaryinfo.event.EnableViewScrollingEvent;
+import com.nextzy.myais.home.module.summaryinfo.event.EnableViewSwipeableEvent;
+
+import java.util.concurrent.TimeUnit;
+
+import lombok.Getter;
+import lombok.Setter;
+import rx.Observable;
+
+/**
+ * Created by TheKhaeng on 9/20/2016.
+ */
+
+class IswopPresenter extends NextzyPresenter&lt;IswopContractor.View&gt; implements IswopContractor.Presenter {
+<span class="fc" id="L34">    private static final String TAG = IswopPresenter.class.getSimpleName();</span>
+    public static final String RESULT_SUCCESS = &quot;Success&quot;;
+
+<span class="fc" id="L37">    @Getter</span>
+    private IswopTransformResult iswopTransformResult;
+<span class="fc" id="L39">    @Getter</span>
+<span class="fc" id="L40">    @Setter</span>
+    private int currentVoiceValue;
+<span class="fc" id="L42">    @Getter</span>
+<span class="nc" id="L43">    @Setter</span>
+    private int currentInternetValue;
+<span class="fc" id="L45">    @Getter</span>
+<span class="fc" id="L46">    @Setter</span>
+    private int newVoiceValue;
+<span class="fc" id="L48">    @Getter</span>
+<span class="fc" id="L49">    @Setter</span>
+    private int newInternetValue;
+<span class="fc" id="L51">    @Getter</span>
+    private float transformScale = 1 / (2765f / 1024);
+<span class="nc" id="L53">    @Getter</span>
+<span class="fc" id="L54">    @Setter</span>
+    private int totalProgress;
+<span class="fc" id="L56">    @Getter</span>
+<span class="fc" id="L57">    @Setter</span>
+    private int fraction;
+
+    public IswopPresenter(IswopContractor.View view) {
+<span class="fc" id="L61">        super(view);</span>
+<span class="fc" id="L62">    }</span>
+
+    public static IswopPresenter createPresenter(IswopContractor.View view) {
+<span class="nc" id="L65">        return new IswopPresenter(view);</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L70">        RxBus.get().register(this);</span>
+<span class="nc" id="L71">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L75">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L76">    }</span>
+
+    @Override
+    public void onViewStart() {
+<span class="nc" id="L80">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L84">    }</span>
+
+    /*******************/
+    /** For view call **/
+    /*******************/
+    //&lt;editor-fold desc=&quot;For view folding&quot;&gt;
+    @Override
+    public void getIswopInfo() {
+<span class="fc" id="L92">        getView().showLoading();</span>
+<span class="fc" id="L93">        requestIswopInfoWithDelay();</span>
+<span class="fc" id="L94">    }</span>
+
+    @Override
+    public void setIswopInfo(IswopInfo iswopInfo) {
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">        if (iswopInfo != null</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">                &amp;&amp; iswopInfo.getIswopResult() != null</span>
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">                &amp;&amp; iswopInfo.getIswopResult().getData() != null</span>
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">                &amp;&amp; iswopInfo.getIswopResult().getData().getVoiceRemaining() != null</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">                &amp;&amp; iswopInfo.getIswopResult().getData().getInternetRemaining() != null) {</span>
+<span class="fc" id="L103">            setTransformScale(iswopInfo.getIswopParameterResult());</span>
+<span class="fc" id="L104">            setInfoResult(iswopInfo.getIswopResult());</span>
+<span class="fc" id="L105">            totalProgress = (int) (currentVoiceValue + (currentInternetValue * transformScale));</span>
+<span class="fc" id="L106">            getView().updateSwopInfo(currentVoiceValue, currentInternetValue, totalProgress);</span>
+        } else {
+<span class="fc" id="L108">            sendDetachIswopEvent();</span>
+        }
+<span class="fc" id="L110">        getView().hideLoading();</span>
+<span class="fc" id="L111">    }</span>
+
+    @Override
+    public void requestTransformIswop(int currentProgress) {
+<span class="fc bfc" id="L115" title="All 2 branches covered.">        if (currentVoiceValue != newVoiceValue) {</span>
+<span class="fc" id="L116">            int tickChange = currentProgress - currentVoiceValue;</span>
+<span class="fc" id="L117">            String transformType = getTransformType(tickChange);</span>
+<span class="fc" id="L118">            String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
+<span class="fc" id="L119">            int transformTimes = Math.abs(tickChange);</span>
+<span class="fc" id="L120">            IswopManager.getInstance().requestTransformIswop(mobileNumber, transformType, transformTimes);</span>
+<span class="fc" id="L121">            getView().showLoadingDialog();</span>
+<span class="fc" id="L122">        } else {</span>
+<span class="fc" id="L123">            getView().showSwopDoesNotChangeDialog();</span>
+        }
+<span class="fc" id="L125">    }</span>
+
+    @Override
+    public void updateNewChangeVal(int progress) {
+<span class="fc" id="L129">        newVoiceValue = progress;</span>
+<span class="fc" id="L130">        newInternetValue = totalProgress - progress;</span>
+<span class="fc" id="L131">    }</span>
+
+    @Override
+    public int getActualInternetValue() {
+<span class="fc" id="L135">        return (int) (newInternetValue / transformScale) + fraction;</span>
+    }
+
+    @Override
+    public void onSwopTouchDown() {
+<span class="fc" id="L140">        RxBus.get().post(new DisableViewScrollingEvent());</span>
+<span class="fc" id="L141">        RxBus.get().post(new DisableViewSwipeableEvent());</span>
+<span class="fc" id="L142">    }</span>
+
+    @Override
+    public void onSwopTouchUp() {
+<span class="fc" id="L146">        RxBus.get().post(new EnableViewScrollingEvent());</span>
+<span class="fc" id="L147">        RxBus.get().post(new EnableViewSwipeableEvent());</span>
+<span class="fc" id="L148">    }</span>
+
+    @Override
+    public void onHoldableButtonTouchDown() {
+<span class="fc" id="L152">        RxBus.get().post(new DisableViewScrollingEvent());</span>
+<span class="fc" id="L153">        RxBus.get().post(new DisableViewSwipeableEvent());</span>
+<span class="fc" id="L154">    }</span>
+
+    @Override
+    public void onHoldableButtonTouchUp() {
+<span class="fc" id="L158">        RxBus.get().post(new EnableViewScrollingEvent());</span>
+<span class="fc" id="L159">        RxBus.get().post(new EnableViewSwipeableEvent());</span>
+<span class="fc" id="L160">    }</span>
+
+    //&lt;/editor-fold&gt;
+
+    @Subscribe
+    public void onIswopInfoResult(IswopInfo iswopInfo) {
+<span class="fc" id="L166">        setIswopInfo(iswopInfo);</span>
+<span class="fc" id="L167">    }</span>
+
+    @Subscribe
+    public void onReceiveIswopTransformResult(IswopTransformResult iswopResult) {
+<span class="fc" id="L171">        iswopTransformResult = iswopResult;</span>
+<span class="fc" id="L172">        getView().showSwopSuccessfulDialog();</span>
+<span class="fc" id="L173">    }</span>
+
+    @Subscribe
+    public void onReceiveIswopException(IswopDataException exception) {
+<span class="fc" id="L177">        sendDetachIswopEvent();</span>
+<span class="fc" id="L178">    }</span>
+
+    @Subscribe
+    public void onReceiveIswopParameterException(IswopParameterResultException exception) {
+<span class="fc" id="L182">        sendDetachIswopEvent();</span>
+<span class="fc" id="L183">    }</span>
+
+    @Subscribe
+    public void onReceiveTransformIswopException(IswopTransformResultException exception) {
+<span class="fc" id="L187">        showResponseExceptionDismiss(exception.getMessage());</span>
+<span class="fc" id="L188">    }</span>
+
+    @Override
+    public void onGoToIswopActivityEvent() {
+<span class="fc" id="L192">        RxBus.get().post(new GotoIswopAcitivtyEvent());</span>
+<span class="fc" id="L193">    }</span>
+
+    /********************/
+    /** Private method **/
+    /********************/
+
+    public void requestIswopInfoWithDelay() {
+<span class="nc" id="L200">        Observable.empty()</span>
+<span class="nc" id="L201">                .delay(400, TimeUnit.MILLISECONDS)</span>
+<span class="nc" id="L202">                .doOnCompleted(() -&gt; IswopManager.getInstance().requestIswopInfo(Mobile.getInstance().getMobileNumber()))</span>
+<span class="nc" id="L203">                .subscribe();</span>
+<span class="nc" id="L204">    }</span>
+
+    //&lt;editor-fold desc=&quot;Private function folding&quot;&gt;
+    public boolean isSuccessResultDescription(String resultDescription) {
+<span class="fc" id="L208">        return RESULT_SUCCESS.equalsIgnoreCase(NextzyUtility.getInstance().wrapBlank(resultDescription));</span>
+    }
+
+    public void showResponseExceptionDismiss(String message) {
+<span class="fc bfc" id="L212" title="All 2 branches covered.">        if (isSuccessResultDescription(message)) {</span>
+<span class="fc" id="L213">            getView().showResponseException();</span>
+        } else {
+<span class="fc" id="L215">            getView().showResponseException(message);</span>
+        }
+<span class="fc" id="L217">    }</span>
+
+    public String getTransformType(int tickChange) {
+<span class="fc bfc" id="L220" title="All 2 branches covered.">        if (tickChange &gt; 0) {</span>
+<span class="fc" id="L221">            return IswopManager.KEY_NET_TO_VOICE;</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">        } else if (tickChange &lt; 0) {</span>
+<span class="fc" id="L223">            return IswopManager.KEY_VOICE_TO_NET;</span>
+        } else {
+<span class="fc" id="L225">            return null;</span>
+        }
+    }
+
+    public void setTransformScale(IswopParameterResult iswopParameterResult) {
+<span class="pc bpc" id="L230" title="3 of 6 branches missed.">        if (iswopParameterResult != null &amp;&amp; iswopParameterResult.hasData() &amp;&amp; iswopParameterResult.getData().getParamValue() != null) {</span>
+<span class="fc" id="L231">            transformScale = 1 / (Float.parseFloat(iswopParameterResult.getData().getParamValue()) / 1024);</span>
+        }
+<span class="fc" id="L233">    }</span>
+
+    public void setInfoResult(IswopResult iswopResult) {
+<span class="pc bpc" id="L236" title="2 of 4 branches missed.">        if (iswopResult != null &amp;&amp; iswopResult.getData() != null) {</span>
+<span class="fc" id="L237">            currentVoiceValue = iswopResult.getData().getVoiceRemaining().getRemaining() / 60;</span>
+<span class="fc" id="L238">            currentInternetValue = iswopResult.getData().getInternetRemaining().getRemaining() / 1024;</span>
+<span class="fc" id="L239">            newVoiceValue = currentVoiceValue;</span>
+<span class="fc" id="L240">            newInternetValue = currentInternetValue;</span>
+<span class="fc" id="L241">            fraction = (int) (newInternetValue % (1 / transformScale));</span>
+        }
+<span class="fc" id="L243">    }</span>
+
+    public void sendDetachIswopEvent() {
+<span class="fc" id="L246">        RxBus.get().post(new DetachIswopEvent());</span>
+<span class="fc" id="L247">    }</span>
+
+    //&lt;/editor-fold&gt;
+
+    /*******************/
+    /** Getter Setter **/
+    /*******************/
+    //&lt;editor-fold desc=&quot;Getter Setter folding&quot;&gt;
+
+    //&lt;/editor-fold&gt;
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

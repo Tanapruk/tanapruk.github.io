@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TimeZoneManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.promotion.helper.roaming.util</a> &gt; <span class="el_source">TimeZoneManager.java</span></div><h1>TimeZoneManager.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.promotion.helper.roaming.util;
+
+import android.content.Context;
+
+import com.nextzy.myais.promotion.R;
+import com.nextzy.myais.promotion.helper.roaming.model.country.CountryDst;
+import com.nextzy.myais.promotion.helper.roaming.model.country.CountryState;
+import com.nextzy.myais.promotion.helper.roaming.model.country.CountryStateDst;
+import com.nextzy.myais.promotion.helper.roaming.model.country.TimeZoneOffset;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+
+/**
+ * Created by trusttanapruk on 10/6/2015.
+ */
+<span class="nc" id="L23">public class TimeZoneManager {</span>
+    final static String DATE_FORMAT_SOURCE = &quot;ddMMyyyyHHmm&quot;;
+    final static String TAG = &quot;TimeZoneManager&quot;;
+
+    public static Calendar convertForeignToLocal(Calendar calendar, TimeZoneOffset timeZoneOffset, boolean foreignToLocal) {
+<span class="nc" id="L28">        int foreignOffsetHours = timeZoneOffset.getForeignHour();</span>
+<span class="nc" id="L29">        int foreignOffsetMinutes = timeZoneOffset.getForeignMinute();</span>
+<span class="nc" id="L30">        int localTimeOffsettingHours = timeZoneOffset.getLocalHour();</span>
+<span class="nc" id="L31">        int localTimeOffsettingMinutes = timeZoneOffset.getLocalMinute();</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        if (foreignToLocal) {</span>
+<span class="nc" id="L33">            return convertAtoB(calendar, foreignOffsetHours, foreignOffsetMinutes, localTimeOffsettingHours, localTimeOffsettingMinutes);</span>
+        } else {
+<span class="nc" id="L35">            return convertAtoB(calendar, localTimeOffsettingHours, localTimeOffsettingMinutes, foreignOffsetHours, foreignOffsetMinutes);</span>
+        }
+
+    }
+
+    public static Calendar convertLocalToThai(Calendar calendar, TimeZoneOffset timeZoneOffset) {
+<span class="nc" id="L41">        int localOffsetHours = timeZoneOffset.getLocalHour();</span>
+<span class="nc" id="L42">        int localOffsetMinutes = timeZoneOffset.getLocalMinute();</span>
+<span class="nc" id="L43">        int thaiTimeOffsettingHours = 7;</span>
+<span class="nc" id="L44">        int thaiTimeOffsettingMinutes = 0;</span>
+<span class="nc" id="L45">        return convertAtoB(calendar, localOffsetHours, localOffsetMinutes, thaiTimeOffsettingHours, thaiTimeOffsettingMinutes);</span>
+    }
+
+    public static Calendar convertForeignToThai(Calendar calendar, TimeZoneOffset timeZoneOffset) {
+<span class="nc" id="L49">        int foreignOffsetHours = timeZoneOffset.getForeignHour();</span>
+<span class="nc" id="L50">        int foreignOffsetMinutes = timeZoneOffset.getForeignMinute();</span>
+<span class="nc" id="L51">        int thaiTimeOffsettingHours = 7;</span>
+<span class="nc" id="L52">        int thaiTimeOffsettingMinutes = 0;</span>
+<span class="nc" id="L53">        return convertAtoB(calendar, foreignOffsetHours, foreignOffsetMinutes, thaiTimeOffsettingHours, thaiTimeOffsettingMinutes);</span>
+    }
+
+    private static Calendar convertAtoB(Calendar calendar, int aHour, int aMinute, int bHour, int bMinute) {
+<span class="nc" id="L57">        Calendar calendarTemp = DateUtils.convertToLocalCalendar(calendar);</span>
+<span class="nc" id="L58">        int diffHour = bHour - aHour;</span>
+<span class="nc" id="L59">        int diffMinute = bMinute - aMinute;</span>
+<span class="nc" id="L60">        calendarTemp.add(Calendar.HOUR_OF_DAY, diffHour);</span>
+<span class="nc" id="L61">        calendarTemp.add(Calendar.MINUTE, diffMinute);</span>
+<span class="nc" id="L62">        return calendarTemp;</span>
+    }
+
+
+    public static TimeZoneOffset getTimeZoneOffset(Calendar calendar, Context context, String countryCode, String stateName) {
+<span class="nc" id="L67">        int localTimeOffsettingHours = getLocalGmtOffsettingHours(calendar);</span>
+<span class="nc" id="L68">        int localTimeOffsettingMinutes = getThaiGmtOffsettingMinutes(calendar);</span>
+<span class="nc" id="L69">        double foreignTimeOffset = getForeignOffsetDstAdjust(calendar, context, countryCode, stateName);</span>
+<span class="nc" id="L70">        int foreignOffsetHours = (int) foreignTimeOffset;</span>
+<span class="nc" id="L71">        int foreignOffsetMinutes = getMinutePart(foreignTimeOffset);</span>
+<span class="nc" id="L72">        return new TimeZoneOffset(localTimeOffsettingHours, localTimeOffsettingMinutes, foreignOffsetHours, foreignOffsetMinutes);</span>
+    }
+
+
+    private static double getForeignOffsetDstAdjust(Calendar calendar, Context context, String countryCode, String stateName) {
+<span class="nc" id="L77">        double foreignOffset = getForeignOffset(context, countryCode, stateName);</span>
+<span class="nc" id="L78">        String stateCode = getStateCode(countryCode);</span>
+        // : 11/16/2015 don't know why this logic exist, the app just work without this. Still cant get to delete it
+        // 10/6/2015 int muliplier things
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        if (!(&quot;&quot;).equals(stateCode)) {</span>
+            //stateCode has number
+            //: 10/6/2015 dosomething for it
+
+        } else {
+
+        }
+<span class="nc" id="L88">        Calendar calendarTemp = DateUtils.convertToLocalCalendar(calendar);</span>
+<span class="nc" id="L89">        return adjustDst(foreignOffset, context, countryCode, calendarTemp, stateName);</span>
+
+    }
+
+    private static int getMinutePart(double foreignOffset) {
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        boolean isNegative = (foreignOffset &lt; 0);</span>
+<span class="nc" id="L95">        String foreignOffsetString = String.valueOf(foreignOffset);</span>
+<span class="nc" id="L96">        StringBuilder sb = new StringBuilder(foreignOffsetString);</span>
+<span class="nc" id="L97">        int theOffset = (int) (Float.valueOf(sb.substring(sb.indexOf(&quot;.&quot;))) * 100);</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        return isNegative ? theOffset * -1 : theOffset;</span>
+    }
+
+    public static boolean showStatePicker(String countryCode) {
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        return !getStateCode(countryCode).equals(&quot;&quot;);</span>
+    }
+
+
+    private static String getStateCode(String countryCode) {
+<span class="nc bnc" id="L107" title="All 18 branches missed.">        switch (countryCode) {</span>
+            case &quot;97&quot;:
+<span class="nc" id="L109">                return &quot;42&quot;; //new york</span>
+            case &quot;36&quot;:
+<span class="nc" id="L111">                return &quot;92&quot;; //Jakata</span>
+            case &quot;3&quot;:
+<span class="nc" id="L113">                return &quot;67&quot;; //sydney</span>
+            case &quot;14&quot;:
+<span class="nc" id="L115">                return &quot;84&quot;; //ottowa</span>
+            default:
+<span class="nc" id="L117">                return &quot;&quot;;</span>
+        }
+
+        //original code
+//        if (countryCode.equalsIgnoreCase(&quot;97&quot;))
+//            return &quot;42&quot;;    //New York.
+//        else if (countryCode.equalsIgnoreCase(&quot;36&quot;))
+//            return &quot;92&quot;;    //Jakata
+//        else if (countryCode.equalsIgnoreCase(&quot;3&quot;))
+//            return &quot;67&quot;;    //Sydney
+//        else if (countryCode.equalsIgnoreCase(&quot;14&quot;))
+//            return &quot;84&quot;;    //Ottowa
+//        else {
+//            return &quot;&quot;;
+//        }
+
+    }
+
+    public static List&lt;CountryStateDst&gt; getCountryStateDst(Context context, String countryCode) {
+        //plainly reuse and refactor old code. Never understand why it works
+<span class="nc" id="L137">        String[] arrCountryCode = context.getResources().getStringArray(R.array.roamingDstStateCountryCodes);</span>
+<span class="nc" id="L138">        String[] arrStateCode = context.getResources().getStringArray(R.array.roamingDstStateCodes);</span>
+<span class="nc" id="L139">        String[] arrStateName = context.getResources().getStringArray(R.array.roamingDstStateNames);</span>
+<span class="nc" id="L140">        String[] arrStateValue = context.getResources().getStringArray(R.array.roamingDstStateValues);</span>
+<span class="nc" id="L141">        String[] arrStart = context.getResources().getStringArray(R.array.roamingDstStateDateStart);</span>
+<span class="nc" id="L142">        String[] arrEnd = context.getResources().getStringArray(R.array.roamingDstStateDateEnd);</span>
+
+<span class="nc" id="L144">        String stateCode = getStateCode(countryCode);</span>
+<span class="nc" id="L145">        List&lt;CountryStateDst&gt; countryStateDstList = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L147" title="All 2 branches missed.">        for (int i = 0; i &lt; arrCountryCode.length; i++) {</span>
+<span class="nc" id="L148">            CountryStateDst countryStateDst = new CountryStateDst();</span>
+
+<span class="nc bnc" id="L150" title="All 2 branches missed.">            if (!stateCode.equals(&quot;&quot;)) {</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">                if (i == 0) {</span>
+<span class="nc" id="L152">                    countryStateDst.setDstStateCountryCode(arrCountryCode[i]);</span>
+<span class="nc" id="L153">                    countryStateDst.setDstStateCode(arrStateCode[i]);</span>
+<span class="nc" id="L154">                    countryStateDst.setDstStateName(arrStateName[i]);</span>
+<span class="nc" id="L155">                    countryStateDst.setDstStateValue(arrStateValue[i]);</span>
+<span class="nc" id="L156">                    countryStateDst.setDstStart(arrStart[i]);</span>
+<span class="nc" id="L157">                    countryStateDst.setDstEnd(arrEnd[i]);</span>
+<span class="nc" id="L158">                    countryStateDstList.add(countryStateDst);</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">                } else if (countryCode.equalsIgnoreCase(arrCountryCode[i])) {</span>
+<span class="nc" id="L160">                    countryStateDst.setDstStateCountryCode(arrCountryCode[i]);</span>
+<span class="nc" id="L161">                    countryStateDst.setDstStateCode(arrStateCode[i]);</span>
+<span class="nc" id="L162">                    countryStateDst.setDstStateName(arrStateName[i]);</span>
+<span class="nc" id="L163">                    countryStateDst.setDstStateValue(arrStateValue[i]);</span>
+<span class="nc" id="L164">                    countryStateDst.setDstStart(arrStart[i]);</span>
+<span class="nc" id="L165">                    countryStateDst.setDstEnd(arrEnd[i]);</span>
+<span class="nc" id="L166">                    countryStateDstList.add(countryStateDst);</span>
+                }
+            } else {
+<span class="nc bnc" id="L169" title="All 2 branches missed.">                if (countryCode.equalsIgnoreCase(arrCountryCode[i])) {</span>
+<span class="nc" id="L170">                    countryStateDst.setDstStateCountryCode(arrCountryCode[i]);</span>
+<span class="nc" id="L171">                    countryStateDst.setDstStateCode(arrStateCode[i]);</span>
+<span class="nc" id="L172">                    countryStateDst.setDstStateName(arrStateName[i]);</span>
+<span class="nc" id="L173">                    countryStateDst.setDstStateValue(arrStateValue[i]);</span>
+<span class="nc" id="L174">                    countryStateDst.setDstStart(arrStart[i]);</span>
+<span class="nc" id="L175">                    countryStateDst.setDstEnd(arrEnd[i]);</span>
+<span class="nc" id="L176">                    countryStateDstList.add(countryStateDst);</span>
+                }
+            }
+        }
+<span class="nc" id="L180">        return countryStateDstList;</span>
+    }
+
+
+    public static List&lt;String&gt; getCountryStateNameList(Context context, String countryCode) {
+<span class="nc" id="L185">        List&lt;CountryState&gt; countryStateList = getCountryStateList(context, countryCode);</span>
+<span class="nc" id="L186">        List&lt;String&gt; countryStateNameList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">        for (int i = 0; i &lt; countryStateList.size(); i++) {</span>
+<span class="nc" id="L188">            CountryState countryState = countryStateList.get(i);</span>
+<span class="nc" id="L189">            countryStateNameList.add(countryState.getStateName());</span>
+        }
+<span class="nc" id="L191">        return countryStateNameList;</span>
+    }
+
+    public static List&lt;CountryState&gt; getCountryStateList(Context context, String countryCode) {
+<span class="nc" id="L195">        List&lt;CountryState&gt; countryStateList = new ArrayList&lt;&gt;();</span>
+//        String stateCode = getStateCode(countryCode);
+<span class="nc" id="L197">        String stateCode = &quot;&quot;;</span>
+<span class="nc" id="L198">        String[] arrStateCode = context.getResources().getStringArray(R.array.roamingStateCodes);</span>
+<span class="nc" id="L199">        String[] arrStateCountry = context.getResources().getStringArray(R.array.roamingStateCountryCodes);</span>
+<span class="nc" id="L200">        String[] arrStateName = context.getResources().getStringArray(R.array.roamingStateNames);</span>
+<span class="nc" id="L201">        String[] arrStateValue = context.getResources().getStringArray(R.array.roamingStateValues);</span>
+<span class="nc" id="L202">        String[] arrStateGmt = context.getResources().getStringArray(R.array.roamingStateGmtTimes);</span>
+
+
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        for (int i = 0; i &lt; arrStateCode.length; i++) {</span>
+<span class="nc" id="L206">            CountryState countryState = new CountryState();</span>
+
+<span class="nc bnc" id="L208" title="All 2 branches missed.">            if (!stateCode.equals(&quot;&quot;)) {</span>
+
+<span class="nc bnc" id="L210" title="All 2 branches missed.">                if (stateCode.equalsIgnoreCase(arrStateCode[i])) {</span>
+<span class="nc" id="L211">                    countryState.setStateCode(arrStateCode[i]);</span>
+<span class="nc" id="L212">                    countryState.setStateCountryCode(arrStateCountry[i]);</span>
+<span class="nc" id="L213">                    countryState.setStateName(arrStateName[i]);</span>
+<span class="nc" id="L214">                    countryState.setStateValue(arrStateValue[i]);</span>
+<span class="nc" id="L215">                    countryState.setStateGmt(arrStateGmt[i]);</span>
+
+<span class="nc" id="L217">                    countryStateList.add(countryState);</span>
+                }
+
+            } else {
+<span class="nc bnc" id="L221" title="All 2 branches missed.">                if (countryCode.equalsIgnoreCase(arrStateCountry[i])) {</span>
+<span class="nc" id="L222">                    countryState.setStateCode(arrStateCode[i]);</span>
+<span class="nc" id="L223">                    countryState.setStateCountryCode(arrStateCountry[i]);</span>
+<span class="nc" id="L224">                    countryState.setStateName(arrStateName[i]);</span>
+<span class="nc" id="L225">                    countryState.setStateValue(arrStateValue[i]);</span>
+<span class="nc" id="L226">                    countryState.setStateGmt(arrStateGmt[i]);</span>
+
+<span class="nc" id="L228">                    countryStateList.add(countryState);</span>
+                }
+            }
+
+        }
+
+
+<span class="nc" id="L235">        return countryStateList;</span>
+    }
+
+    public static List&lt;CountryDst&gt; getCountryDstList(Context context, String countryCode) {
+<span class="nc" id="L239">        List&lt;CountryDst&gt; countryDstList = new ArrayList&lt;&gt;();</span>
+
+        //plainly refactor old code, never understand why it works
+<span class="nc" id="L242">        String[] arrCountryCode = context.getResources().getStringArray(R.array.roamingDstCountryCodes);</span>
+<span class="nc" id="L243">        String[] arrStart = context.getResources().getStringArray(R.array.roamingDstCountryDateStart);</span>
+<span class="nc" id="L244">        String[] arrEnd = context.getResources().getStringArray(R.array.roamingDstCountryDateEnd);</span>
+
+<span class="nc bnc" id="L246" title="All 2 branches missed.">        for (int i = 0; i &lt; arrCountryCode.length; i++) {</span>
+<span class="nc" id="L247">            CountryDst countryDst = new CountryDst();</span>
+
+<span class="nc bnc" id="L249" title="All 2 branches missed.">            if (!countryCode.equals(&quot;&quot;)) {</span>
+
+<span class="nc bnc" id="L251" title="All 2 branches missed.">                if (i == 0) {</span>
+<span class="nc" id="L252">                    countryDst.setDstCountryCode(arrCountryCode[i]);</span>
+<span class="nc" id="L253">                    countryDst.setDstCountryStart(arrStart[i]);</span>
+<span class="nc" id="L254">                    countryDst.setDstCountryEnd(arrEnd[i]);</span>
+<span class="nc" id="L255">                    countryDstList.add(countryDst);</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">                } else if (countryCode.equalsIgnoreCase(arrCountryCode[i])) {</span>
+<span class="nc" id="L257">                    countryDst.setDstCountryCode(arrCountryCode[i]);</span>
+<span class="nc" id="L258">                    countryDst.setDstCountryStart(arrStart[i]);</span>
+<span class="nc" id="L259">                    countryDst.setDstCountryEnd(arrEnd[i]);</span>
+<span class="nc" id="L260">                    countryDstList.add(countryDst);</span>
+                }
+            } else {
+<span class="nc" id="L263">                countryDst.setDstCountryCode(arrCountryCode[i]);</span>
+<span class="nc" id="L264">                countryDst.setDstCountryStart(arrStart[i]);</span>
+<span class="nc" id="L265">                countryDst.setDstCountryEnd(arrEnd[i]);</span>
+<span class="nc" id="L266">                countryDstList.add(countryDst);</span>
+            }
+
+        }
+
+<span class="nc" id="L271">        return countryDstList;</span>
+    }
+
+    private static int getLocalGmtOffsettingMilliseconds(Calendar calendar) {
+        //have time zone object get the current system setting
+<span class="nc" id="L276">        TimeZone timeZone = calendar.getTimeZone();</span>
+<span class="nc" id="L277">        int offset = timeZone.getRawOffset();</span>
+<span class="nc bnc" id="L278" title="All 2 branches missed.">        if (timeZone.inDaylightTime(new Date())) {</span>
+<span class="nc" id="L279">            offset = offset + timeZone.getDSTSavings();</span>
+        }
+        //milliseconds converted by dividing seconds and minutes
+<span class="nc" id="L282">        return offset;</span>
+    }
+
+    private static int getLocalGmtOffsettingHours(Calendar calendar) {
+<span class="nc" id="L286">        return getLocalGmtOffsettingMilliseconds(calendar) / 1000 / 60 / 60;</span>
+    }
+
+    private static int getThaiGmtOffsettingMinutes(Calendar calendar) {
+<span class="nc" id="L290">        return getLocalGmtOffsettingMilliseconds(calendar) / 1000 / 60 % 60;</span>
+    }
+
+    private static double getForeignOffset(Context context, String countryCode, String stateName) {
+
+<span class="nc bnc" id="L295" title="All 2 branches missed.">        if (stateName.equals(&quot;&quot;)) {</span>
+<span class="nc" id="L296">            return getGmt(context, countryCode);</span>
+        } else {
+<span class="nc" id="L298">            return getStateGmt(context, countryCode, stateName);</span>
+        }
+    }
+
+    private static double getGmt(Context context, String countryCode) {
+        //have to get the countryNameListEn because it has been created and stay in public variable
+<span class="nc" id="L304">        List&lt;String&gt; countryGmtList = new ArrayList&lt;&gt;(Arrays.asList(context.getResources().getStringArray(R.array.roamingGmtTimes)));</span>
+<span class="nc" id="L305">        List&lt;String&gt; countryCodeList = new ArrayList&lt;&gt;(Arrays.asList(context.getResources().getStringArray(R.array.roamingGmtCountryCodes)));</span>
+
+<span class="nc bnc" id="L307" title="All 2 branches missed.">        for (int i = 0; i &lt; countryCodeList.size(); i++) {</span>
+<span class="nc" id="L308">            String countryCodeThis = countryCodeList.get(i);</span>
+<span class="nc bnc" id="L309" title="All 2 branches missed.">            if (countryCodeThis.equals(countryCode)) {</span>
+<span class="nc" id="L310">                return Double.valueOf(countryGmtList.get(i));</span>
+            }
+        }
+        ////  10/6/2015 may change to other value -1 is a valid number
+<span class="nc" id="L314">        return -1;</span>
+    }
+
+    private static double getStateGmt(Context context, String countryCode, String stateName) {
+<span class="nc" id="L318">        List&lt;CountryState&gt; countryStateList = new ArrayList&lt;&gt;(getCountryStateList(context, countryCode));</span>
+
+<span class="nc bnc" id="L320" title="All 2 branches missed.">        for (int i = 0; i &lt; countryStateList.size(); i++) {</span>
+<span class="nc" id="L321">            CountryState countryState = countryStateList.get(i);</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">            if (countryState.getStateName().equals(stateName)) {</span>
+//                Log.d(TAG, &quot;getStateGmt() returned: &quot; + countryState.getStateGmt());
+<span class="nc" id="L324">                return Double.valueOf(countryState.getStateGmt());</span>
+            }
+        }
+        ////  10/6/2015 may change to other value -1 is a valid number
+<span class="nc" id="L328">        return -1;</span>
+    }
+
+    static double adjustDst(double foreignOffset, Context context, String countryCode, Calendar calendar, String stateName) {
+        //+1 for dst,
+        // -1  for custom country.
+        // 0  not dst
+<span class="nc" id="L335">        boolean isDst = getIsDst(context, countryCode, calendar, stateName);</span>
+<span class="nc" id="L336">        boolean isCustomCountry = getIsCustomCountry(context, calendar, countryCode, stateName);</span>
+<span class="nc bnc" id="L337" title="All 2 branches missed.">        if (isDst) {</span>
+<span class="nc bnc" id="L338" title="All 2 branches missed.">            return isCustomCountry ? customCountryHoursAdjustment(foreignOffset) : foreignOffset + 1;</span>
+        } else {
+<span class="nc" id="L340">            return foreignOffset;</span>
+        }
+    }
+
+    static double customCountryHoursAdjustment(double foreignOffset) {
+//        return foreignOffset &lt; 0 ? foreignOffset - 1 : foreignOffset + 1;
+        //Sep 5
+<span class="nc" id="L347">        return foreignOffset + 1;</span>
+    }
+
+    static boolean getIsDst(Context context, String countryCode, Calendar calendar, String stateName) {
+<span class="nc" id="L351">        String stateCode = getStateCode(countryCode);</span>
+        try {
+<span class="nc bnc" id="L353" title="All 2 branches missed.">            return stateCode.trim().equalsIgnoreCase(&quot;&quot;) ? isCountryDstNotState(context, countryCode, calendar) : isCountryDstHaveState(context, countryCode, calendar, stateName);</span>
+<span class="nc" id="L354">        } catch (ParseException e) {</span>
+<span class="nc" id="L355">            return false;</span>
+        }
+    }
+
+
+    private static boolean isCountryDstNotState(Context context, String countryCode, Calendar calendar) throws ParseException {
+<span class="nc" id="L361">        boolean isDst = false;</span>
+<span class="nc" id="L362">        List&lt;CountryDst&gt; countryDstList = getCountryDstList(context, countryCode);</span>
+<span class="nc" id="L363">        String strStart = &quot;&quot;;</span>
+<span class="nc" id="L364">        String strEnd = &quot;&quot;;</span>
+        String strYear, strMonth, strDay, strHour, strMinute, strSecond;
+<span class="nc" id="L366">        SimpleDateFormat dateFormatSource = new SimpleDateFormat(DATE_FORMAT_SOURCE);</span>
+
+<span class="nc" id="L368">        Date date = calendar.getTime();</span>
+//        Date date = dateFormatSource.parse(strDateTime);
+
+<span class="nc bnc" id="L371" title="All 2 branches missed.">        if (countryDstList.size() &gt; 0) {</span>
+<span class="nc bnc" id="L372" title="All 2 branches missed.">            for (CountryDst countryDst : countryDstList) {</span>
+<span class="nc" id="L373">                strStart = countryDst.getDstCountryStart();</span>
+<span class="nc" id="L374">                strEnd = countryDst.getDstCountryEnd();</span>
+
+<span class="nc bnc" id="L376" title="All 4 branches missed.">                if (!strStart.equalsIgnoreCase(&quot;&quot;) &amp;&amp; !strEnd.equalsIgnoreCase(&quot;&quot;)) {</span>
+//
+<span class="nc" id="L378">                    strYear = countryDst.getDstCountryStart().trim().substring(0, 4);</span>
+<span class="nc" id="L379">                    strMonth = countryDst.getDstCountryStart().trim().substring(4, 6);</span>
+<span class="nc" id="L380">                    strDay = countryDst.getDstCountryStart().trim().substring(6, 8);</span>
+<span class="nc" id="L381">                    strHour = countryDst.getDstCountryStart().trim().substring(8, 10);</span>
+<span class="nc" id="L382">                    strMinute = countryDst.getDstCountryStart().trim().substring(10, 12);</span>
+<span class="nc" id="L383">                    strSecond = countryDst.getDstCountryStart().trim().substring(12, 14);</span>
+
+<span class="nc" id="L385">                    strStart = strDay + strMonth + strYear + strHour + strMinute;</span>
+
+<span class="nc" id="L387">                    strYear = countryDst.getDstCountryEnd().trim().substring(0, 4);</span>
+<span class="nc" id="L388">                    strMonth = countryDst.getDstCountryEnd().trim().substring(4, 6);</span>
+<span class="nc" id="L389">                    strDay = countryDst.getDstCountryEnd().trim().substring(6, 8);</span>
+<span class="nc" id="L390">                    strHour = countryDst.getDstCountryEnd().trim().substring(8, 10);</span>
+<span class="nc" id="L391">                    strMinute = countryDst.getDstCountryEnd().trim().substring(10, 12);</span>
+<span class="nc" id="L392">                    strSecond = countryDst.getDstCountryEnd().trim().substring(12, 14);</span>
+
+<span class="nc" id="L394">                    strEnd = strDay + strMonth + strYear + strHour + strMinute;</span>
+
+<span class="nc" id="L396">                    Date dateStart = dateFormatSource.parse(strStart);</span>
+<span class="nc" id="L397">                    Date dateEnd = dateFormatSource.parse(strEnd);</span>
+<span class="nc" id="L398">                    Date comDate = date; //dateFormatSource.parse(strDateTime);</span>
+
+<span class="nc bnc" id="L400" title="All 2 branches missed.">                    if (dateEnd.after(dateStart)) {</span>
+<span class="nc bnc" id="L401" title="All 4 branches missed.">                        if ((comDate.after(dateStart) || comDate.equals(dateStart)) &amp;&amp;</span>
+<span class="nc bnc" id="L402" title="All 4 branches missed.">                                (comDate.before(dateEnd) || comDate.equals(dateEnd))) {</span>
+<span class="nc" id="L403">                            isDst = true;</span>
+                        } else {
+<span class="nc" id="L405">                            isDst = false;</span>
+                        }
+                    } else {
+<span class="nc bnc" id="L408" title="All 4 branches missed.">                        if (!((comDate.after(dateEnd) || comDate.equals(dateEnd)) &amp;&amp;</span>
+<span class="nc bnc" id="L409" title="All 4 branches missed.">                                (comDate.before(dateStart) || comDate.equals(dateStart)))) {</span>
+<span class="nc" id="L410">                            isDst = true;</span>
+                        } else {
+<span class="nc" id="L412">                            isDst = false;</span>
+                        }
+                    }
+                }
+<span class="nc" id="L416">            }</span>
+        }
+
+<span class="nc" id="L419">        return isDst;</span>
+    }
+
+    private static boolean isCountryDstHaveState(Context context, String countryCode, Calendar calendar, String stateName) throws ParseException {
+<span class="nc" id="L423">        List&lt;CountryStateDst&gt; countryStateDstList = getCountryStateDst(context, countryCode);</span>
+
+<span class="nc" id="L425">        String stateCode = getStateCodeByStateName(context, countryCode, stateName);</span>
+<span class="nc" id="L426">        boolean isDST = false;</span>
+
+<span class="nc" id="L428">        String strStart = &quot;&quot;;</span>
+<span class="nc" id="L429">        String strEnd = &quot;&quot;;</span>
+        String strYear, strMonth, strDay, strHour, strMinute, strSecond;
+
+<span class="nc" id="L432">        SimpleDateFormat dateFormatSource = new SimpleDateFormat(DATE_FORMAT_SOURCE);</span>
+<span class="nc" id="L433">        Date date = calendar.getTime();</span>
+//        Date date = dateFormatSource.parse(strDateTime);
+
+<span class="nc bnc" id="L436" title="All 2 branches missed.">        if (countryStateDstList.size() &gt; 0) {</span>
+<span class="nc bnc" id="L437" title="All 2 branches missed.">            for (CountryStateDst countryStateDst : countryStateDstList) {</span>
+<span class="nc" id="L438">                strStart = countryStateDst.getDstStart();</span>
+<span class="nc" id="L439">                strEnd = countryStateDst.getDstEnd();</span>
+
+<span class="nc" id="L441">                String dstStateCountryCode = countryStateDst.getDstStateCode();</span>
+<span class="nc bnc" id="L442" title="All 2 branches missed.">                if (stateCode.equals(dstStateCountryCode)) {</span>
+<span class="nc bnc" id="L443" title="All 4 branches missed.">                    if (!strStart.equalsIgnoreCase(&quot;&quot;) &amp;&amp; !strEnd.equalsIgnoreCase(&quot;&quot;)) {</span>
+//
+<span class="nc" id="L445">                        strYear = countryStateDst.getDstStart().trim().substring(0, 4);</span>
+<span class="nc" id="L446">                        strMonth = countryStateDst.getDstStart().trim().substring(4, 6);</span>
+<span class="nc" id="L447">                        strDay = countryStateDst.getDstStart().trim().substring(6, 8);</span>
+<span class="nc" id="L448">                        strHour = countryStateDst.getDstStart().trim().substring(8, 10);</span>
+<span class="nc" id="L449">                        strMinute = countryStateDst.getDstStart().trim().substring(10, 12);</span>
+<span class="nc" id="L450">                        strSecond = countryStateDst.getDstStart().trim().substring(12, 14);</span>
+
+<span class="nc" id="L452">                        strStart = strDay + strMonth + strYear + strHour + strMinute;</span>
+
+<span class="nc" id="L454">                        strYear = countryStateDst.getDstEnd().trim().substring(0, 4);</span>
+<span class="nc" id="L455">                        strMonth = countryStateDst.getDstEnd().trim().substring(4, 6);</span>
+<span class="nc" id="L456">                        strDay = countryStateDst.getDstEnd().trim().substring(6, 8);</span>
+<span class="nc" id="L457">                        strHour = countryStateDst.getDstEnd().trim().substring(8, 10);</span>
+<span class="nc" id="L458">                        strMinute = countryStateDst.getDstEnd().trim().substring(10, 12);</span>
+<span class="nc" id="L459">                        strSecond = countryStateDst.getDstEnd().trim().substring(12, 14);</span>
+
+<span class="nc" id="L461">                        strEnd = strDay + strMonth + strYear + strHour + strMinute;</span>
+
+<span class="nc" id="L463">                        Date dateStart = dateFormatSource.parse(strStart);</span>
+<span class="nc" id="L464">                        Date dateEnd = dateFormatSource.parse(strEnd);</span>
+<span class="nc" id="L465">                        Date comDate = date; //dateFormatSource.parse(strDateTime);</span>
+
+<span class="nc" id="L467">                        Calendar cStateDST = Calendar.getInstance();</span>
+
+<span class="nc bnc" id="L469" title="All 2 branches missed.">                        if (dateEnd.after(dateStart)) {</span>
+<span class="nc bnc" id="L470" title="All 4 branches missed.">                            if ((comDate.after(dateStart) || comDate.equals(dateStart)) &amp;&amp;</span>
+<span class="nc bnc" id="L471" title="All 4 branches missed.">                                    (comDate.before(dateEnd) || comDate.equals(dateEnd))) {</span>
+<span class="nc" id="L472">                                isDST = true;</span>
+                            } else {
+<span class="nc" id="L474">                                isDST = false;</span>
+                            }
+                        } else {
+<span class="nc bnc" id="L477" title="All 4 branches missed.">                            if (!((comDate.after(dateEnd) || comDate.equals(dateEnd)) &amp;&amp;</span>
+<span class="nc bnc" id="L478" title="All 4 branches missed.">                                    (comDate.before(dateStart) || comDate.equals(dateStart)))) {</span>
+<span class="nc" id="L479">                                isDST = true;</span>
+                            } else {
+<span class="nc" id="L481">                                isDST = false;</span>
+                            }
+                        }
+<span class="nc" id="L484">                    }</span>
+                    break;
+                }
+<span class="nc" id="L487">            }</span>
+        }
+
+
+<span class="nc" id="L491">        return isDST;</span>
+    }
+
+    static boolean getIsCustomCountry(Context context, Calendar calendar, String countryCode, String stateName) {
+        try {
+<span class="nc bnc" id="L496" title="All 2 branches missed.">            if (isCountryDstNotState(context, countryCode, calendar)) {</span>
+<span class="nc bnc" id="L497" title="All 2 branches missed.">                return countryCode.equals(&quot;148&quot;) /*Paraguay*/ ||</span>
+<span class="nc bnc" id="L498" title="All 2 branches missed.">                        countryCode.equalsIgnoreCase(&quot;125&quot;) /*fiji */ ||</span>
+<span class="nc bnc" id="L499" title="All 2 branches missed.">                        countryCode.equalsIgnoreCase(&quot;212&quot;) /*Western Samoa*/ ||</span>
+<span class="nc bnc" id="L500" title="All 2 branches missed.">                        countryCode.equalsIgnoreCase(&quot;67&quot;)/*New Zealand*/;</span>
+            }
+
+<span class="nc bnc" id="L503" title="All 2 branches missed.">            if (isCountryDstHaveState(context, countryCode, calendar, stateName)) {</span>
+<span class="nc" id="L504">                String stateCode = getStateCodeByStateName(context, countryCode, stateName);</span>
+<span class="nc bnc" id="L505" title="All 2 branches missed.">                return stateCode.equalsIgnoreCase(&quot;66&quot;) /*Australian Capital Territory*/ ||</span>
+<span class="nc bnc" id="L506" title="All 2 branches missed.">                        stateCode.equalsIgnoreCase(&quot;67&quot;)/*New South Wales*/;</span>
+            }
+<span class="nc" id="L508">        } catch (ParseException e) {</span>
+<span class="nc" id="L509">            e.printStackTrace();</span>
+<span class="nc" id="L510">        }</span>
+
+<span class="nc" id="L512">        return false;</span>
+    }
+
+    public static String getStateCodeByStateName(Context context, String countryCode, String stateName) {
+<span class="nc" id="L516">        String strReturn = &quot;&quot;;</span>
+
+<span class="nc" id="L518">        List&lt;CountryState&gt; countryStateList = getCountryStateList(context, countryCode);</span>
+<span class="nc bnc" id="L519" title="All 2 branches missed.">        for (CountryState countryState : countryStateList) {</span>
+<span class="nc bnc" id="L520" title="All 2 branches missed.">            if (stateName.equalsIgnoreCase(countryState.getStateName())) {</span>
+<span class="nc" id="L521">                strReturn = countryState.getStateCode();</span>
+            }
+<span class="nc" id="L523">        }</span>
+<span class="nc" id="L524">        return strReturn;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

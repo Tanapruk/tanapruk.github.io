@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SuggestInfoPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.home.module.suggestinfo</a> &gt; <span class="el_source">SuggestInfoPresenter.java</span></div><h1>SuggestInfoPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.home.module.suggestinfo;
+
+import android.net.Uri;
+
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.event.GoToUrlSchemeTabEvent;
+import com.nextzy.myais.common.mvp.NextzyPresenter;
+import com.nextzy.myais.common.utility.UrlSchemeUtils;
+import com.nextzy.myais.home.helper.feedcontent.model.FeedContentData;
+import com.nextzy.myais.home.helper.feedcontent.model.FeedContentResult;
+import com.nextzy.myais.home.helper.feedcontent.network.FeedContentManager;
+
+import java.util.concurrent.TimeUnit;
+
+import rx.Observable;
+
+/**
+ * Created by Akexorcist on 9/13/2016 AD.
+ */
+
+public class SuggestInfoPresenter extends NextzyPresenter&lt;SuggestInfoContractor.View&gt; implements SuggestInfoContractor.Presenter {
+
+    public static SuggestInfoPresenter createPresenter(SuggestInfoContractor.View view) {
+<span class="nc" id="L27">        return new SuggestInfoPresenter(view);</span>
+    }
+
+    public SuggestInfoPresenter(SuggestInfoContractor.View view) {
+<span class="fc" id="L31">        super(view);</span>
+<span class="fc" id="L32">    }</span>
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L36">        RxBus.get().register(this);</span>
+<span class="nc" id="L37">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L41">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L42">    }</span>
+
+    @Override
+    public void onViewStart() {
+
+<span class="nc" id="L47">    }</span>
+
+    @Override
+    public void onViewStop() {
+
+<span class="nc" id="L52">    }</span>
+
+    @Override
+    public void getSuggestInfo() {
+<span class="fc" id="L56">        getView().showLoading();</span>
+<span class="fc" id="L57">        callCurrentStatementServiceWithDelay();</span>
+<span class="fc" id="L58">    }</span>
+
+    @Override
+    public void setFeedContent(FeedContentResult result) {
+<span class="fc bfc" id="L62" title="All 4 branches covered.">        if (result != null &amp;&amp; result.hasDataList()) {</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">            for (FeedContentData content : result.getData()) {</span>
+<span class="fc" id="L64">                String contentTopic = content.getContentTopic();</span>
+<span class="fc" id="L65">                String contentDetail = content.getContentDetail();</span>
+<span class="fc" id="L66">                String contentUrl = content.getContentUrl();</span>
+<span class="fc" id="L67">                String iconUrl = getFeedURL() + content.getContentIconPath();</span>
+<span class="fc" id="L68">                getView().addSuggestInfoView(contentTopic, contentDetail, contentUrl, iconUrl);</span>
+<span class="fc" id="L69">            }</span>
+<span class="fc" id="L70">            getView().hideLoading();</span>
+        } else {
+<span class="fc" id="L72">            getView().hideSuggestInfo();</span>
+        }
+<span class="fc" id="L74">    }</span>
+
+    @Override
+    public void onMoveToTabByUrlScheme(String url) {
+<span class="nc" id="L78">        UrlSchemeUtils.getInstance().setupUrlScheme(Uri.parse(url));</span>
+<span class="nc" id="L79">        RxBus.get().post(new GoToUrlSchemeTabEvent());</span>
+<span class="nc" id="L80">    }</span>
+
+    @Override
+    public boolean isUrlScheme(String url) {
+<span class="nc bnc" id="L84" title="All 4 branches missed.">        return url != null &amp;&amp; url.startsWith(&quot;myais://&quot;);</span>
+    }
+
+    @Override
+    public String getFeedURL() {
+<span class="fc" id="L89">        String url = URL.getSSB();</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        String businessType = Mobile.getInstance().isPostpaid() ? &quot;postpaid3g&quot; : &quot;prepaid3g&quot;;</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        String lang = getView().isEnglish() ? &quot;EN&quot; : &quot;TH&quot;;</span>
+<span class="fc" id="L92">        return String.format(&quot;%sresource/%s/images/%s/feedcontent/&quot;, url, businessType, lang);</span>
+    }
+
+    @Subscribe
+    public void onFeedContentResult(FeedContentResult result) {
+<span class="fc" id="L97">        setFeedContent(result);</span>
+<span class="fc" id="L98">    }</span>
+
+    public void callCurrentStatementServiceWithDelay() {
+<span class="fc" id="L101">        Observable.empty()</span>
+<span class="fc" id="L102">                .delay(600, TimeUnit.MILLISECONDS)</span>
+<span class="fc" id="L103">                .doOnCompleted(() -&gt; FeedContentManager.getInstance().getFeedContent())</span>
+<span class="fc" id="L104">                .subscribe();</span>
+<span class="fc" id="L105">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NextzyUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.common.utility</a> &gt; <span class="el_source">NextzyUtility.java</span></div><h1>NextzyUtility.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.common.utility;
+
+import com.google.gson.Gson;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Created by Akexorcist on 8/9/16 AD.
+ */
+<span class="fc" id="L18">public class NextzyUtility {</span>
+    private static NextzyUtility util;
+    public static final String DEFAULT_SEPARATE = &quot;-&quot;;
+    public static final String PATTERN_MOBILE_NUMBER = &quot;###-###-####&quot;;
+    public static final String PATTERN_ID_CARD = &quot;#-####-#####-##-#&quot;;
+
+    public static NextzyUtility getInstance() {
+<span class="fc bfc" id="L25" title="All 2 branches covered.">        if (util == null) {</span>
+<span class="fc" id="L26">            util = new NextzyUtility();</span>
+        }
+<span class="fc" id="L28">        return util;</span>
+    }
+
+    public String getCurrentDateTime(String pattern) {
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (pattern != null) {</span>
+<span class="fc" id="L33">            Calendar calendar = new GregorianCalendar(Locale.getDefault());</span>
+<span class="fc" id="L34">            SimpleDateFormat sdf = new SimpleDateFormat(pattern, Locale.getDefault());</span>
+<span class="fc" id="L35">            return sdf.format(calendar.getTime());</span>
+        }
+<span class="fc" id="L37">        return null;</span>
+    }
+
+    /**
+     * convert date in 30/12/2016 to 30/12/2559
+     * @param dateTime date in 30/12/2016
+     * @param splitRegex e.g., /
+     * @param language {@link NextzyLanguage#getCurrentLanguage()}
+     * @return
+     */
+    public String convertYearAD2BE(String dateTime, String splitRegex, String language) {
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        if (language.equalsIgnoreCase(&quot;th&quot;)) {</span>
+<span class="fc" id="L49">            String year = dateTime.split(splitRegex)[2];</span>
+<span class="fc" id="L50">            String yearTh = String.valueOf(Integer.parseInt(year) + 543);</span>
+<span class="fc" id="L51">            dateTime = dateTime.replace(year, yearTh);</span>
+        }
+<span class="fc" id="L53">        return dateTime;</span>
+    }
+
+    public String convertYearWithSlash(String dateInAD) {
+<span class="fc" id="L57">        return convertYearAD2BE(dateInAD, &quot;/&quot;, NextzyLanguage.getInstance().getCurrentLanguage());</span>
+    }
+
+    public boolean isValidIdCard(String message) {
+<span class="fc bfc" id="L61" title="All 4 branches covered.">        if (message == null || message.length() != 13) {</span>
+<span class="fc" id="L62">            return false;</span>
+        }
+        try {
+<span class="fc" id="L65">            int sum = 0;</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">            for (int i = 0; i &lt; 12; i++) {</span>
+<span class="fc" id="L67">                sum += Integer.parseInt(String.valueOf(message.charAt(i))) * (13 - i);</span>
+            }
+<span class="fc bfc" id="L69" title="All 2 branches covered.">            return message.charAt(12) - '0' == ((11 - (sum % 11)) % 10);</span>
+<span class="nc" id="L70">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L71">            e.printStackTrace();</span>
+<span class="nc" id="L72">            return false;</span>
+        }
+    }
+
+    public boolean isMobileNumberOrInternetNumber(String number) {
+<span class="pc bpc" id="L77" title="2 of 4 branches missed.">        return (number != null &amp;&amp; number.length() == 10</span>
+<span class="pc bpc" id="L78" title="1 of 4 branches missed.">                &amp;&amp; (number.charAt(0) == '0' || number.charAt(0) == '8'));</span>
+    }
+
+    public boolean isMobileNumber(String number) {
+<span class="nc bnc" id="L82" title="All 6 branches missed.">        return number != null &amp;&amp; number.length() == 10 &amp;&amp; number.charAt(0) == '0';</span>
+    }
+
+    public boolean isMobileNumberOnly(String number) {
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        return isMobileNumber(number)</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">                &amp;&amp; !isInternetNumber(number)</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">                &amp;&amp; !isHomeNumber(number);</span>
+    }
+
+    public boolean isHomeNumber(String number){
+<span class="nc bnc" id="L92" title="All 8 branches missed.">        return number != null &amp;&amp; number.length() == 10 &amp;&amp; number.charAt(0) == '0' &amp;&amp; number.charAt(1) == '2';</span>
+    }
+
+    public boolean isInternetNumber(String number) {
+<span class="nc bnc" id="L96" title="All 6 branches missed.">        return number != null &amp;&amp; number.length() == 10 &amp;&amp; number.charAt(0) == '8';</span>
+    }
+
+    public boolean isPassword(String pass) {
+<span class="fc" id="L100">        Pattern VALID_PASSWORD_REGEX =</span>
+<span class="fc" id="L101">                Pattern.compile(</span>
+                        &quot;^(((?=.*[a-z])(?=.*[A-Z])(?=.*[@#!?.\\-_;#])(?=\\S+$))&quot; +
+                                &quot;|((?=.*[0-9])(?=.*[A-Z])(?=.*[@#!?.\\-_;#])(?=\\S+$))&quot; +
+                                &quot;|((?=.*[0-9])(?=.*[a-z])(?=.*[@#!?.\\-_;#])(?=\\S+$))&quot; +
+                                &quot;|((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$))&quot; +
+                                &quot;).{8,30}$&quot;
+                );
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">        if (pass != null) {</span>
+<span class="fc" id="L109">            Matcher matcher = VALID_PASSWORD_REGEX.matcher(pass);</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">            if (matcher.matches()) {</span>
+<span class="fc" id="L111">                return true;</span>
+            }
+        }
+<span class="fc" id="L114">        return false;</span>
+    }
+
+    public boolean isPassword(String pass, String repass) {
+<span class="nc bnc" id="L118" title="All 6 branches missed.">        return isPassword(pass) &amp;&amp; isPassword(repass) &amp;&amp; pass.equals(repass);</span>
+    }
+
+    public boolean isOTP(String message) {
+<span class="pc bpc" id="L122" title="2 of 6 branches missed.">        return isNumeric(message) &amp;&amp; (message != null &amp;&amp; message.length() == 4);</span>
+    }
+
+    public boolean isUrl(String message) {
+        try {
+<span class="fc" id="L127">            new URL(message);</span>
+<span class="fc" id="L128">            return true;</span>
+<span class="fc" id="L129">        } catch (MalformedURLException ignored) {</span>
+        }
+<span class="fc" id="L131">        return false;</span>
+    }
+
+    public boolean isNumeric(String message) {
+<span class="pc bpc" id="L135" title="1 of 4 branches missed.">        if (message == null || message.isEmpty()) {</span>
+<span class="fc" id="L136">            return false;</span>
+        }
+<span class="fc" id="L138">        int l = message.length();</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        for (int i = 0; i &lt; l; i++) {</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">            if (!Character.isDigit(message.codePointAt(i)))</span>
+<span class="fc" id="L141">                return false;</span>
+        }
+<span class="fc" id="L143">        return true;</span>
+    }
+
+    public boolean isJson(String message) {
+<span class="fc bfc" id="L147" title="All 2 branches covered.">        if (!message.startsWith(&quot;{&quot;)) {</span>
+<span class="fc" id="L148">            return false;</span>
+        }
+
+        try {
+<span class="fc" id="L152">            new Gson().fromJson(message, Object.class);</span>
+<span class="fc" id="L153">            return true;</span>
+<span class="nc" id="L154">        } catch (com.google.gson.JsonSyntaxException ignored) {</span>
+        }
+<span class="nc" id="L156">        return false;</span>
+    }
+
+    public boolean isEmptyString(String str) {
+<span class="nc bnc" id="L160" title="All 4 branches missed.">        return str == null || wrapBlank(str).isEmpty();</span>
+    }
+
+    public boolean isStringEqual(String str1, String str2) {
+<span class="nc" id="L164">        return wrapBlank(str1).equals(wrapBlank(str2));</span>
+    }
+
+    public boolean isContain(String str, String expect) {
+<span class="nc" id="L168">        return wrapBlank(str).contains(wrapBlank(expect));</span>
+    }
+
+    public boolean isContainLowerCase(String str, String expect) {
+<span class="nc" id="L172">        return wrapBlank(str).toLowerCase().contains(wrapBlank(expect).toLowerCase());</span>
+    }
+
+    public String wrapBlank(String message) {
+<span class="pc bpc" id="L176" title="1 of 6 branches missed.">        return (message == null || &quot;null&quot;.equalsIgnoreCase(message) || message.equals(&quot;-&quot;)) ? &quot;&quot; : message.trim();</span>
+    }
+
+    public String wrapBlank(String message, String replacement) {
+<span class="pc bpc" id="L180" title="1 of 8 branches missed.">        return (message == null || &quot;null&quot;.equalsIgnoreCase(message) || message.equals(&quot;-&quot;) || message.isEmpty()) ? replacement : message.trim();</span>
+    }
+
+    public String convertMsisdn(String msisdn) {
+<span class="fc bfc" id="L184" title="All 2 branches covered.">        return msisdn.startsWith(&quot;66&quot;) ? msisdn.replaceFirst(&quot;^66&quot;, &quot;0&quot;) : msisdn;</span>
+    }
+
+    public String convertTo66Prefix(String mobileNumber) {
+<span class="nc" id="L188">        return mobileNumber.replaceFirst(&quot;0&quot;, &quot;66&quot;);</span>
+    }
+
+    public String joinStringWithSeparator(List&lt;String&gt; list, String separator) {
+<span class="fc" id="L192">        StringBuilder b = new StringBuilder();</span>
+<span class="fc bfc" id="L193" title="All 2 branches covered.">        for (String item : list) {</span>
+<span class="fc" id="L194">            b.append(separator).append(item);</span>
+<span class="fc" id="L195">        }</span>
+<span class="fc" id="L196">        return b.toString().substring(separator.length());</span>
+    }
+
+    public String removeLastNewLineTag(String message) {
+<span class="pc bpc" id="L200" title="2 of 4 branches missed.">        return message != null &amp;&amp; message.endsWith(&quot;&lt;br&gt;&quot;) ? message.substring(0, message.length() - &quot;&lt;br&gt;&quot;.length()) : message;</span>
+    }
+
+    public String getLocalMessage(String messageEn, String messageTh, String locale) {
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        return &quot;th&quot;.equalsIgnoreCase(locale) ? messageTh : messageEn;</span>
+    }
+
+    public boolean isEmail(CharSequence email) {
+<span class="fc bfc" id="L208" title="All 2 branches covered.">        if (email != null) {</span>
+<span class="fc" id="L209">            Pattern EMAIL_ADDRESS</span>
+<span class="fc" id="L210">                    = Pattern.compile(</span>
+                    &quot;[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}&quot; +
+                            &quot;\\@&quot; +
+                            &quot;[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}&quot; +
+                            &quot;(&quot; +
+                            &quot;\\.&quot; +
+                            &quot;[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}&quot; +
+                            &quot;)+&quot;
+            );
+<span class="fc" id="L219">            return EMAIL_ADDRESS.matcher(email).matches();</span>
+        }
+<span class="fc" id="L221">        return false;</span>
+    }
+
+    public String applyAisNumberPattern(String number) {
+<span class="nc" id="L225">        return applyStringPattern(number, PATTERN_MOBILE_NUMBER);</span>
+    }
+
+    public String applyAisIdCardPattern(String number) {
+<span class="nc" id="L229">        return applyStringPattern(number, PATTERN_ID_CARD);</span>
+    }
+
+    public String applyStringPattern(String text, String format){
+        // ex. pattern &quot;(\\d{3})(\\d{3})(\\d+)&quot;
+<span class="nc" id="L234">        String pattern = &quot;&quot;;</span>
+        // ex. replacement &quot;$1-$2-$3&quot;
+<span class="nc" id="L236">        String replacement = &quot;&quot;;</span>
+<span class="nc" id="L237">        String[] formats = format.split(DEFAULT_SEPARATE);</span>
+<span class="nc bnc" id="L238" title="All 2 branches missed.">        for (int i = 0; i &lt; formats.length; i++) {</span>
+<span class="nc" id="L239">            pattern += &quot;(\\d{&quot; + formats[i].length() + &quot;})&quot;;</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">            if (i == 0) {</span>
+<span class="nc" id="L241">                replacement += &quot;$&quot; + (i + 1);</span>
+            } else {
+<span class="nc" id="L243">                replacement += DEFAULT_SEPARATE + &quot;$&quot; + (i + 1);</span>
+            }
+        }
+<span class="nc" id="L246">        text = text.replaceFirst(pattern, replacement);</span>
+<span class="nc" id="L247">        return text;</span>
+    }
+
+    public String getTextNoDash( String text ){
+<span class="nc" id="L251">        return getTextNoSeparate(text, DEFAULT_SEPARATE);</span>
+    }
+
+    public String getTextNoSeparate(String text, String separate ){
+<span class="nc bnc" id="L255" title="All 2 branches missed.">        if( text.contains(separate)){</span>
+<span class="nc" id="L256">            return text.replace(separate, &quot;&quot;);</span>
+        }
+<span class="nc" id="L258">        return text;</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaymentPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.payment.module.payment.activity</a> &gt; <span class="el_source">PaymentPresenter.java</span></div><h1>PaymentPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.payment.module.payment.activity;
+
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.mvp.NextzyActivityPresenter;
+import com.nextzy.myais.payment.helper.payment.event.GoToBillEvent;
+import com.nextzy.myais.payment.helper.payment.event.GotoBillConfirmEvent;
+import com.nextzy.myais.payment.helper.payment.event.GotoBillOtherEvent;
+import com.nextzy.myais.payment.helper.payment.event.GotoPayAllBillConfirmEvent;
+import com.nextzy.myais.payment.helper.payment.event.GotoPayAllBillEvent;
+
+import java.lang.Override;
+
+public class PaymentPresenter extends NextzyActivityPresenter&lt;PaymentContractor.View&gt; implements PaymentContractor.Presenter {
+    public PaymentPresenter(PaymentContractor.View view) {
+<span class="nc" id="L16">        super(view);</span>
+<span class="nc" id="L17">    }</span>
+
+    public static PaymentPresenter createPresenter(PaymentContractor.View view) {
+<span class="nc" id="L20">        return new PaymentPresenter(view);</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L25">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L29">    }</span>
+
+    @Override
+    public void onViewStart() {
+<span class="nc" id="L33">        super.onViewStart();</span>
+<span class="nc" id="L34">        RxBus.get().register(this);</span>
+<span class="nc" id="L35">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L39">        super.onViewStop();</span>
+<span class="nc" id="L40">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L41">    }</span>
+
+    @Subscribe
+    public void onGotoBillConfirmEvent(GotoBillConfirmEvent event) {
+<span class="nc" id="L45">        getView().gotoBillConfirmEvent();</span>
+<span class="nc" id="L46">    }</span>
+
+    @Subscribe
+    public void onGotoBillOtherEvent(GotoBillOtherEvent event) {
+<span class="nc" id="L50">        getView().gotoBillOtherEvent();</span>
+<span class="nc" id="L51">    }</span>
+
+    @Subscribe
+    public void onGotoBillEvent(GoToBillEvent event) {
+<span class="nc" id="L55">        getView().gotoBillEvent();</span>
+<span class="nc" id="L56">    }</span>
+
+    @Subscribe
+    public void onGotoPayAllBillEvent(GotoPayAllBillEvent event) {
+<span class="nc" id="L60">        getView().gotoPayAllBillEvent();</span>
+<span class="nc" id="L61">    }</span>
+
+    @Subscribe
+    public void onGotoPayAllBillConfirmEvent(GotoPayAllBillConfirmEvent event) {
+<span class="nc" id="L65">        getView().gotoPayAllBillConfirmEvent();</span>
+<span class="nc" id="L66">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

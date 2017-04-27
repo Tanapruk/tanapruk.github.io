@@ -9,7 +9,7 @@ import com.ais.mimo.eservice.helper.register.network.operator.RegisterSendOtpDat
 import com.ais.mimo.eservice.helper.register.network.operator.RegisterVerifyIdentityDataCheck;
 import com.ais.mimo.eservice.helper.register.network.operator.RegisterVerifyMyAisDataCheck;
 import com.ais.mimo.eservice.helper.register.network.operator.RegisterVerifyOtpDataCheck;
-import com.ais.mimo.eservice.helper.register.network.operator.filter.RegisterMyNumberFilter;
+import com.ais.mimo.eservice.helper.register.network.operator.filter.FilterNumberFromMyNumber;
 import com.ais.mimo.eservice.helper.register.network.realm.RegisterSaveRealmResult;
 import com.ais.mimo.eservice.helper.register.network.request.ChangePasswordBody;
 import com.ais.mimo.eservice.helper.register.network.request.RegisterConfirmBody;
@@ -57,148 +57,153 @@ public class RegisterManager extends GenericNetworkController {
     public static final String FLAG_Y = &quot;Y&quot;;
     public static final String FLAG_N = &quot;N&quot;;
     public static final String SSBE309 = &quot;SSBE309&quot;;
-    public static final String MASTER_MOBILE_NUMBER = &quot;service_main_mobile_number&quot;;
 
     private static RegisterManager instance;
     private RegisterApi registerApi;
 
     public static RegisterManager getInstance() {
-<span class="fc bfc" id="L66" title="All 2 branches covered.">        if (instance == null) {</span>
-<span class="fc" id="L67">            instance = new RegisterManager();</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if (instance == null) {</span>
+<span class="fc" id="L66">            instance = new RegisterManager();</span>
         }
-<span class="fc" id="L69">        return instance;</span>
+<span class="fc" id="L68">        return instance;</span>
     }
 
-<span class="fc" id="L72">    private RegisterManager() {</span>
-<span class="fc" id="L73">    }</span>
+<span class="fc" id="L71">    private RegisterManager() {</span>
+<span class="fc" id="L72">    }</span>
 
     // inject for testing
     public void setRegisterApi(RegisterApi mockApi) {
-<span class="fc" id="L77">        registerApi = mockApi;</span>
-<span class="fc" id="L78">    }</span>
+<span class="fc" id="L76">        registerApi = mockApi;</span>
+<span class="fc" id="L77">    }</span>
 
     public RegisterApi getRegisterApi() {
-<span class="fc" id="L81">        return registerApi;</span>
+<span class="fc" id="L80">        return registerApi;</span>
     }
 
     public void verifyMyAisWithIdCard(String mobileNumber, String idCard) {
-<span class="fc" id="L85">        verifyMyAisSingle(mobileNumber, idCard, SERVICE_VERIFY_MY_AIS)</span>
-<span class="fc" id="L86">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_VERIFY_MY_AIS));</span>
-<span class="fc" id="L87">    }</span>
+<span class="fc" id="L84">        verifyMyAisSingle(mobileNumber, idCard, SERVICE_VERIFY_MY_AIS)</span>
+<span class="fc" id="L85">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_VERIFY_MY_AIS));</span>
+<span class="fc" id="L86">    }</span>
 
     public void verifyIdentityForChangeMasterNumber(String mobileNumber, RegisterVerifyIdentityBody body) {
-<span class="nc" id="L90">        verifyIdentitySingle(</span>
-<span class="nc" id="L91">                new EventLogParam(&quot;APP_CONFIRM_REGISTER_ADDMEMBER&quot;, &quot;5010&quot;, &quot;5113&quot;).getEventLogHeader(),</span>
+<span class="nc" id="L89">        verifyIdentitySingle(</span>
+<span class="nc" id="L90">                new EventLogParam(&quot;APP_CONFIRM_REGISTER_ADDMEMBER&quot;, &quot;5010&quot;, &quot;5113&quot;).getEventLogHeader(),</span>
                 mobileNumber,
                 body,
                 SERVICE_VERIFY_IDENTITY_FOR_CHANGE_MASTER)
-<span class="nc" id="L95">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(</span>
+<span class="nc" id="L94">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(</span>
                         SERVICE_VERIFY_IDENTITY_FOR_CHANGE_MASTER));
-<span class="nc" id="L97">    }</span>
+<span class="nc" id="L96">    }</span>
 
     public void verifyIdentityMasterNumber(String mobileNumber, RegisterVerifyIdentityBody body) {
-<span class="fc" id="L100">        verifyIdentitySingle(</span>
-<span class="fc" id="L101">                new EventLogParam(&quot;APP_CONFIRM_REGISTER_ADDMEMBER&quot;, &quot;5010&quot;, &quot;5113&quot;).getEventLogHeader(),</span>
+<span class="fc" id="L99">        verifyIdentitySingle(</span>
+<span class="fc" id="L100">                new EventLogParam(&quot;APP_CONFIRM_REGISTER_ADDMEMBER&quot;, &quot;5010&quot;, &quot;5113&quot;).getEventLogHeader(),</span>
                 mobileNumber,
                 body,
                 SERVICE_VERIFY_IDENTITY_MASTER)
-<span class="fc" id="L105">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(</span>
-                        SERVICE_VERIFY_IDENTITY_MASTER));
-<span class="fc" id="L107">    }</span>
+<span class="fc" id="L104">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_VERIFY_IDENTITY_MASTER));</span>
+<span class="fc" id="L105">    }</span>
 
     public void verifyIdentityNumberSelected(String mobileNumber, RegisterVerifyIdentityBody body) {
-<span class="fc" id="L110">        verifyIdentitySingle(</span>
-<span class="fc" id="L111">                new EventLogParam(&quot;APP_CONFIRM_REGISTER_ADDMEMBER&quot;, &quot;5010&quot;, &quot;5113&quot;).getEventLogHeader(),</span>
+<span class="fc" id="L108">        verifyIdentitySingle(</span>
+<span class="fc" id="L109">                new EventLogParam(&quot;APP_CONFIRM_REGISTER_ADDMEMBER&quot;, &quot;5010&quot;, &quot;5113&quot;).getEventLogHeader(),</span>
                 mobileNumber,
                 body,
                 SERVICE_VERIFY_IDENTITY_NUMBER_SELECTED)
-<span class="fc" id="L115">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(</span>
+<span class="fc" id="L113">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(</span>
                         SERVICE_VERIFY_IDENTITY_NUMBER_SELECTED));
-<span class="fc" id="L117">    }</span>
+<span class="fc" id="L115">    }</span>
 
     public void verifyOtpAndGetMyNumber(String mobileNumber, RegisterVerifyOtpBody body) {
-<span class="fc" id="L120">        String[] services = {</span>
+<span class="fc" id="L118">        String[] services = {</span>
                 SERVICE_VERIFY_OTP_NUMBER_SELECTED,
                 SERVICE_GET_MY_NUMBER
         };
-<span class="fc" id="L124">        Single.zip(</span>
-<span class="fc" id="L125">                verifyOtpSingle(mobileNumber, body, SERVICE_VERIFY_OTP_NUMBER_SELECTED),</span>
-<span class="fc" id="L126">                getMyNumberSingle(mobileNumber, SERVICE_GET_MY_NUMBER),</span>
+<span class="fc" id="L122">        Single.zip(</span>
+<span class="fc" id="L123">                verifyOtpSingle(mobileNumber, body, SERVICE_VERIFY_OTP_NUMBER_SELECTED),</span>
+<span class="fc" id="L124">                getMyNumberSingle(mobileNumber, mobileNumber, SERVICE_GET_MY_NUMBER),</span>
                 RegisterChangeMainNumberModel::new)
-<span class="fc" id="L128">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(services));</span>
-<span class="fc" id="L129">    }</span>
+<span class="fc" id="L126">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(services));</span>
+<span class="fc" id="L127">    }</span>
 
     public void verifyIdentityAddNoConfirmNumber(String mobileNumber, RegisterVerifyIdentityBody body) {
-<span class="fc" id="L132">        verifyIdentitySingle(</span>
-<span class="fc" id="L133">                new EventLogParam(&quot;APP_CONFIRM_REGISTER_ADDMEMBER&quot;, &quot;5010&quot;, &quot;5113&quot;).getEventLogHeader(),</span>
+<span class="fc" id="L130">        verifyIdentitySingle(</span>
+<span class="fc" id="L131">                new EventLogParam(&quot;APP_CONFIRM_REGISTER_ADDMEMBER&quot;, &quot;5010&quot;, &quot;5113&quot;).getEventLogHeader(),</span>
                 mobileNumber,
                 body,
                 SERVICE_VERIFY_IDENTITY_ADD_NO_CONFIRM_NUMBER)
-<span class="fc" id="L137">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_VERIFY_IDENTITY_ADD_NO_CONFIRM_NUMBER));</span>
-<span class="fc" id="L138">    }</span>
+<span class="fc" id="L135">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_VERIFY_IDENTITY_ADD_NO_CONFIRM_NUMBER));</span>
+<span class="fc" id="L136">    }</span>
 
     public void verifyIdentityRegisterAddNoConfirmNumber(String mobileNumber, RegisterVerifyIdentityBody body) {
-<span class="nc" id="L141">        verifyIdentitySingle(</span>
-<span class="nc" id="L142">                new EventLogParam(&quot;APP_VIEW_REGISTER_ADDMEMBER&quot;, &quot;5010&quot;, &quot;5112&quot;).getEventLogHeader(),</span>
+<span class="nc" id="L139">        verifyIdentitySingle(</span>
+<span class="nc" id="L140">                new EventLogParam(&quot;APP_VIEW_REGISTER_ADDMEMBER&quot;, &quot;5010&quot;, &quot;5112&quot;).getEventLogHeader(),</span>
                 mobileNumber,
                 body,
                 SERVICE_VERIFY_IDENTITY_ADD_NO_CONFIRM_NUMBER)
-<span class="nc" id="L146">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_VERIFY_IDENTITY_ADD_NO_CONFIRM_NUMBER));</span>
-<span class="nc" id="L147">    }</span>
+<span class="nc" id="L144">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_VERIFY_IDENTITY_ADD_NO_CONFIRM_NUMBER));</span>
+<span class="nc" id="L145">    }</span>
 
     public void getMyNumber(String mobileNumber) {
-<span class="fc" id="L150">        String service = SERVICE_GET_MY_NUMBER;</span>
-<span class="fc" id="L151">        getMyNumberSingle(mobileNumber, service)</span>
-<span class="fc" id="L152">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(service));</span>
+<span class="fc" id="L148">        String service = SERVICE_GET_MY_NUMBER;</span>
+<span class="fc" id="L149">        getMyNumberSingle(mobileNumber, mobileNumber, service)</span>
+<span class="fc" id="L150">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(service));</span>
 
-<span class="fc" id="L154">    }</span>
+<span class="fc" id="L152">    }</span>
+
+    public void getMyNumber(String mobileNumber, String filterNumber) {
+<span class="nc" id="L155">        String service = SERVICE_GET_MY_NUMBER;</span>
+<span class="nc" id="L156">        getMyNumberSingle(mobileNumber, filterNumber, service)</span>
+<span class="nc" id="L157">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(service));</span>
+
+<span class="nc" id="L159">    }</span>
 
     public void verifyOtpNumberSelected(String mobileNumber, RegisterVerifyOtpBody body) {
-<span class="fc" id="L157">        verifyOtpSingle(mobileNumber, body, SERVICE_VERIFY_OTP_NUMBER_SELECTED)</span>
-<span class="fc" id="L158">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_VERIFY_OTP_NUMBER_SELECTED));</span>
-<span class="fc" id="L159">    }</span>
+<span class="fc" id="L162">        verifyOtpSingle(mobileNumber, body, SERVICE_VERIFY_OTP_NUMBER_SELECTED)</span>
+<span class="fc" id="L163">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_VERIFY_OTP_NUMBER_SELECTED));</span>
+<span class="fc" id="L164">    }</span>
 
     public void verifyOtpChangeMaster(String mobileNumber, RegisterVerifyOtpBody body) {
-<span class="nc" id="L162">        verifyOtpChangeMasterSingle(mobileNumber, body, SERVICE_VERIFY_OTP_NUMBER_SELECTED)</span>
-<span class="nc" id="L163">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_VERIFY_OTP_NUMBER_SELECTED));</span>
-<span class="nc" id="L164">    }</span>
+<span class="nc" id="L167">        verifyOtpChangeMasterSingle(mobileNumber, body, SERVICE_VERIFY_OTP_NUMBER_SELECTED)</span>
+<span class="nc" id="L168">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_VERIFY_OTP_NUMBER_SELECTED));</span>
+<span class="nc" id="L169">    }</span>
 
 
     public void sendOtp(String mobileNumber, RegisterSendOtpBody body) {
-<span class="nc" id="L168">        sendOtpSingle(</span>
-<span class="nc" id="L169">                new EventLogParam(&quot;APP_VIEW_FORGET_PASSWORD&quot;, &quot;5010&quot;, &quot;5114&quot;).getEventLogHeader(),</span>
+<span class="nc" id="L173">        sendOtpSingle(</span>
+<span class="nc" id="L174">                new EventLogParam(&quot;APP_VIEW_FORGET_PASSWORD&quot;, &quot;5010&quot;, &quot;5114&quot;).getEventLogHeader(),</span>
                 mobileNumber,
                 body)
-<span class="nc" id="L172">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_SEND_OTP));</span>
-<span class="nc" id="L173">    }</span>
+<span class="nc" id="L177">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_SEND_OTP));</span>
+<span class="nc" id="L178">    }</span>
 
     public void verifyIdentityAndSendOtpChangeMaster(String paramMobileNumber,
                                                      String selectedMobileNumber,
                                                      RegisterVerifyIdentityBody body,
                                                      boolean isFibre) {
-<span class="nc" id="L179">        verifyIdentitySingle(</span>
-<span class="nc" id="L180">                new EventLogParam(&quot;APP_CONFIRM_REGISTER_ADDMEMBER&quot;, &quot;5010&quot;, &quot;5113&quot;).getEventLogHeader(),</span>
+<span class="nc" id="L184">        verifyIdentitySingle(</span>
+<span class="nc" id="L185">                new EventLogParam(&quot;APP_CONFIRM_REGISTER_ADDMEMBER&quot;, &quot;5010&quot;, &quot;5113&quot;).getEventLogHeader(),</span>
                 paramMobileNumber,
                 body,
                 SERVICE_VERITY_SEND_OTP_CHANGE_MASTER)
-<span class="nc" id="L184">                .flatMap(getSendOtpFunction(paramMobileNumber, selectedMobileNumber, isFibre))</span>
-<span class="nc" id="L185">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_VERITY_SEND_OTP_CHANGE_MASTER));</span>
-<span class="nc" id="L186">    }</span>
-
-    public void requestForgotPasswordVerifyOtp(String mobileNumber, RegisterVerifyOtpBody body) {
-<span class="nc" id="L189">        verifyOtpSingle(mobileNumber, body, SERVICE_FORGOT_PASSWORD_VERIFY_OTP)</span>
-<span class="nc" id="L190">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_FORGOT_PASSWORD_VERIFY_OTP));</span>
+<span class="nc" id="L189">                .flatMap(getSendOtpFunction(paramMobileNumber, selectedMobileNumber, isFibre))</span>
+<span class="nc" id="L190">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_VERITY_SEND_OTP_CHANGE_MASTER));</span>
 <span class="nc" id="L191">    }</span>
 
+    public void requestForgotPasswordVerifyOtp(String mobileNumber, RegisterVerifyOtpBody body) {
+<span class="nc" id="L194">        verifyOtpSingle(mobileNumber, body, SERVICE_FORGOT_PASSWORD_VERIFY_OTP)</span>
+<span class="nc" id="L195">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_FORGOT_PASSWORD_VERIFY_OTP));</span>
+<span class="nc" id="L196">    }</span>
+
     public void requestConfirmRegister(String mobileNumber, RegisterConfirmBody body) {
-<span class="fc" id="L194">        confirmRegisterSingle(mobileNumber, body, SERVICE_CONFIRM_REGISTER)</span>
-<span class="fc" id="L195">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_CONFIRM_REGISTER));</span>
-<span class="fc" id="L196">    }</span>
+<span class="fc" id="L199">        confirmRegisterSingle(mobileNumber, body, SERVICE_CONFIRM_REGISTER)</span>
+<span class="fc" id="L200">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_CONFIRM_REGISTER));</span>
+<span class="fc" id="L201">    }</span>
 
     public void changePassword(String mobileNumber, ChangePasswordBody body) {
-<span class="nc" id="L199">        changePasswordSingle(mobileNumber, body)</span>
-<span class="nc" id="L200">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_CHANGE_PASSWORD));</span>
-<span class="nc" id="L201">    }</span>
+<span class="nc" id="L204">        changePasswordSingle(mobileNumber, body)</span>
+<span class="nc" id="L205">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_CHANGE_PASSWORD));</span>
+<span class="nc" id="L206">    }</span>
 
     /*******************/
     /** Create Single **/
@@ -207,129 +212,131 @@ public class RegisterManager extends GenericNetworkController {
     Single&lt;RegisterVerifyMyAisResult&gt; verifyMyAisSingle(String mobileNumber,
                                                         String idCard,
                                                         String serviceName) {
-<span class="fc" id="L210">        return RegisterService.newInstance(URL.getSSB())</span>
-<span class="fc" id="L211">                .getRxApi(getRegisterApi())</span>
-<span class="fc" id="L212">                .getVerifyMyAIS(</span>
-<span class="fc" id="L213">                        getEventLogRegister(),</span>
+<span class="fc" id="L215">        return RegisterService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L216">                .getRxApi(getRegisterApi())</span>
+<span class="fc" id="L217">                .getVerifyMyAIS(</span>
+<span class="fc" id="L218">                        getEventLogRegister(),</span>
                         mobileNumber,
                         new RegisterVerifyMyAISBody(mobileNumber, idCard))
-<span class="fc" id="L216">                .compose(new SchedulersAndErrorHandling&lt;&gt;(RegisterVerifyMyAisResult.class, serviceName))</span>
-<span class="fc" id="L217">                .flatMap(new RegisterVerifyMyAisDataCheck())</span>
-<span class="fc" id="L218">                .map(new RegisterSaveRealmResult&lt;&gt;(serviceName));</span>
+<span class="fc" id="L221">                .compose(new SchedulersAndErrorHandling&lt;&gt;(RegisterVerifyMyAisResult.class, serviceName))</span>
+<span class="fc" id="L222">                .flatMap(new RegisterVerifyMyAisDataCheck())</span>
+<span class="fc" id="L223">                .map(new RegisterSaveRealmResult&lt;&gt;(serviceName));</span>
     }
 
-    public Single&lt;RegisterMyNumberResult&gt; getMyNumberSingle(String mobileNum, String serviceName) {
-<span class="fc" id="L222">        return RegisterService.newInstance(URL.getSSB())</span>
-<span class="fc" id="L223">                .getRxApi(getRegisterApi())</span>
-<span class="fc" id="L224">                .getMyNumber(</span>
-<span class="fc" id="L225">                        new EventLogParam(&quot;APP_VIEW_REGISTER_ADDMEMBER&quot;, &quot;5010&quot;, &quot;5112&quot;).getEventLogHeader(),</span>
+    public Single&lt;RegisterMyNumberResult&gt; getMyNumberSingle(String mobileNum,
+                                                            String filterNumber,
+                                                            String serviceName) {
+<span class="fc" id="L229">        return RegisterService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L230">                .getRxApi(getRegisterApi())</span>
+<span class="fc" id="L231">                .getMyNumber(</span>
+<span class="fc" id="L232">                        new EventLogParam(&quot;APP_VIEW_REGISTER_ADDMEMBER&quot;, &quot;5010&quot;, &quot;5112&quot;).getEventLogHeader(),</span>
                         mobileNum)
-<span class="fc" id="L227">                .compose(new SchedulersAndErrorHandling&lt;&gt;(RegisterMyNumberResult.class, serviceName))</span>
-<span class="fc" id="L228">                .flatMap(new RegisterMyNumberDataCheck())</span>
-<span class="fc" id="L229">                .flatMap(new RegisterMyNumberFilter(mobileNum))</span>
-<span class="fc" id="L230">                .map(new RegisterSaveRealmResult&lt;&gt;(serviceName));</span>
+<span class="fc" id="L234">                .compose(new SchedulersAndErrorHandling&lt;&gt;(RegisterMyNumberResult.class, serviceName))</span>
+<span class="fc" id="L235">                .flatMap(new RegisterMyNumberDataCheck())</span>
+<span class="fc" id="L236">                .flatMap(new FilterNumberFromMyNumber(filterNumber))</span>
+<span class="fc" id="L237">                .map(new RegisterSaveRealmResult&lt;&gt;(serviceName));</span>
     }
 
     Single&lt;RegisterConfirmResult&gt; confirmRegisterSingle(String mobileNum,
                                                         RegisterConfirmBody body,
                                                         String serviceName) {
-<span class="fc" id="L236">        return RegisterService.newInstance(URL.getSSB())</span>
-<span class="fc" id="L237">                .getRxApi(getRegisterApi())</span>
-<span class="fc" id="L238">                .getConfirmRegister(new EventLogParam(&quot;APP_COMFIRM_REGISTER&quot;, &quot;5010&quot;, &quot;5111&quot;).getEventLogHeader(), mobileNum, body)</span>
-<span class="fc" id="L239">                .compose(new SchedulersAndErrorHandling&lt;&gt;(RegisterConfirmResult.class, serviceName))</span>
-<span class="fc" id="L240">                .flatMap(new RegisterConfirmDataCheck())</span>
-<span class="fc" id="L241">                .map(new RegisterSaveRealmResult&lt;&gt;(serviceName));</span>
+<span class="fc" id="L243">        return RegisterService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L244">                .getRxApi(getRegisterApi())</span>
+<span class="fc" id="L245">                .getConfirmRegister(new EventLogParam(&quot;APP_COMFIRM_REGISTER&quot;, &quot;5010&quot;, &quot;5111&quot;).getEventLogHeader(), mobileNum, body)</span>
+<span class="fc" id="L246">                .compose(new SchedulersAndErrorHandling&lt;&gt;(RegisterConfirmResult.class, serviceName))</span>
+<span class="fc" id="L247">                .flatMap(new RegisterConfirmDataCheck())</span>
+<span class="fc" id="L248">                .map(new RegisterSaveRealmResult&lt;&gt;(serviceName));</span>
     }
 
     Single&lt;RegisterVerifyIdentityResult&gt; verifyIdentitySingle(String eventLogParam,
                                                               String mobileNum,
                                                               RegisterVerifyIdentityBody body,
                                                               String serviceName) {
-<span class="fc" id="L248">        return RegisterService.newInstance(URL.getSSB())</span>
-<span class="fc" id="L249">                .getRxApi(getRegisterApi())</span>
-<span class="fc" id="L250">                .getVerifyIdentity(eventLogParam, mobileNum, body)</span>
-<span class="fc" id="L251">                .compose(new SchedulersAndErrorHandling&lt;&gt;(RegisterVerifyIdentityResult.class, serviceName))</span>
-<span class="fc" id="L252">                .flatMap(new RegisterVerifyIdentityDataCheck())</span>
-<span class="fc" id="L253">                .map(new RegisterSaveRealmResult&lt;&gt;(serviceName));</span>
+<span class="fc" id="L255">        return RegisterService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L256">                .getRxApi(getRegisterApi())</span>
+<span class="fc" id="L257">                .getVerifyIdentity(eventLogParam, mobileNum, body)</span>
+<span class="fc" id="L258">                .compose(new SchedulersAndErrorHandling&lt;&gt;(RegisterVerifyIdentityResult.class, serviceName))</span>
+<span class="fc" id="L259">                .flatMap(new RegisterVerifyIdentityDataCheck())</span>
+<span class="fc" id="L260">                .map(new RegisterSaveRealmResult&lt;&gt;(serviceName));</span>
     }
 
     private String getEventLogRegister() {
-<span class="fc" id="L257">        return new EventLogParam(&quot;APP_VIEW_REGISTER&quot;, &quot;5010&quot;, &quot;5109&quot;).getEventLogHeader();</span>
+<span class="fc" id="L264">        return new EventLogParam(&quot;APP_VIEW_REGISTER&quot;, &quot;5010&quot;, &quot;5109&quot;).getEventLogHeader();</span>
     }
 
     Single&lt;RegisterVerifyOtpResult&gt; verifyOtpSingle(String mobileNum,
                                                     RegisterVerifyOtpBody body,
                                                     String serviceName) {
-<span class="fc" id="L263">        return RegisterService.newInstance(URL.getSSB())</span>
-<span class="fc" id="L264">                .getRxApi(getRegisterApi())</span>
-<span class="fc" id="L265">                .getVerifyOtp(</span>
-<span class="fc" id="L266">                        getEventLogRegister(),</span>
+<span class="fc" id="L270">        return RegisterService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L271">                .getRxApi(getRegisterApi())</span>
+<span class="fc" id="L272">                .getVerifyOtp(</span>
+<span class="fc" id="L273">                        getEventLogRegister(),</span>
                         mobileNum,
                         body)
-<span class="fc" id="L269">                .compose(new SchedulersAndErrorHandling&lt;&gt;(RegisterVerifyOtpResult.class, serviceName))</span>
-<span class="fc" id="L270">                .flatMap(new RegisterVerifyOtpDataCheck())</span>
-<span class="fc" id="L271">                .map(new RegisterSaveRealmResult&lt;&gt;(serviceName));</span>
+<span class="fc" id="L276">                .compose(new SchedulersAndErrorHandling&lt;&gt;(RegisterVerifyOtpResult.class, serviceName))</span>
+<span class="fc" id="L277">                .flatMap(new RegisterVerifyOtpDataCheck())</span>
+<span class="fc" id="L278">                .map(new RegisterSaveRealmResult&lt;&gt;(serviceName));</span>
     }
 
     Single&lt;RegisterVerifyOtpResult&gt; verifyOtpChangeMasterSingle(String mobileNum,
                                                                 RegisterVerifyOtpBody body,
                                                                 String serviceName) {
-<span class="nc" id="L277">        return RegisterService.newInstance(URL.getSSB())</span>
-<span class="nc" id="L278">                .getRxApi(getRegisterApi())</span>
-<span class="nc" id="L279">                .getVerifyOtp(</span>
-<span class="nc" id="L280">                        new EventLogParam(&quot;APP_VERIFY_OTP&quot;, &quot;5010&quot;, &quot;10506&quot;).getEventLogHeader(),</span>
+<span class="nc" id="L284">        return RegisterService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L285">                .getRxApi(getRegisterApi())</span>
+<span class="nc" id="L286">                .getVerifyOtp(</span>
+<span class="nc" id="L287">                        new EventLogParam(&quot;APP_VERIFY_OTP&quot;, &quot;5010&quot;, &quot;10506&quot;).getEventLogHeader(),</span>
                         mobileNum,
                         body)
-<span class="nc" id="L283">                .compose(new SchedulersAndErrorHandling&lt;&gt;(RegisterVerifyOtpResult.class, serviceName))</span>
-<span class="nc" id="L284">                .flatMap(new RegisterVerifyOtpDataCheck())</span>
-<span class="nc" id="L285">                .map(new RegisterSaveRealmResult&lt;&gt;(serviceName));</span>
+<span class="nc" id="L290">                .compose(new SchedulersAndErrorHandling&lt;&gt;(RegisterVerifyOtpResult.class, serviceName))</span>
+<span class="nc" id="L291">                .flatMap(new RegisterVerifyOtpDataCheck())</span>
+<span class="nc" id="L292">                .map(new RegisterSaveRealmResult&lt;&gt;(serviceName));</span>
     }
 
     private Single&lt;RegisterSendOtpResult&gt; sendOtpSingle(String eventLog, String mobileNum, RegisterSendOtpBody body) {
-<span class="nc" id="L289">        return RegisterService.newInstance(URL.getSSB())</span>
-<span class="nc" id="L290">                .getRxApi(getRegisterApi())</span>
-<span class="nc" id="L291">                .getSendOtp(</span>
+<span class="nc" id="L296">        return RegisterService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L297">                .getRxApi(getRegisterApi())</span>
+<span class="nc" id="L298">                .getSendOtp(</span>
                         eventLog,
                         mobileNum,
                         body)
-<span class="nc" id="L295">                .compose(new SchedulersAndErrorHandling&lt;&gt;(RegisterSendOtpResult.class, SERVICE_SEND_OTP))</span>
-<span class="nc" id="L296">                .flatMap(new RegisterSendOtpDataCheck())</span>
-<span class="nc" id="L297">                .map(new SaveRealmResult&lt;&gt;(SERVICE_SEND_OTP));</span>
+<span class="nc" id="L302">                .compose(new SchedulersAndErrorHandling&lt;&gt;(RegisterSendOtpResult.class, SERVICE_SEND_OTP))</span>
+<span class="nc" id="L303">                .flatMap(new RegisterSendOtpDataCheck())</span>
+<span class="nc" id="L304">                .map(new SaveRealmResult&lt;&gt;(SERVICE_SEND_OTP));</span>
     }
 
     private Single&lt;ChangePasswordResult&gt; changePasswordSingle(String mobileNumber, ChangePasswordBody body) {
-<span class="nc" id="L301">        return RegisterService.newInstance(URL.getSSB())</span>
-<span class="nc" id="L302">                .getRxApi(getRegisterApi())</span>
-<span class="nc" id="L303">                .changePassword(</span>
-<span class="nc" id="L304">                        new EventLogParam(&quot;APP_CONFIRM_RESET_PASSWORD&quot;, &quot;5010&quot;, &quot;5115&quot;).getEventLogHeader(),</span>
+<span class="nc" id="L308">        return RegisterService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L309">                .getRxApi(getRegisterApi())</span>
+<span class="nc" id="L310">                .changePassword(</span>
+<span class="nc" id="L311">                        new EventLogParam(&quot;APP_CONFIRM_RESET_PASSWORD&quot;, &quot;5010&quot;, &quot;5115&quot;).getEventLogHeader(),</span>
                         mobileNumber,
                         body)
-<span class="nc" id="L307">                .compose(new SchedulersAndErrorHandling&lt;&gt;(ChangePasswordResult.class, SERVICE_CHANGE_PASSWORD))</span>
-<span class="nc" id="L308">                .flatMap(new ChangePasswordDataCheck())</span>
-<span class="nc" id="L309">                .map(new SaveRealmResult&lt;&gt;(SERVICE_CHANGE_PASSWORD));</span>
+<span class="nc" id="L314">                .compose(new SchedulersAndErrorHandling&lt;&gt;(ChangePasswordResult.class, SERVICE_CHANGE_PASSWORD))</span>
+<span class="nc" id="L315">                .flatMap(new ChangePasswordDataCheck())</span>
+<span class="nc" id="L316">                .map(new SaveRealmResult&lt;&gt;(SERVICE_CHANGE_PASSWORD));</span>
     }
     //&lt;/editor-fold&gt;
 
     @NonNull
     private Func1&lt;RegisterVerifyIdentityResult, Single&lt;RegisterSendOtpResult&gt;&gt; getSendOtpFunction(final String paramMobileNumber, final String mobileNumber, final boolean isFibre) {
-<span class="nc" id="L315">        return registerVerifyIdentityResult -&gt; {</span>
-<span class="nc" id="L316">            RegisterSendOtpBody sendOtpBody = new RegisterSendOtpBody(</span>
+<span class="nc" id="L322">        return registerVerifyIdentityResult -&gt; {</span>
+<span class="nc" id="L323">            RegisterSendOtpBody sendOtpBody = new RegisterSendOtpBody(</span>
                     mobileNumber,
                     &quot;&quot;,
                     &quot;&quot;);
             String eventLog;
-<span class="nc bnc" id="L321" title="All 2 branches missed.">            if (isFibre) {</span>
-<span class="nc" id="L322">                eventLog = new EventLogParam(</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">            if (isFibre) {</span>
+<span class="nc" id="L329">                eventLog = new EventLogParam(</span>
                         &quot;APP_CHANGE_MASTER_REQUEST_OTP&quot;,
                         &quot;5010&quot;,
                         &quot;5146&quot;)
-<span class="nc" id="L326">                        .getEventLogHeader();</span>
+<span class="nc" id="L333">                        .getEventLogHeader();</span>
 
             } else {
-<span class="nc" id="L329">                eventLog = new EventLogParam(&quot;APP_SEND_OTP&quot;, &quot;&quot;, &quot;10504&quot;).getEventLogHeader();</span>
+<span class="nc" id="L336">                eventLog = new EventLogParam(&quot;APP_SEND_OTP&quot;, &quot;&quot;, &quot;10504&quot;).getEventLogHeader();</span>
             }
-<span class="nc" id="L331">            RxBus.get().post(new VerifyIdentityNtypeEvent(registerVerifyIdentityResult.getData().getNtype()));</span>
-<span class="nc" id="L332">            return sendOtpSingle(eventLog, paramMobileNumber, sendOtpBody);</span>
+<span class="nc" id="L338">            RxBus.get().post(new VerifyIdentityNtypeEvent(registerVerifyIdentityResult.getData().getNtype()));</span>
+<span class="nc" id="L339">            return sendOtpSingle(eventLog, paramMobileNumber, sendOtpBody);</span>
         };
     }
 }

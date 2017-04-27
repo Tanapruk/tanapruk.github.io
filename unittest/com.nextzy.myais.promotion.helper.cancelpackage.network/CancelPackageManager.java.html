@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CancelPackageManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.promotion.helper.cancelpackage.network</a> &gt; <span class="el_source">CancelPackageManager.java</span></div><h1>CancelPackageManager.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.promotion.helper.cancelpackage.network;
+
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.database.model.SaveRealmResult;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.network.subscriber.NextzySimpleSubscriber;
+import com.nextzy.myais.common.network.worker.GenericNetworkController;
+import com.nextzy.myais.common.network.worker.SchedulersAndErrorHandling;
+import com.nextzy.myais.promotion.helper.cancelpackage.network.api.CancelPackageApi;
+import com.nextzy.myais.promotion.helper.cancelpackage.network.api.CancelPackageService;
+import com.nextzy.myais.promotion.helper.cancelpackage.network.check.BillingCycleCheck;
+import com.nextzy.myais.promotion.helper.cancelpackage.network.check.CancelListPackageCheck;
+import com.nextzy.myais.promotion.helper.cancelpackage.network.check.CancelPackageRemarkCheck;
+import com.nextzy.myais.promotion.helper.cancelpackage.network.check.CancelResultCheck;
+import com.nextzy.myais.promotion.helper.cancelpackage.network.model.BillingCycleResult;
+import com.nextzy.myais.promotion.helper.cancelpackage.network.model.CancelListResult;
+import com.nextzy.myais.promotion.helper.cancelpackage.network.model.CancelPackageRequest;
+import com.nextzy.myais.promotion.helper.cancelpackage.network.model.CancelRemarkResult;
+import com.nextzy.myais.promotion.helper.cancelpackage.network.model.CancelResult;
+import com.nextzy.myais.promotion.helper.cancelpackage.network.model.request.CancelRequest;
+import com.nextzy.myais.promotion.helper.cancelpackage.network.model.RemarkAndBillingCycleResult;
+
+import java.util.List;
+
+import rx.Single;
+
+public class CancelPackageManager extends GenericNetworkController {
+    public static final String SERVICE_GET_CANCEL_LIST = &quot;get_cancel_list&quot;;
+    public static final String SERVICE_GET_CANCEL_RESULT = &quot;get_cancel_result&quot;;
+    public static final String SERVICE_GET_REMARK = &quot;get_cancel_remark&quot;;
+    public static final String SERVICE_GET_BILLING_CYCLE = &quot;get_cancel_bill_cycle&quot;;
+
+    public static final String IM_TYPE = &quot;IM&quot;;
+
+    private static CancelPackageManager instance;
+    private CancelPackageApi cancelPackageApi;
+
+    public static CancelPackageManager getInstance() {
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        if (instance == null) {</span>
+<span class="fc" id="L40">            instance = new CancelPackageManager();</span>
+        }
+<span class="fc" id="L42">        return instance;</span>
+    }
+
+<span class="fc" id="L45">    private CancelPackageManager() {</span>
+<span class="fc" id="L46">    }</span>
+
+    private String getEventLogCancelPackage() {
+<span class="fc" id="L49">        return new EventLogParam(&quot;APP_VIEW_CANCEL_ONTOP_PACKAGE&quot;, &quot;5001&quot;, &quot;5021&quot;).getEventLogHeader();</span>
+    }
+
+    // inject for testing
+    public void setChangePackageApi(CancelPackageApi mockApi) {
+<span class="fc" id="L54">        cancelPackageApi = mockApi;</span>
+<span class="fc" id="L55">    }</span>
+
+    public CancelPackageApi getCancelPackageApi() {
+<span class="fc" id="L58">        return cancelPackageApi;</span>
+    }
+
+    public void requestCancelListPackage(String mobileNumber) {
+<span class="fc" id="L62">        String service = SERVICE_GET_CANCEL_LIST;</span>
+<span class="fc" id="L63">        getSingleCancelListPackage(mobileNumber, service)</span>
+<span class="fc" id="L64">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(service));</span>
+<span class="fc" id="L65">    }</span>
+
+
+    public void requestBillingCycleAndRemark(String mobileNumber) {
+<span class="nc" id="L69">        String[] services = {SERVICE_GET_REMARK, SERVICE_GET_BILLING_CYCLE};</span>
+<span class="nc" id="L70">        Single.zip(</span>
+<span class="nc" id="L71">                getSingleCancelRemarkPackage(mobileNumber, services[0]),</span>
+<span class="nc" id="L72">                getSingleBillingCyclePackage(mobileNumber, services[1]),</span>
+                RemarkAndBillingCycleResult::new)
+<span class="nc" id="L74">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(services));</span>
+<span class="nc" id="L75">    }</span>
+
+    public void requestCancelResult(String mobileNum, List&lt;CancelPackageRequest&gt; packages) {
+<span class="fc" id="L78">        CancelRequest req = new CancelRequest();</span>
+<span class="fc" id="L79">        req.setEffectiveOption(IM_TYPE);</span>
+<span class="fc" id="L80">        req.setPackages(packages);</span>
+<span class="fc" id="L81">        getSingleCancelResultPackage(mobileNum, req, SERVICE_GET_CANCEL_RESULT)</span>
+<span class="fc" id="L82">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_GET_CANCEL_RESULT));</span>
+<span class="fc" id="L83">    }</span>
+
+    /*******************/
+    /** Create Single **/
+    /*******************/
+    //&lt;editor-fold desc=&quot;Create Single folding&quot;&gt;
+    public Single&lt;CancelListResult&gt; getSingleCancelListPackage(String mobileNum,
+                                                               String serviceName) {
+<span class="fc" id="L91">        return CancelPackageService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L92">                .getRxApi(getCancelPackageApi())</span>
+<span class="fc" id="L93">                .getCancelList(</span>
+<span class="fc" id="L94">                        getEventLogCancelPackage(),</span>
+                        mobileNum)
+<span class="fc" id="L96">                .compose(new SchedulersAndErrorHandling&lt;&gt;(CancelListResult.class, serviceName))</span>
+<span class="fc" id="L97">                .flatMap(new CancelListPackageCheck())</span>
+<span class="fc" id="L98">                .map(new SaveRealmResult&lt;&gt;(serviceName));</span>
+    }
+
+
+    public Single&lt;BillingCycleResult&gt; getSingleBillingCyclePackage(String mobileNum,
+                                                                   String serviceName) {
+<span class="fc" id="L104">        return CancelPackageService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L105">                .getRxApi(getCancelPackageApi())</span>
+<span class="fc" id="L106">                .getBillingCycle(</span>
+<span class="fc" id="L107">                        getEventLogCancelPackage(),</span>
+                        mobileNum)
+<span class="fc" id="L109">                .compose(new SchedulersAndErrorHandling&lt;&gt;(BillingCycleResult.class, serviceName))</span>
+<span class="fc" id="L110">                .flatMap(new BillingCycleCheck())</span>
+<span class="fc" id="L111">                .map(new SaveRealmResult&lt;&gt;(serviceName));</span>
+
+    }
+
+
+    public Single&lt;CancelRemarkResult&gt; getSingleCancelRemarkPackage(String mobileNum,
+                                                                   String serviceName) {
+<span class="fc" id="L118">        return CancelPackageService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L119">                .getRxApi(getCancelPackageApi())</span>
+<span class="fc" id="L120">                .getCancelRemark(</span>
+<span class="fc" id="L121">                        getEventLogCancelPackage(),</span>
+                        mobileNum)
+<span class="fc" id="L123">                .compose(new SchedulersAndErrorHandling&lt;&gt;(CancelRemarkResult.class, serviceName))</span>
+<span class="fc" id="L124">                .flatMap(new CancelPackageRemarkCheck())</span>
+<span class="fc" id="L125">                .map(new SaveRealmResult&lt;&gt;(serviceName));</span>
+
+    }
+
+    public Single&lt;CancelResult&gt; getSingleCancelResultPackage(String mobileNum,
+                                                             CancelRequest request,
+                                                             String serviceName) {
+<span class="fc" id="L132">        return CancelPackageService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L133">                .getRxApi(getCancelPackageApi())</span>
+<span class="fc" id="L134">                .getCancelResult(</span>
+<span class="fc" id="L135">                        new EventLogParam(&quot;APP_CONFIRM_CANCEL_ONTOP_PACKAGE&quot;, &quot;5001&quot;, &quot;5022&quot;).getEventLogHeader(),</span>
+                        mobileNum,
+                        request)
+<span class="fc" id="L138">                .compose(new SchedulersAndErrorHandling&lt;&gt;(CancelResult.class, serviceName))</span>
+<span class="fc" id="L139">                .flatMap(new CancelResultCheck())</span>
+<span class="fc" id="L140">                .map(new SaveRealmResult&lt;&gt;(serviceName));</span>
+    }
+
+    //&lt;/editor-fold&gt;
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TopUpSelectionPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.payment.module.topup.fragment</a> &gt; <span class="el_source">TopUpSelectionPresenter.java</span></div><h1>TopUpSelectionPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.payment.module.topup.fragment;
+
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.mvp.NextzyPresenter;
+import com.nextzy.myais.common.network.event.ErrorEvent;
+import com.nextzy.myais.common.network.model.Checker;
+import com.nextzy.myais.common.network.tool.ApiServiceCache;
+import com.nextzy.myais.common.utility.NextzyLanguage;
+import com.nextzy.myais.common.utility.NextzyUtility;
+import com.nextzy.myais.common.utility.remark.RemarkUtility;
+import com.nextzy.myais.payment.R;
+import com.nextzy.myais.payment.helper.payment.model.CreditCardDropdownResult;
+import com.nextzy.myais.payment.helper.payment.util.CreditCardDropdownFilter;
+import com.nextzy.myais.payment.helper.topup.event.GotoTopUpConfirmPostpaidEvent;
+import com.nextzy.myais.payment.helper.topup.event.GotoTopUpConfirmPrepaidEvent;
+import com.nextzy.myais.payment.helper.topup.model.CheckCapMaxResult;
+import com.nextzy.myais.payment.helper.topup.model.TopUpData;
+import com.nextzy.myais.payment.helper.topup.model.TopUpLimitResult;
+import com.nextzy.myais.payment.helper.topup.model.TopUpRemarkResult;
+import com.nextzy.myais.payment.helper.topup.model.TopUpValidateParam;
+import com.nextzy.myais.payment.helper.topup.model.TopUpValidateResult;
+import com.nextzy.myais.payment.helper.topup.network.TopupManager;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class TopUpSelectionPresenter extends NextzyPresenter&lt;TopUpSelectionContractor.View&gt; implements TopUpSelectionContractor.Presenter {
+<span class="fc" id="L31">    private final String KEY_TOP_UP_REMARK = &quot;REMARK&quot;;</span>
+
+    private TopUpData mTopUpData;
+<span class="fc" id="L34">    private String htmlRemark = &quot;&quot;;</span>
+    private TopUpLimitResult limitResult;
+    private CreditCardDropdownResult creditCardDropdownResult;
+    private TopUpRemarkResult remarkResult;
+    private CheckCapMaxResult checkCapMaxResult;
+    private List&lt;String&gt; limitList;
+    private List&lt;String&gt; checkCapMaxLimitList;
+    private ArrayList&lt;String&gt; creditCardList;
+
+    TopUpSelectionPresenter(TopUpSelectionContractor.View view) {
+<span class="fc" id="L44">        super(view);</span>
+<span class="fc" id="L45">    }</span>
+
+    public static TopUpSelectionPresenter createPresenter(TopUpSelectionContractor.View view) {
+<span class="nc" id="L48">        return new TopUpSelectionPresenter(view);</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L53">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L57">    }</span>
+
+    @Override
+    public void onViewStart() {
+<span class="nc" id="L61">        RxBus.get().register(this);</span>
+<span class="nc" id="L62">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L66">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L67">    }</span>
+
+    @Override
+    public void callService() {
+<span class="fc" id="L71">        getView().rememberLanguageHeader(NextzyLanguage.getInstance().getCurrentLanguage());</span>
+<span class="fc" id="L72">        String topUpEventLog = new EventLogParam(&quot;APP_VIEW_TOPUP&quot;, &quot;5003&quot;, &quot;5057&quot;).getEventLogHeader();</span>
+<span class="fc" id="L73">        getView().showLoadingDialog();</span>
+<span class="fc" id="L74">        getView().hideContent();</span>
+<span class="fc" id="L75">        getView().hideReloadLayout();</span>
+<span class="fc" id="L76">        TopupManager.getInstance().getTopUpData(topUpEventLog);</span>
+<span class="fc" id="L77">    }</span>
+
+    @Override
+    public List&lt;String&gt; getCheckCapMaxList() {
+<span class="fc" id="L81">        return checkCapMaxLimitList;</span>
+    }
+
+    @Override
+    public List&lt;String&gt; getLimit() {
+<span class="fc" id="L86">        return limitList;</span>
+    }
+
+    @Override
+    public String getHtmlRemark() {
+<span class="fc" id="L91">        return htmlRemark;</span>
+    }
+
+    @Override
+    public void validate(int checkedRadioButtonId, String cardPinOrIdCard, String mobileNumber) {
+<span class="fc bfc" id="L96" title="All 6 branches covered.">        boolean invalidIdCard = cardPinOrIdCard.length() == 0 || (cardPinOrIdCard.length() == 13 &amp;&amp; !NextzyUtility.getInstance().isValidIdCard(cardPinOrIdCard));</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        if (checkedRadioButtonId == -1) {</span>
+<span class="fc" id="L98">            getView().showAlertDialogDismissOnClick(R.string.my_ais_topup_error_topup_channel);</span>
+<span class="fc" id="L99">            return;</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        } else if (getView().isRadioCreditCard(checkedRadioButtonId)) {</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">            if (getView().isCardTypeNotChosen()) {</span>
+<span class="fc" id="L102">                getView().showAlertDialogDismissOnClick(R.string.my_ais_topup_error_credit_type);</span>
+<span class="fc" id="L103">                return;</span>
+            }
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        } else if (getView().isRadioDebitCard(checkedRadioButtonId)) {</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">        } else if (getView().isRadioMPayWallet(checkedRadioButtonId)) {</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        } else if (getView().isRadioCashCard(checkedRadioButtonId)) {</span>
+
+<span class="fc bfc" id="L109" title="All 2 branches covered.">            if (cardPinOrIdCard.trim().isEmpty()) {</span>
+<span class="fc" id="L110">                getView().showAlertDialogDismissOnClick(R.string.my_ais_topup_error_inser_pin_number);</span>
+<span class="fc" id="L111">                return;</span>
+            }
+<span class="fc bfc" id="L113" title="All 2 branches covered.">            if (cardPinOrIdCard.length() != 16) {</span>
+<span class="fc" id="L114">                getView().showAlertDialogDismissOnClick(R.string.my_ais_topup_error_insert_16pin_number);</span>
+<span class="fc" id="L115">                return;</span>
+            }
+
+<span class="fc bfc" id="L118" title="All 4 branches covered.">        } else if (getView().isRadioTopUp(checkedRadioButtonId) &amp;&amp; invalidIdCard) {</span>
+<span class="fc" id="L119">            getView().showAlertDialogDismissOnClick(R.string.my_ais_topup_error_insert_id_number);</span>
+<span class="fc" id="L120">            return;</span>
+        }
+
+<span class="fc bfc" id="L123" title="All 2 branches covered.">        if (mobileNumber.length() == 0) {</span>
+<span class="fc" id="L124">            getView().showAlertDialogDismissOnClick(R.string.my_ais_topup_error_input_mobile_number);</span>
+<span class="fc" id="L125">            return;</span>
+        }
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        if (mobileNumber.length() != 10) {</span>
+<span class="fc" id="L128">            getView().showAlertDialogDismissOnClick(R.string.my_ais_topup_error_input_10digit_mobile_number);</span>
+<span class="fc" id="L129">            return;</span>
+        }
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        if (mobileNumber.charAt(0) != '0') {</span>
+<span class="fc" id="L132">            getView().showAlertDialogDismissOnClick(R.string.my_ais_topup_error_invalid_mobile_number);</span>
+<span class="fc" id="L133">            return;</span>
+        }
+
+<span class="fc bfc" id="L136" title="All 4 branches covered.">        if (!getView().isRadioCashCard(checkedRadioButtonId) &amp;&amp; !NextzyUtility.getInstance().isNumeric(getView().getTopUpSpinnerString())) {</span>
+<span class="fc" id="L137">            getView().showAlertDialogDismissOnClick(R.string.my_ais_topup_error_topup_amount);</span>
+<span class="fc" id="L138">            return;</span>
+        }
+<span class="fc" id="L140">        getView().passAllClientValidation();</span>
+<span class="fc" id="L141">    }</span>
+
+    @Override
+    public void validateAisTopUp() {
+<span class="fc" id="L145">        TopUpValidateParam param = new TopUpValidateParam();</span>
+<span class="fc" id="L146">        param.setAmount(getView().getAmount());</span>
+<span class="fc" id="L147">        param.setPayTo(getView().getPayTo());</span>
+<span class="fc" id="L148">        param.setIdCard(getView().getIdCardOrPin());</span>
+<span class="fc" id="L149">        TopupManager.getInstance().validateTopUp(param);</span>
+<span class="fc" id="L150">    }</span>
+
+    @Override
+    public void gotoConfirmPage() {
+<span class="fc bfc" id="L154" title="All 2 branches covered.">        if (Mobile.getInstance().isPostpaid())</span>
+<span class="fc" id="L155">            RxBus.get().post(new GotoTopUpConfirmPostpaidEvent());</span>
+        else {
+<span class="fc" id="L157">            RxBus.get().post(new GotoTopUpConfirmPrepaidEvent());</span>
+        }
+<span class="fc" id="L159">    }</span>
+
+    @Override
+    public ArrayList&lt;String&gt; getCreditDropDownList() {
+<span class="fc" id="L163">        return creditCardList;</span>
+    }
+
+    @Override
+    public TopUpData getTopUpData() {
+<span class="nc" id="L168">        return mTopUpData;</span>
+    }
+
+    @Override
+    public void setTopUpData(TopUpData topUpData) {
+<span class="fc" id="L173">        mTopUpData = topUpData;</span>
+<span class="fc" id="L174">    }</span>
+
+
+    @Override
+    public void initTopUpData() {
+<span class="fc" id="L179">        getView().dismissDialog();</span>
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        if (mTopUpData != null) {</span>
+<span class="fc" id="L181">            limitResult = mTopUpData.getTopUpLimitResult();</span>
+<span class="fc" id="L182">            creditCardDropdownResult = mTopUpData.getCreditCardDropdownResult();</span>
+<span class="fc" id="L183">            remarkResult = mTopUpData.getTopUpRemarkResult();</span>
+        }
+
+<span class="pc bpc" id="L186" title="1 of 2 branches missed.">        if (!isTopUpDataAvailable()) {</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">            if (Mobile.getInstance().isPrepaid()) {</span>
+<span class="nc" id="L188">                getView().showPrepaidUnavailableTopUpService();</span>
+<span class="nc" id="L189">                return;</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">            } else if (Mobile.getInstance().isPostpaid()) {</span>
+<span class="nc" id="L191">                getView().showPostpaidUnavailableTopUpService();</span>
+<span class="nc" id="L192">                return;</span>
+            } else {
+<span class="nc" id="L194">                throw new NullPointerException(&quot;Unknown business type for initial top up data&quot;);</span>
+            }
+        }
+<span class="fc" id="L197">        setLimit();</span>
+<span class="fc" id="L198">        setCreditCardDropdown();</span>
+<span class="fc" id="L199">        setRemark();</span>
+<span class="fc" id="L200">        getView().showContent();</span>
+<span class="fc" id="L201">        getView().hideReloadLayout();</span>
+<span class="fc" id="L202">    }</span>
+
+
+    @Override
+    public void callCheckCapMaxService() {
+<span class="nc" id="L207">        getView().showLoadingDialog();</span>
+<span class="nc" id="L208">        TopupManager.getInstance().checkCapMax();</span>
+<span class="nc" id="L209">    }</span>
+
+    @Override
+    public boolean isTopUpDataAvailable() {
+<span class="fc bfc" id="L213" title="All 2 branches covered.">        return limitResult != null &amp;&amp;</span>
+<span class="pc bpc" id="L214" title="2 of 4 branches missed.">                limitResult.hasData() &amp;&amp;</span>
+                creditCardDropdownResult != null &amp;&amp;
+<span class="pc bpc" id="L216" title="2 of 4 branches missed.">                creditCardDropdownResult.hasDataList() &amp;&amp;</span>
+                remarkResult != null &amp;&amp;
+<span class="pc bpc" id="L218" title="1 of 2 branches missed.">                remarkResult.hasDataList();</span>
+    }
+
+
+    public void setRemark() {
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">        if (!Checker.dataListNotNull(remarkResult)) {</span>
+<span class="nc" id="L224">            return;</span>
+        }
+<span class="fc" id="L226">        htmlRemark = RemarkUtility.getInstance().sum(new String[]{KEY_TOP_UP_REMARK}, remarkResult.getDataList());</span>
+<span class="fc" id="L227">    }</span>
+
+
+    public void setCreditCardDropdown() {
+<span class="pc bpc" id="L231" title="1 of 2 branches missed.">        if (!Checker.dataListNotNull(creditCardDropdownResult)) {</span>
+<span class="nc" id="L232">            return;</span>
+        }
+<span class="fc" id="L234">        creditCardList = CreditCardDropdownFilter.getInstance().getCreditCardList(creditCardDropdownResult.getDataList(), true);</span>
+<span class="fc" id="L235">    }</span>
+
+    public void setLimit() {
+<span class="pc bpc" id="L238" title="1 of 2 branches missed.">        if (!Checker.dataNotNull(limitResult)) {</span>
+<span class="nc" id="L239">            return;</span>
+        }
+<span class="fc" id="L241">        limitList = limitResult.getData().getLimitList();</span>
+<span class="fc" id="L242">        getView().addLimitToSpinner(getLimit());</span>
+<span class="fc" id="L243">    }</span>
+
+    public void setCheckCapMax() {
+<span class="pc bpc" id="L246" title="1 of 2 branches missed.">        if (!Checker.dataNotNull(checkCapMaxResult)) {</span>
+<span class="nc" id="L247">            showAlertCheckCapMax();</span>
+<span class="nc" id="L248">            return;</span>
+        }
+<span class="fc" id="L250">        checkCapMaxLimitList = checkCapMaxResult.getData().getLimitList();</span>
+<span class="pc bpc" id="L251" title="1 of 2 branches missed.">        if (getView().isRadioTopUp(getView().getCurrentRadioId())) {</span>
+<span class="nc" id="L252">            getView().addLimitToSpinner(getCheckCapMaxList());</span>
+        }
+<span class="fc" id="L254">    }</span>
+
+    private void showAlertCheckCapMax() {
+<span class="nc bnc" id="L257" title="All 4 branches missed.">        if (checkCapMaxResult == null || checkCapMaxResult.getResultDescription() == null) {</span>
+<span class="nc" id="L258">            getView().showPostpaidUnavailableTopUpService();</span>
+        } else {
+<span class="nc" id="L260">            getView().showAlertDialogFinishOnClick(checkCapMaxResult.getResultDescription());</span>
+        }
+<span class="nc" id="L262">    }</span>
+
+    @Subscribe
+    public void onValidateTopUpResult(TopUpValidateResult result) {
+<span class="fc" id="L266">        getView().dismissDialog();</span>
+<span class="fc bfc" id="L267" title="All 2 branches covered.">        if (!result.hasData()) {</span>
+<span class="fc" id="L268">            return;</span>
+        }
+
+<span class="fc bfc" id="L271" title="All 2 branches covered.">        if (result.getData().isValid()) {</span>
+<span class="fc" id="L272">            getView().validateSuccess();</span>
+        } else {
+<span class="fc" id="L274">            getView().showAlertDialogDismissOnClick(result.getData().getConfirmMessage());</span>
+        }
+<span class="fc" id="L276">    }</span>
+
+    @Subscribe
+    public void onCheckCapMaxResult(CheckCapMaxResult result) {
+<span class="fc" id="L280">        getView().dismissDialog();</span>
+<span class="fc" id="L281">        checkCapMaxResult = result;</span>
+<span class="fc" id="L282">        setCheckCapMax();</span>
+<span class="fc" id="L283">    }</span>
+
+    @Subscribe
+    public void onTopUpDataSuccess(TopUpData topUpData) {
+<span class="fc" id="L287">        setTopUpData(topUpData);</span>
+<span class="fc" id="L288">        initTopUpData();</span>
+<span class="fc" id="L289">        ApiServiceCache.getInstance().clearCache(TopUpData.class);</span>
+<span class="fc" id="L290">    }</span>
+
+    @Subscribe
+    public void onErrorEvent(ErrorEvent event) {
+<span class="nc bnc" id="L294" title="All 2 branches missed.">        if (event.isMatch(TopupManager.SERVICE_NAME_CHECK_CAP_MAX,</span>
+                TopupManager.SERVICE_NAME_GET_TOP_UP_LIMIT,
+                TopupManager.SERVICE_NAME_GET_TOP_UP_REMARK,
+                TopupManager.SERVICE_NAME_PAYMENT_ACTION_CASH_CARD,
+                TopupManager.SERVICE_NAME_PAYMENT_ACTION_TOP_UP,
+                TopupManager.SERVICE_NAME_VALIDATE_TOP_UP)) {
+<span class="nc" id="L300">            getView().hideContent();</span>
+<span class="nc" id="L301">            getView().showReloadLayout();</span>
+        }
+<span class="nc" id="L303">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

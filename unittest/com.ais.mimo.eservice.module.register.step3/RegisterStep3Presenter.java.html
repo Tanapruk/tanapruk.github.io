@@ -68,7 +68,7 @@ public class RegisterStep3Presenter extends RegisterBasePresenter&lt;RegisterSte
     @Override
     public void requestTerm() {
 <span class="fc" id="L70">        getView().showLoadingNoFade();</span>
-<span class="fc" id="L71">        String mobileNumber = getView().getArgumentsStringMobileNumber();</span>
+<span class="fc" id="L71">        String mobileNumber = getView().getMobileNumberStringArgument();</span>
 <span class="fc" id="L72">        EventLogBlob.getInstance().addEventLog(</span>
                 TermManager.SERVICE_NAME_BY_MOBILE_TERM_OF_CONDITION,
                 new EventLogParam(&quot;APP_REGISTER_TERMS_CONDITION&quot;, &quot;5010&quot;, &quot;5110&quot;));

@@ -12,6 +12,7 @@ import com.ais.mimo.eservice.helper.myaccount.network.response.MyNumberResult;
 import com.ais.mimo.eservice.helper.myaccount.network.response.QueryMyAisResult;
 import com.ais.mimo.eservice.helper.myaccount.utility.MyNumberArranger;
 import com.ais.mimo.eservice.helper.register.network.RegisterManager;
+import com.ais.mimo.eservice.helper.register.network.exception.RegisterSSBE309Exception;
 import com.ais.mimo.eservice.helper.register.network.exception.RegisterVerifyIdentityDataException;
 import com.ais.mimo.eservice.helper.register.network.exception.RegisterVerifyOtpDataException;
 import com.ais.mimo.eservice.helper.register.network.request.RegisterVerifyIdentityBody;
@@ -38,8 +39,6 @@ import com.nextzy.myais.myais.R;
 import java.util.List;
 import java.util.Map;
 
-import timber.log.Timber;
-
 import static com.ais.mimo.eservice.helper.register.network.RegisterManager.FLAG_N;
 import static com.nextzy.myais.common.delegate.FormatUtility.FORMAT_MOBILE_NUMBER;
 import static com.nextzy.myais.common.utility.DefaultPreference.KEY_PRIVATE_ID;
@@ -64,479 +63,471 @@ public class MyAccountEditAccountPresenter extends NextzyPresenter&lt;MyAccountE
     public String ntype;
 
     public MyAccountEditAccountPresenter(MyAccountEditAccountContractor.View view) {
-<span class="fc" id="L67">        super(view);</span>
-<span class="fc" id="L68">    }</span>
+<span class="fc" id="L66">        super(view);</span>
+<span class="fc" id="L67">    }</span>
 
     public static MyAccountEditAccountPresenter createPresenter(MyAccountEditAccountContractor.View view) {
-<span class="nc" id="L71">        return new MyAccountEditAccountPresenter(view);</span>
+<span class="nc" id="L70">        return new MyAccountEditAccountPresenter(view);</span>
     }
 
     public MyAccountManager getMyAccountManager() {
-<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        if (myAccountManager == null) {</span>
-<span class="nc" id="L76">            myAccountManager = MyAccountManager.getInstance();</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if (myAccountManager == null) {</span>
+<span class="nc" id="L75">            myAccountManager = MyAccountManager.getInstance();</span>
         }
-<span class="fc" id="L78">        return myAccountManager;</span>
+<span class="fc" id="L77">        return myAccountManager;</span>
     }
 
     public void setMockMyAccountManager(MyAccountManager mockMyAccountManager) {
-<span class="fc" id="L82">        this.myAccountManager = mockMyAccountManager;</span>
-<span class="fc" id="L83">    }</span>
+<span class="fc" id="L81">        this.myAccountManager = mockMyAccountManager;</span>
+<span class="fc" id="L82">    }</span>
 
     public RegisterManager getRegisterManager() {
-<span class="pc bpc" id="L86" title="1 of 2 branches missed.">        if (registerManager == null) {</span>
-<span class="nc" id="L87">            registerManager = RegisterManager.getInstance();</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        if (registerManager == null) {</span>
+<span class="nc" id="L86">            registerManager = RegisterManager.getInstance();</span>
         }
-<span class="fc" id="L89">        return registerManager;</span>
+<span class="fc" id="L88">        return registerManager;</span>
     }
 
     public void setMockRegisterManager(RegisterManager mockRegisterManager) {
-<span class="fc" id="L93">        this.registerManager = mockRegisterManager;</span>
-<span class="fc" id="L94">    }</span>
+<span class="fc" id="L92">        this.registerManager = mockRegisterManager;</span>
+<span class="fc" id="L93">    }</span>
 
     public LogoutManager getLogoutManager() {
-<span class="pc bpc" id="L97" title="1 of 2 branches missed.">        if (logoutManager == null) {</span>
-<span class="nc" id="L98">            logoutManager = LogoutManager.getInstance();</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">        if (logoutManager == null) {</span>
+<span class="nc" id="L97">            logoutManager = LogoutManager.getInstance();</span>
         }
-<span class="fc" id="L100">        return logoutManager;</span>
+<span class="fc" id="L99">        return logoutManager;</span>
     }
 
     public void setMockLogoutManager(LogoutManager logoutManager) {
-<span class="fc" id="L104">        this.logoutManager = logoutManager;</span>
-<span class="fc" id="L105">    }</span>
+<span class="fc" id="L103">        this.logoutManager = logoutManager;</span>
+<span class="fc" id="L104">    }</span>
 
     public DefaultPreference getDefaultPreference() {
-<span class="pc bpc" id="L108" title="1 of 2 branches missed.">        if (defaultPreference == null) {</span>
-<span class="nc" id="L109">            defaultPreference = DefaultPreference.getInstance();</span>
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">        if (defaultPreference == null) {</span>
+<span class="nc" id="L108">            defaultPreference = DefaultPreference.getInstance();</span>
         }
-<span class="fc" id="L111">        return defaultPreference;</span>
+<span class="fc" id="L110">        return defaultPreference;</span>
     }
 
     public void setMockDefaultPreference(DefaultPreference defaultPreference) {
-<span class="fc" id="L115">        this.defaultPreference = defaultPreference;</span>
-<span class="fc" id="L116">    }</span>
+<span class="fc" id="L114">        this.defaultPreference = defaultPreference;</span>
+<span class="fc" id="L115">    }</span>
 
     public MobileType getMobileType() {
-<span class="nc" id="L119">        return mobileType;</span>
+<span class="nc" id="L118">        return mobileType;</span>
     }
 
     public void setMobileType(MobileType mobileType) {
-<span class="fc" id="L123">        this.mobileType = mobileType;</span>
-<span class="fc" id="L124">    }</span>
+<span class="fc" id="L122">        this.mobileType = mobileType;</span>
+<span class="fc" id="L123">    }</span>
 
     public String getMobileNumber() {
-<span class="nc" id="L127">        return mobileNumber;</span>
+<span class="nc" id="L126">        return mobileNumber;</span>
     }
 
     public String getEmail() {
-<span class="fc" id="L131">        return email;</span>
+<span class="fc" id="L130">        return email;</span>
     }
 
     public void setEmail(String email) {
-<span class="fc" id="L135">        this.email = email;</span>
-<span class="fc" id="L136">    }</span>
+<span class="fc" id="L134">        this.email = email;</span>
+<span class="fc" id="L135">    }</span>
 
     public String getReferenceId() {
-<span class="nc" id="L139">        return referenceId;</span>
+<span class="nc" id="L138">        return referenceId;</span>
     }
 
     public void setReferenceId(String referenceId) {
-<span class="fc" id="L143">        this.referenceId = referenceId;</span>
-<span class="fc" id="L144">    }</span>
+<span class="fc" id="L142">        this.referenceId = referenceId;</span>
+<span class="fc" id="L143">    }</span>
 
     @Override
     public String getNtype() {
-<span class="nc" id="L148">        return ntype;</span>
+<span class="nc" id="L147">        return ntype;</span>
     }
 
     @Override
     public void setNtype(String ntype) {
-<span class="nc" id="L153">        this.ntype = ntype;</span>
-<span class="nc" id="L154">    }</span>
+<span class="nc" id="L152">        this.ntype = ntype;</span>
+<span class="nc" id="L153">    }</span>
 
     @Override
     public void onViewCreate() {
-<span class="nc" id="L158">        RxBus.get().register(this);</span>
-<span class="nc" id="L159">    }</span>
+<span class="nc" id="L157">        RxBus.get().register(this);</span>
+<span class="nc" id="L158">    }</span>
 
     @Override
     public void onViewDestroy() {
-<span class="nc" id="L163">        RxBus.get().unregister(this);</span>
-<span class="nc" id="L164">    }</span>
+<span class="nc" id="L162">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L163">    }</span>
 
     @Override
     public void onViewStart() {
-
-<span class="nc" id="L169">    }</span>
+        // Do nothing onViewStart
+<span class="nc" id="L168">    }</span>
 
     @Override
     public void onViewStop() {
-
-<span class="nc" id="L174">    }</span>
+        // Do nothing onViewStop
+<span class="nc" id="L173">    }</span>
 
     @Override
     public void updateMyAccountUi() {
-<span class="fc" id="L178">        String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
-<span class="fc" id="L179">        getView().updateUi(NextzyUtility.getInstance()</span>
-<span class="fc" id="L180">                .applyStringPattern(mobileNumber, FORMAT_MOBILE_NUMBER));</span>
-<span class="fc" id="L181">    }</span>
+<span class="fc" id="L177">        String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
+<span class="fc" id="L178">        getView().updateUi(NextzyUtility.getInstance()</span>
+<span class="fc" id="L179">                .applyStringPattern(mobileNumber, FORMAT_MOBILE_NUMBER));</span>
+<span class="fc" id="L180">    }</span>
 
     @Override
     public void requestMyNumber() {
-<span class="fc" id="L185">        getView().showLoadingDialog();</span>
-<span class="fc" id="L186">        String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
-<span class="fc" id="L187">        getMyAccountManager().requestMyNumber(mobileNumber);</span>
-<span class="fc" id="L188">    }</span>
+<span class="fc" id="L184">        getView().showLoadingDialog();</span>
+<span class="fc" id="L185">        String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
+<span class="fc" id="L186">        getMyAccountManager().requestMyNumber(mobileNumber);</span>
+<span class="fc" id="L187">    }</span>
 
     @Override
     public void validateMobileNumber(String mobileNumber) {
-<span class="fc bfc" id="L192" title="All 2 branches covered.">        if (mobileNumber.isEmpty()) {</span>
-<span class="fc" id="L193">            getView().showDialogWithRes(R.string.my_ais_account_please_fill_your_number);</span>
-<span class="fc" id="L194">            return;</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">        if (mobileNumber.isEmpty()) {</span>
+<span class="fc" id="L192">            getView().showDialogWithRes(R.string.my_ais_account_please_fill_your_number);</span>
+<span class="fc" id="L193">            return;</span>
         }
-<span class="fc bfc" id="L196" title="All 2 branches covered.">        if (mobileNumber.length() &lt; 10) {</span>
-<span class="fc" id="L197">            getView().showDialogWithRes(R.string.my_ais_account_please_input_your_number);</span>
-<span class="fc" id="L198">            return;</span>
+<span class="fc bfc" id="L195" title="All 2 branches covered.">        if (mobileNumber.length() &lt; 10) {</span>
+<span class="fc" id="L196">            getView().showDialogWithRes(R.string.my_ais_account_please_input_your_number);</span>
+<span class="fc" id="L197">            return;</span>
         }
-<span class="fc bfc" id="L200" title="All 2 branches covered.">        if (!NextzyUtility.getInstance().isMobileNumberOrInternetNumber(mobileNumber)) {</span>
-<span class="fc" id="L201">            getView().showDialogWithRes(R.string.my_ais_account_detail_dialog_fill_number);</span>
-<span class="fc" id="L202">            return;</span>
-        }
-
-<span class="pc bpc" id="L205" title="1 of 2 branches missed.">        if (mobileNumber.equalsIgnoreCase(Mobile.getInstance().getMobileNumber())) {</span>
-<span class="fc" id="L206">            getView().showDialogDuplicateMaster();</span>
-<span class="fc" id="L207">            return;</span>
+<span class="fc bfc" id="L199" title="All 2 branches covered.">        if (!NextzyUtility.getInstance().isMobileNumberOrInternetNumber(mobileNumber)) {</span>
+<span class="fc" id="L200">            getView().showDialogWithRes(R.string.my_ais_account_detail_dialog_fill_number);</span>
+<span class="fc" id="L201">            return;</span>
         }
 
-<span class="nc" id="L210">        setMobileNumber(mobileNumber);</span>
-<span class="nc" id="L211">        verifyPriority();</span>
-<span class="nc" id="L212">    }</span>
+<span class="pc bpc" id="L204" title="1 of 2 branches missed.">        if (mobileNumber.equalsIgnoreCase(Mobile.getInstance().getMobileNumber())) {</span>
+<span class="fc" id="L205">            getView().showDialogDuplicateMaster();</span>
+<span class="fc" id="L206">            return;</span>
+        }
+
+<span class="nc" id="L209">        setMobileNumber(mobileNumber);</span>
+<span class="nc" id="L210">        verifyPriority();</span>
+<span class="nc" id="L211">    }</span>
 
     @Override
     public void requestVerifyIdentity(String mobileNumber, boolean isFibre) {
-<span class="fc" id="L216">        setMobileNumber(mobileNumber);</span>
-<span class="fc" id="L217">        getView().showLoadingDialog();</span>
-<span class="fc" id="L218">        RegisterVerifyIdentityBody body = new RegisterVerifyIdentityBody()</span>
-<span class="fc" id="L219">                .setNumber(mobileNumber)</span>
-<span class="fc" id="L220">                .setCardId(null)</span>
-<span class="fc" id="L221">                .setEmail(&quot;&quot;)                       /// Already fixed</span>
-<span class="fc" id="L222">                .setVerifyCaptchaFlag(FLAG_N)</span>
-<span class="fc" id="L223">                .setSendOtpFlag(FLAG_N)             /// Already fixed</span>
-<span class="fc" id="L224">                .setReferenceId(null)</span>
-<span class="fc" id="L225">                .setCaptcha(null);</span>
-<span class="fc bfc" id="L226" title="All 2 branches covered.">        if (isFibre) {</span>
-<span class="fc" id="L227">            getView().showEmail(getEmail());</span>
+<span class="fc" id="L215">        setMobileNumber(mobileNumber);</span>
+<span class="fc" id="L216">        getView().showLoadingDialog();</span>
+<span class="fc" id="L217">        RegisterVerifyIdentityBody body = new RegisterVerifyIdentityBody()</span>
+<span class="fc" id="L218">                .setNumber(mobileNumber)</span>
+<span class="fc" id="L219">                .setCardId(null)</span>
+<span class="fc" id="L220">                .setEmail(&quot;&quot;)                       /// Already fixed</span>
+<span class="fc" id="L221">                .setVerifyCaptchaFlag(FLAG_N)</span>
+<span class="fc" id="L222">                .setSendOtpFlag(FLAG_N)             /// Already fixed</span>
+<span class="fc" id="L223">                .setReferenceId(null)</span>
+<span class="fc" id="L224">                .setCaptcha(null);</span>
+<span class="fc bfc" id="L225" title="All 2 branches covered.">        if (isFibre) {</span>
+<span class="fc" id="L226">            getView().showEmail(getEmail());</span>
         }
-<span class="fc" id="L229">        getRegisterManager().verifyIdentityAndSendOtpChangeMaster(</span>
-<span class="fc" id="L230">                Mobile.getInstance().getMobileNumber(),</span>
+<span class="fc" id="L228">        getRegisterManager().verifyIdentityAndSendOtpChangeMaster(</span>
+<span class="fc" id="L229">                Mobile.getInstance().getMobileNumber(),</span>
                 mobileNumber,
                 body,
                 isFibre);
-<span class="fc" id="L234">    }</span>
+<span class="fc" id="L233">    }</span>
 
     @Override
     public void setMyNumber(MyNumberResult myNumberResult) {
-<span class="nc" id="L238">        this.myNumberResult = myNumberResult;</span>
-<span class="nc" id="L239">    }</span>
+<span class="nc" id="L237">        this.myNumberResult = myNumberResult;</span>
+<span class="nc" id="L238">    }</span>
 
     @Override
     public MyNumberResult getMyNumberResult() {
-<span class="nc" id="L243">        return myNumberResult;</span>
+<span class="nc" id="L242">        return myNumberResult;</span>
     }
 
     @Override
     public void setMobileNumber(String mobileNumber) {
-<span class="fc" id="L248">        this.mobileNumber = mobileNumber;</span>
-<span class="fc" id="L249">    }</span>
+<span class="fc" id="L247">        this.mobileNumber = mobileNumber;</span>
+<span class="fc" id="L248">    }</span>
 
     @Override
     public List&lt;MyNumberDropDownDialog.ContentItem&gt; getMyNumberDropDownList() {
-<span class="nc" id="L253">        return new MyNumberArranger().getContentItemList(myNumberResult);</span>
+<span class="nc" id="L252">        return new MyNumberArranger().getContentItemList(myNumberResult);</span>
     }
 
     @Override
     public void verifyOtp(String otp) {
-<span class="fc bfc" id="L258" title="All 2 branches covered.">        if (NextzyUtility.getInstance().isOTP(otp)) {</span>
-<span class="fc" id="L259">            getView().showLoadingDialog();</span>
-<span class="fc" id="L260">            getView().showDefaultOtpEdt();</span>
-<span class="fc" id="L261">            RegisterVerifyOtpBody body = new RegisterVerifyOtpBody()</span>
-<span class="fc" id="L262">                    .setReferenceId(referenceId)</span>
-<span class="fc" id="L263">                    .setOtp(otp);</span>
-<span class="fc" id="L264">            getRegisterManager().verifyOtpChangeMaster(</span>
-<span class="fc" id="L265">                    Mobile.getInstance().getMobileNumber(),</span>
+<span class="fc bfc" id="L257" title="All 2 branches covered.">        if (NextzyUtility.getInstance().isOTP(otp)) {</span>
+<span class="fc" id="L258">            getView().showLoadingDialog();</span>
+<span class="fc" id="L259">            getView().showDefaultOtpEdt();</span>
+<span class="fc" id="L260">            RegisterVerifyOtpBody body = new RegisterVerifyOtpBody()</span>
+<span class="fc" id="L261">                    .setReferenceId(referenceId)</span>
+<span class="fc" id="L262">                    .setOtp(otp);</span>
+<span class="fc" id="L263">            getRegisterManager().verifyOtpChangeMaster(</span>
+<span class="fc" id="L264">                    Mobile.getInstance().getMobileNumber(),</span>
                     body);
-<span class="fc" id="L267">        } else {</span>
-<span class="fc" id="L268">            getView().showOtpError();</span>
-<span class="fc" id="L269">            getView().showDialogWithRes(R.string.my_ais_register_dialog_otp_none);</span>
+<span class="fc" id="L266">        } else {</span>
+<span class="fc" id="L267">            getView().showOtpError();</span>
+<span class="fc" id="L268">            getView().showDialogWithRes(R.string.my_ais_register_dialog_otp_none);</span>
         }
 
-<span class="fc" id="L272">    }</span>
+<span class="fc" id="L271">    }</span>
 
     @Override
     public void callLogout() {
-<span class="fc" id="L276">        getView().showLoadingDialog();</span>
-<span class="fc" id="L277">        getLogoutManager().simplyLogout();</span>
-<span class="fc" id="L278">    }</span>
+<span class="fc" id="L275">        getView().showLoadingDialog();</span>
+<span class="fc" id="L276">        getLogoutManager().simplyLogout();</span>
+<span class="fc" id="L277">    }</span>
 
     @Override
     public void gotoLoginPage() {
-<span class="nc" id="L282">        RxBus.get().post(new GotoLoginPageEvent());</span>
-<span class="nc" id="L283">    }</span>
+<span class="nc" id="L281">        RxBus.get().post(new GotoLoginPageEvent());</span>
+<span class="nc" id="L282">    }</span>
 
     @Override
     public void setMobileNumberDefaultDropDown(List&lt;MyNumberDropDownDialog.ContentItem&gt; contentItemList) {
-<span class="nc bnc" id="L287" title="All 2 branches missed.">        if (contentItemList.size() &gt; 0) {</span>
-<span class="nc" id="L288">            String mobileNumber = contentItemList.get(0).getMobileNumber();</span>
-<span class="nc" id="L289">            getView().showMobileNumberDefaultDropDown(NextzyUtility.getInstance()</span>
-<span class="nc" id="L290">                    .applyStringPattern(mobileNumber, FORMAT_MOBILE_NUMBER));</span>
+<span class="nc bnc" id="L286" title="All 4 branches missed.">        if (contentItemList != null &amp;&amp; !contentItemList.isEmpty()) {</span>
+<span class="nc" id="L287">            String mobileNumber = contentItemList.get(0).getMobileNumber();</span>
+<span class="nc" id="L288">            getView().showMobileNumberDefaultDropDown(NextzyUtility.getInstance()</span>
+<span class="nc" id="L289">                    .applyStringPattern(mobileNumber, FORMAT_MOBILE_NUMBER));</span>
         }
-<span class="nc" id="L292">    }</span>
+<span class="nc" id="L291">    }</span>
 
     @Override
     public void verifyPriority() {
-<span class="fc bfc" id="L296" title="All 2 branches covered.">        if (NextzyUtility.getInstance().isInternetNumber(mobileNumber)) {</span>
+<span class="fc bfc" id="L295" title="All 2 branches covered.">        if (NextzyUtility.getInstance().isInternetNumber(mobileNumber)) {</span>
             //fibre
-<span class="fc" id="L298">            Timber.d(&quot;MyTimber : verifyPriority = FBB&quot;);</span>
-<span class="fc" id="L299">            verifyEmail();</span>
+<span class="fc" id="L297">            verifyEmail();</span>
         } else {
             // Postpaid , Prepaid
-<span class="fc" id="L302">            Timber.d(&quot;MyTimber : verifyPriority = Postpaid , Prepaid&quot;);</span>
-<span class="fc bfc" id="L303" title="All 2 branches covered.">            if (getDefaultPreference().loadPasscodeSwitchSetting()) {</span>
-<span class="fc" id="L304">                getView().dismissDialog();</span>
-<span class="fc" id="L305">                getView().showDialogSetNewPasscode(false);</span>
-<span class="fc" id="L306">                return;</span>
+<span class="fc bfc" id="L300" title="All 2 branches covered.">            if (isPasscodeAvailable()) {</span>
+<span class="fc" id="L301">                getView().showSetNewPasscodeDialog(false);</span>
+            } else {
+<span class="fc" id="L303">                requestVerifyIdentity(mobileNumber, false);</span>
             }
-<span class="fc" id="L308">            requestVerifyIdentity(mobileNumber, false);</span>
+
         }
-<span class="fc" id="L310">    }</span>
+<span class="fc" id="L307">    }</span>
 
     @Override
     public void goToEditEmailFragment() {
-<span class="fc" id="L314">        getView().popBack();</span>
-<span class="fc" id="L315">        RxBus.get().post(new GoToEditEmailFragmentEvent());</span>
-<span class="fc" id="L316">    }</span>
+<span class="fc" id="L311">        getView().popBack();</span>
+<span class="fc" id="L312">        RxBus.get().post(new GoToEditEmailFragmentEvent());</span>
+<span class="fc" id="L313">    }</span>
 
     public void verifyEmail() {
-<span class="fc bfc" id="L319" title="All 2 branches covered.">        if (isEmail()) {</span>
-<span class="pc bpc" id="L320" title="1 of 2 branches missed.">            if (getDefaultPreference().loadPasscodeSwitchSetting()) {</span>
-<span class="nc" id="L321">                getView().dismissDialog();</span>
-<span class="nc" id="L322">                getView().showDialogSetNewPasscode(true);</span>
-<span class="nc" id="L323">                return;</span>
-            }
-<span class="fc" id="L325">            setEmail(Mobile.getInstance().getEmailMyAccount());</span>
-<span class="fc" id="L326">            getView().showEmail(getEmail());</span>
-<span class="fc" id="L327">            requestVerifyIdentity(mobileNumber, true);</span>
-<span class="fc" id="L328">            return;</span>
+
+<span class="pc bpc" id="L317" title="1 of 4 branches missed.">        if (isEmailAvailable() &amp;&amp; isPasscodeAvailable()) {</span>
+<span class="nc" id="L318">            setEmail(Mobile.getInstance().getEmailMyAccount());</span>
+<span class="nc" id="L319">            getView().showSetNewPasscodeDialog(true);</span>
+<span class="pc bpc" id="L320" title="1 of 4 branches missed.">        } else if (isEmailAvailable() &amp;&amp; !isPasscodeAvailable()) {</span>
+<span class="fc" id="L321">            setEmail(Mobile.getInstance().getEmailMyAccount());</span>
+<span class="fc" id="L322">            getView().showEmail(getEmail());</span>
+<span class="fc" id="L323">            requestVerifyIdentity(mobileNumber, true);</span>
+        } else {
+<span class="fc" id="L325">            getMyAccountManager().queryMyAis(Mobile.getInstance().getMobileNumber());</span>
         }
-<span class="fc" id="L330">        getMyAccountManager().queryMyAis(Mobile.getInstance().getMobileNumber());</span>
-<span class="fc" id="L331">    }</span>
+<span class="fc" id="L327">    }</span>
 
 
-    public boolean isEmail() {
-<span class="fc" id="L335">        String email = Mobile.getInstance().getEmailMyAccount();</span>
-<span class="pc bpc" id="L336" title="1 of 4 branches missed.">        if (email != null &amp;&amp; !email.isEmpty()) {</span>
-<span class="fc" id="L337">            return true;</span>
-        }
-<span class="fc" id="L339">        return false;</span>
+    public boolean isEmailAvailable() {
+<span class="fc" id="L331">        String email = Mobile.getInstance().getEmailMyAccount();</span>
+<span class="pc bpc" id="L332" title="1 of 4 branches missed.">        return email != null &amp;&amp; !email.isEmpty();</span>
+    }
+
+    public boolean isEmailAvailable(QueryMyAisResult result) {
+<span class="pc bpc" id="L336" title="1 of 4 branches missed.">        return result.hasData() &amp;&amp; result.getData().isEmail();</span>
     }
 
     @Subscribe
     public void onReceiveMyNumberSuccess(MyNumberResult myNumberResult) {
-<span class="fc bfc" id="L344" title="All 2 branches covered.">        if (myNumberResult.isSuccess()) {</span>
-<span class="fc" id="L345">            getView().dismissDialog();</span>
-<span class="fc" id="L346">            getView().updateUiByResult(myNumberResult);</span>
+<span class="fc bfc" id="L341" title="All 2 branches covered.">        if (myNumberResult.isSuccess()) {</span>
+<span class="fc" id="L342">            getView().dismissDialog();</span>
+<span class="fc" id="L343">            getView().updateUiByResult(myNumberResult);</span>
         } else {
-<span class="fc" id="L348">            getView().dismissDialog();</span>
-<span class="fc" id="L349">            getView().showResponseException(myNumberResult.getResultDescription());</span>
+<span class="fc" id="L345">            getView().dismissDialog();</span>
+<span class="fc" id="L346">            getView().showResponseException(myNumberResult.getResultDescription());</span>
         }
-<span class="fc" id="L351">    }</span>
+<span class="fc" id="L348">    }</span>
 
     @Subscribe
     public void onReceiveMyNumberException(MyNumberException e) {
-<span class="fc" id="L355">        getView().showResponseException(e.getMessage());</span>
-<span class="fc" id="L356">    }</span>
+<span class="fc" id="L352">        getView().showResponseException(e.getMessage());</span>
+<span class="fc" id="L353">    }</span>
 
     @Subscribe
     public void onVerifyIdentityNtypeEvents(VerifyIdentityNtypeEvent event) {
-<span class="fc" id="L360">        ntype = event.getNType();</span>
-<span class="fc" id="L361">    }</span>
+<span class="fc" id="L357">        ntype = event.getNType();</span>
+<span class="fc" id="L358">    }</span>
 
     @Subscribe
     public void onReceiveSendOtpResultSuccess(RegisterSendOtpResult result) {
-<span class="pc bpc" id="L365" title="1 of 2 branches missed.">        if (result.isSuccess()) {</span>
-<span class="fc" id="L366">            referenceId = result.getData().referenceId;</span>
-<span class="fc" id="L367">            verifyMobileType(ntype);</span>
+<span class="pc bpc" id="L362" title="1 of 2 branches missed.">        if (result.isSuccess()) {</span>
+<span class="fc" id="L363">            referenceId = result.getData().referenceId;</span>
+<span class="fc" id="L364">            verifyMobileType(ntype);</span>
         }
-<span class="fc" id="L369">    }</span>
+<span class="fc" id="L366">    }</span>
 
     @Subscribe
     public void onReceiveIdentityResponseException(RegisterVerifyIdentityDataException exception) {
-<span class="fc" id="L373">        getView().showResponseException(exception.getMessage());</span>
-<span class="fc" id="L374">    }</span>
+<span class="fc" id="L370">        getView().showResponseException(exception.getMessage());</span>
+<span class="fc" id="L371">    }</span>
+
+    @Subscribe
+    public void onReceiveIdentityResponseException(RegisterSSBE309Exception exception) {
+<span class="nc" id="L375">        getView().showResponseException(exception.getMessage());</span>
+<span class="nc" id="L376">    }</span>
 
     @Subscribe
     public void onVerifyOtpResult(RegisterVerifyOtpResult result) {
-<span class="pc bpc" id="L378" title="1 of 2 branches missed.">        if (result.isSSBE309()) {</span>
-<span class="nc" id="L379">            getView().dismissDialog();</span>
-<span class="nc" id="L380">            getView().showOtpError();</span>
-<span class="nc" id="L381">            getView().showResponseException(result.getResultDescription());</span>
-<span class="fc bfc" id="L382" title="All 2 branches covered.">        } else if (result.isCanNextStep()) {</span>
-<span class="fc" id="L383">            changeLoginUser();</span>
+<span class="fc bfc" id="L380" title="All 2 branches covered.">        if (result.isCanNextStep()) {</span>
+<span class="fc" id="L381">            changeLoginUser();</span>
         } else {
-<span class="fc" id="L385">            getView().dismissDialog();</span>
-<span class="fc" id="L386">            getView().showOtpError();</span>
-<span class="fc" id="L387">            getView().showResponseException(result.getResultDescription());</span>
+<span class="fc" id="L383">            getView().dismissDialog();</span>
+<span class="fc" id="L384">            getView().showOtpError();</span>
+<span class="fc" id="L385">            getView().showResponseException(result.getResultDescription());</span>
         }
-<span class="fc" id="L389">    }</span>
+<span class="fc" id="L387">    }</span>
 
     @Subscribe
     public void onReceiveOtpResponseException(RegisterVerifyOtpDataException exception) {
-<span class="fc" id="L393">        getView().showDialog(exception.getMessage());</span>
-<span class="fc" id="L394">    }</span>
+<span class="fc" id="L391">        getView().showDialog(exception.getMessage());</span>
+<span class="fc" id="L392">    }</span>
 
     @Subscribe
     public void onChangeLoginUserResult(ChangeLoginUserResult result) {
-<span class="pc bpc" id="L398" title="1 of 2 branches missed.">        if (result.isSuccess()) {</span>
-<span class="fc bfc" id="L399" title="All 2 branches covered.">            if (getDefaultPreference().loadPasscodeSwitchSetting()) {</span>
-<span class="fc" id="L400">                disableFingerScan();</span>
-<span class="fc" id="L401">                return;</span>
+<span class="pc bpc" id="L396" title="1 of 2 branches missed.">        if (result.isSuccess()) {</span>
+<span class="fc bfc" id="L397" title="All 2 branches covered.">            if (isPasscodeAvailable()) {</span>
+<span class="fc" id="L398">                disableFingerScan();</span>
+            } else {
+<span class="fc" id="L400">                getView().showChangeLoginSuccessDialog(mobileNumber);</span>
             }
-<span class="fc" id="L403">            getView().showChangeLoginSuccessDialog(mobileNumber);</span>
         }
-<span class="fc" id="L405">    }</span>
+<span class="fc" id="L403">    }</span>
 
     @Subscribe
     public void onChangeLoginUserException(ChangeLoginUserException exception) {
-<span class="fc" id="L409">        getView().dismissDialog();</span>
-<span class="fc" id="L410">        getView().showResponseException(exception.getMessage());</span>
-<span class="fc" id="L411">    }</span>
+<span class="fc" id="L407">        getView().dismissDialog();</span>
+<span class="fc" id="L408">        getView().showResponseException(exception.getMessage());</span>
+<span class="fc" id="L409">    }</span>
 
     @Subscribe
     public void onReceiveDisableFingerScanResult(DisableFingerScanResult result) {
-<span class="fc" id="L415">        getView().dismissDialog();</span>
-<span class="fc" id="L416">        getDefaultPreference().removeAllPasscodeData();</span>
-<span class="fc" id="L417">        getView().showChangeLoginSuccessDialog(mobileNumber);</span>
-<span class="fc" id="L418">    }</span>
+<span class="fc" id="L413">        getView().dismissDialog();</span>
+<span class="fc" id="L414">        getDefaultPreference().removeAllPasscodeData();</span>
+<span class="fc" id="L415">        getView().showChangeLoginSuccessDialog(mobileNumber);</span>
+<span class="fc" id="L416">    }</span>
 
     @Subscribe
     public void onReceiveDisableFingerScanException(DisableFingerScanException e) {
-<span class="fc" id="L422">        getView().dismissDialog();</span>
-<span class="fc" id="L423">        getView().showResponseException(e.getMessage());</span>
-<span class="fc" id="L424">    }</span>
+<span class="fc" id="L420">        getView().dismissDialog();</span>
+<span class="fc" id="L421">        getView().showResponseException(e.getMessage());</span>
+<span class="fc" id="L422">    }</span>
 
     @Subscribe
     public void onLogoutSuccess(LogoutResult result) {
-<span class="fc" id="L428">        getView().dismissDialog();</span>
-<span class="fc" id="L429">        Mobile.getInstance().clear();</span>
-<span class="fc" id="L430">        gotoLoginPage();</span>
-<span class="fc" id="L431">    }</span>
+<span class="fc" id="L426">        getView().dismissDialog();</span>
+<span class="fc" id="L427">        Mobile.getInstance().clear();</span>
+<span class="fc" id="L428">        gotoLoginPage();</span>
+<span class="fc" id="L429">    }</span>
 
     @Subscribe
     public void onQueryMyAisSuccess(QueryMyAisResult result) {
-<span class="fc" id="L435">        getView().dismissDialog();</span>
-<span class="fc bfc" id="L436" title="All 2 branches covered.">        if (result.isSuccess()) {</span>
-<span class="fc" id="L437">            checkEmail(result);</span>
+<span class="fc" id="L433">        getView().dismissDialog();</span>
+<span class="fc bfc" id="L434" title="All 2 branches covered.">        if (result.isSuccess()) {</span>
+<span class="fc" id="L435">            updateEmailFromResult(result);</span>
         } else {
-<span class="fc" id="L439">            getView().showResponseException(result.getResultDescription());</span>
+<span class="fc" id="L437">            getView().showResponseException(result.getResultDescription());</span>
         }
-<span class="fc" id="L441">    }</span>
+<span class="fc" id="L439">    }</span>
 
     @Subscribe
     public void onQueryMyAisException(QueryMyAIsException e) {
-<span class="fc" id="L445">        getView().dismissDialog();</span>
-<span class="fc" id="L446">        getView().showResponseException(e.getMessage());</span>
-<span class="fc" id="L447">    }</span>
+<span class="fc" id="L443">        getView().dismissDialog();</span>
+<span class="fc" id="L444">        getView().showResponseException(e.getMessage());</span>
+<span class="fc" id="L445">    }</span>
 
-    public void checkEmail(QueryMyAisResult result) {
-<span class="pc bpc" id="L450" title="1 of 4 branches missed.">        if (result.hasData() &amp;&amp; result.getData().isEmail()) {</span>
-<span class="fc" id="L451">            setEmail(result.getData().getEmail());</span>
-<span class="fc" id="L452">            checkPasscode();</span>
+    public void updateEmailFromResult(QueryMyAisResult result) {
+<span class="fc bfc" id="L448" title="All 4 branches covered.">        if (isEmailAvailable(result) &amp;&amp; isPasscodeAvailable()) {</span>
+            // Email will show in next step
+<span class="fc" id="L450">            setEmail(result.getData().getEmail());</span>
+<span class="fc" id="L451">            getView().showSetNewPasscodeDialog(true);</span>
+<span class="pc bpc" id="L452" title="1 of 4 branches missed.">        } else if (isEmailAvailable(result) &amp;&amp; !isPasscodeAvailable()) {</span>
+            // Email will show instantly
+<span class="fc" id="L454">            setEmail(result.getData().getEmail());</span>
+<span class="fc" id="L455">            getView().showEmail(getEmail());</span>
+<span class="fc" id="L456">            requestVerifyIdentity(mobileNumber, true);</span>
         } else {
-<span class="fc" id="L454">            getView().showUpdateEmailDialog();</span>
+<span class="fc" id="L458">            getView().showEmailUnavailableDialog();</span>
         }
-<span class="fc" id="L456">    }</span>
+<span class="fc" id="L460">    }</span>
 
-    public void checkPasscode() {
-<span class="fc bfc" id="L459" title="All 2 branches covered.">        if (getDefaultPreference().loadPasscodeSwitchSetting()) {</span>
-<span class="fc" id="L460">            getView().dismissDialog();</span>
-<span class="fc" id="L461">            getView().showDialogSetNewPasscode(true);</span>
-<span class="fc" id="L462">            return;</span>
-        }
-<span class="fc" id="L464">        getView().showEmail(getEmail());</span>
-<span class="fc" id="L465">        requestVerifyIdentity(mobileNumber, true);</span>
-<span class="fc" id="L466">        return;</span>
+    public boolean isPasscodeAvailable() {
+<span class="fc" id="L463">        return getDefaultPreference().isPasscodeSettingOn();</span>
     }
 
     public void disableFingerScan() {
-<span class="nc" id="L470">        String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
-<span class="nc" id="L471">        Map&lt;String, String&gt; result = getDefaultPreference().loadPrivateIdAndToken();</span>
-<span class="nc" id="L472">        String privateId = result.get(KEY_PRIVATE_ID);</span>
-<span class="nc" id="L473">        String token = result.get(KEY_TOKEN);</span>
-<span class="nc" id="L474">        DisableFingerScanBody body = new DisableFingerScanBody(</span>
+<span class="nc" id="L467">        String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
+<span class="nc" id="L468">        Map&lt;String, String&gt; result = getDefaultPreference().loadPrivateIdAndToken();</span>
+<span class="nc" id="L469">        String privateId = result.get(KEY_PRIVATE_ID);</span>
+<span class="nc" id="L470">        String token = result.get(KEY_TOKEN);</span>
+<span class="nc" id="L471">        DisableFingerScanBody body = new DisableFingerScanBody(</span>
                 mobileNumber,
                 token,
                 privateId,
                 null
         );
-<span class="nc" id="L480">        PasscodeManager.getInstance().requestDisableFingerScan(mobileNumber, body);</span>
-<span class="nc" id="L481">    }</span>
+<span class="nc" id="L477">        PasscodeManager.getInstance().requestDisableFingerScan(mobileNumber, body);</span>
+<span class="nc" id="L478">    }</span>
 
     public void changeLoginUser() {
-<span class="fc" id="L484">        ChangeLoginUserBody body = new ChangeLoginUserBody(referenceId, mobileNumber);</span>
-<span class="fc" id="L485">        getMyAccountManager().changeLoginUser(body);</span>
-<span class="fc" id="L486">    }</span>
+<span class="fc" id="L481">        ChangeLoginUserBody body = new ChangeLoginUserBody(referenceId, mobileNumber);</span>
+<span class="fc" id="L482">        getMyAccountManager().changeLoginUser(body);</span>
+<span class="fc" id="L483">    }</span>
 
     public void verifyMobileType(String nType) {
-<span class="pc bpc" id="L489" title="1 of 2 branches missed.">        if (nTypeIsNotNull(nType)) {</span>
-<span class="fc bfc" id="L490" title="All 2 branches covered.">            if (isNotLowerMasterNumberPriority()) {</span>
-<span class="fc" id="L491">                getView().dismissDialog();</span>
-<span class="fc" id="L492">                getView().showOtpView();</span>
+<span class="pc bpc" id="L486" title="1 of 2 branches missed.">        if (nTypeIsNotNull(nType)) {</span>
+<span class="pc bpc" id="L487" title="1 of 2 branches missed.">            if (isNotLowerMasterNumberPriority()) {</span>
+<span class="fc" id="L488">                getView().dismissDialog();</span>
+<span class="fc" id="L489">                getView().showOtpView();</span>
             } else {
-<span class="fc" id="L494">                getView().dismissDialog();</span>
-<span class="fc" id="L495">                getView().showDialogWithRes(R.string.my_ais_account_cannot_key_in_change_main_number);</span>
+<span class="nc" id="L491">                getView().dismissDialog();</span>
+<span class="nc" id="L492">                getView().showDialogWithRes(R.string.my_ais_account_cannot_key_in_change_main_number);</span>
             }
         } else {
-<span class="nc" id="L498">            getView().dismissDialog();</span>
-<span class="nc" id="L499">            getView().showDialogWithRes(R.string.my_ais_account_cannot_change_main_number);</span>
+<span class="nc" id="L495">            getView().dismissDialog();</span>
+<span class="nc" id="L496">            getView().showDialogWithRes(R.string.my_ais_account_cannot_change_main_number);</span>
         }
-<span class="fc" id="L501">    }</span>
+<span class="fc" id="L498">    }</span>
 
     public MobileType getMobileType(String nType) {
-<span class="fc bfc" id="L504" title="All 2 branches covered.">        if (Mobile.getInstance().isPostpaid(nType)) {</span>
-<span class="fc" id="L505">            return MobileType.POSTPAID;</span>
+<span class="fc bfc" id="L501" title="All 2 branches covered.">        if (Mobile.getInstance().isPostpaid(nType)) {</span>
+<span class="fc" id="L502">            return MobileType.POSTPAID;</span>
         }
-<span class="fc bfc" id="L507" title="All 2 branches covered.">        if (Mobile.getInstance().isFibre(nType)) {</span>
-<span class="fc" id="L508">            return MobileType.FBB;</span>
+<span class="fc bfc" id="L504" title="All 2 branches covered.">        if (Mobile.getInstance().isFibre(nType)) {</span>
+<span class="fc" id="L505">            return MobileType.FBB;</span>
         }
-<span class="pc bpc" id="L510" title="1 of 2 branches missed.">        if (Mobile.getInstance().isPrepaid(nType)) {</span>
-<span class="fc" id="L511">            return MobileType.PREPAID;</span>
+<span class="pc bpc" id="L507" title="1 of 2 branches missed.">        if (Mobile.getInstance().isPrepaid(nType)) {</span>
+<span class="fc" id="L508">            return MobileType.PREPAID;</span>
         }
-<span class="nc" id="L513">        return null;</span>
+<span class="nc" id="L510">        return null;</span>
     }
 
     private boolean nTypeIsNotNull(String nType) {
-<span class="fc" id="L517">        mobileType = getMobileType(nType);</span>
-<span class="pc bpc" id="L518" title="1 of 2 branches missed.">        return mobileType != null;</span>
+<span class="fc" id="L514">        mobileType = getMobileType(nType);</span>
+<span class="pc bpc" id="L515" title="1 of 2 branches missed.">        return mobileType != null;</span>
     }
 
     private boolean isNotLowerMasterNumberPriority() {
-<span class="pc bpc" id="L522" title="1 of 2 branches missed.">        if (Mobile.getInstance().isPostpaid()) {</span>
-<span class="fc bfc" id="L523" title="All 2 branches covered.">            if (mobileType == MobileType.POSTPAID) {</span>
-<span class="fc" id="L524">                return true;</span>
-            }
+<span class="pc bpc" id="L519" title="1 of 4 branches missed.">        if (Mobile.getInstance().isPostpaid() &amp;&amp; mobileType == MobileType.POSTPAID) {</span>
+<span class="fc" id="L520">            return true;</span>
         }
-<span class="pc bpc" id="L527" title="1 of 2 branches missed.">        if (Mobile.getInstance().isFibre()) {</span>
-<span class="nc bnc" id="L528" title="All 4 branches missed.">            if (mobileType == MobileType.POSTPAID || mobileType == MobileType.FBB) {</span>
-<span class="nc" id="L529">                return true;</span>
-            }
+<span class="pc bpc" id="L522" title="4 of 6 branches missed.">        if (Mobile.getInstance().isFibre() &amp;&amp; mobileType == MobileType.POSTPAID || mobileType == MobileType.FBB) {</span>
+<span class="fc" id="L523">            return true;</span>
         }
-<span class="pc bpc" id="L532" title="1 of 2 branches missed.">        if (Mobile.getInstance().isPrepaid()) {</span>
-<span class="nc bnc" id="L533" title="All 6 branches missed.">            if (mobileType == MobileType.POSTPAID</span>
-                    || mobileType == MobileType.FBB
-                    || mobileType == MobileType.PREPAID) {
-<span class="nc" id="L536">                return true;</span>
-            }
+<span class="nc bnc" id="L525" title="All 8 branches missed.">        if (Mobile.getInstance().isPrepaid() &amp;&amp; mobileType == MobileType.POSTPAID</span>
+                || mobileType == MobileType.FBB
+                || mobileType == MobileType.PREPAID) {
+<span class="nc" id="L528">            return true;</span>
         }
-<span class="fc" id="L539">        return false;</span>
+<span class="nc" id="L530">        return false;</span>
     }
 
 }

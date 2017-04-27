@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FooterBannerContentPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.home.module.footerbanner.adapter</a> &gt; <span class="el_source">FooterBannerContentPresenter.java</span></div><h1>FooterBannerContentPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.home.module.footerbanner.adapter;
+
+import android.content.Intent;
+import android.net.Uri;
+import android.util.Log;
+
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.mvp.NextzyPresenter;
+import com.nextzy.myais.home.helper.footerbanner.model.Action;
+import com.nextzy.myais.home.helper.footerbanner.model.DataList;
+import com.nextzy.myais.home.helper.footerbanner.model.RelatedMobileNumbers;
+import com.nextzy.myais.home.helper.footerbanner.model.RequestResult;
+import com.nextzy.myais.home.helper.footerbanner.model.ResponseResult;
+import com.nextzy.myais.home.helper.footerbanner.model.ResponseResultPreview;
+import com.nextzy.myais.home.helper.footerbanner.network.FooterBannerManager;
+
+import java.util.List;
+
+import rx.exceptions.OnErrorNotImplementedException;
+
+/**
+ * Created by Akexorcist on 10/24/2016 AD.
+ */
+
+public class FooterBannerContentPresenter extends NextzyPresenter&lt;FooterBannerContentContractor.View&gt; implements FooterBannerContentContractor.Presenter {
+    private List&lt;DataList&gt; footerBannerItemList;
+    private Action mockAction;
+    private List&lt;RelatedMobileNumbers&gt; relatedMobileNumbersesList;
+<span class="fc" id="L31">    private boolean isRelateMobileNumber=false;</span>
+
+    public static FooterBannerContentPresenter createPresenter(FooterBannerContentContractor.View view) {
+<span class="nc" id="L34">        return new FooterBannerContentPresenter(view);</span>
+    }
+
+    public FooterBannerContentPresenter(FooterBannerContentContractor.View view) {
+<span class="fc" id="L38">        super(view);</span>
+<span class="fc" id="L39">    }</span>
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L43">    }</span>
+
+//    private void createMockAction() {
+//        relatedMobileNumbersesList = new ArrayList&lt;&gt;();
+//        mockAction = new Action();
+//        for (int i=0 ; i&lt;6 ; i++) {
+//            RelatedMobileNumbers relatedMobileNumbers = new RelatedMobileNumbers();
+//            relatedMobileNumbers.setLabel(&quot;หมายเลขโทรศัพท์ที่ &quot; + i);
+//            relatedMobileNumbers.setMobileNumber(&quot;&quot;);
+//            relatedMobileNumbersesList.add(relatedMobileNumbers);
+//        }
+//        mockAction.setName(&quot;ยืนยันรับสิทธิ์&quot;);
+//        mockAction.setType(&quot;ACCEPT_CAMPAIGN&quot;);
+//        mockAction.setRelatedMobileNumbers(relatedMobileNumbersesList);
+//    }
+
+    @Override
+    public void onViewDestroy() {
+
+<span class="nc" id="L62">    }</span>
+
+    @Override
+    public void onViewStart() {
+
+<span class="nc" id="L67">    }</span>
+
+    @Override
+    public void onViewStop() {
+
+<span class="nc" id="L72">    }</span>
+
+    @Override
+    public void setFooterBannerItemList(List&lt;DataList&gt; footerBannerItemList) {
+<span class="fc" id="L76">        this.footerBannerItemList = footerBannerItemList;</span>
+<span class="fc" id="L77">    }</span>
+
+    @Override
+    public List&lt;DataList&gt; getFooterBannerItemList() {
+<span class="nc" id="L81">        return footerBannerItemList;</span>
+    }
+
+    @Override
+    public int getFooterBannerItemCount() {
+<span class="fc bfc" id="L86" title="All 2 branches covered.">        return footerBannerItemList != null ? footerBannerItemList.size() : 0;</span>
+    }
+
+    @Override
+    public DataList getFooterBannerItem(int position) {
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        return footerBannerItemList != null ? footerBannerItemList.get(position) : null;</span>
+    }
+
+    @Override
+    public void onCampaignClicked(int position) {
+<span class="nc" id="L96">        RequestResult requestResult = new RequestResult();</span>
+<span class="nc" id="L97">        requestResult.setActionType(&quot;PREVIEW&quot;);</span>
+<span class="nc" id="L98">        requestResult.setCampaignId(footerBannerItemList.get(position).getId());</span>
+//        requestResult.setRelatedMobileNumbers(null);
+<span class="nc" id="L100">        getResults(footerBannerItemList.get(position).getId(), requestResult, true, &quot;POST&quot;);</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">        if (footerBannerItemList.get(position).getActions().size()&gt;0) {</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">            if (isRelateMobileNumber(getPositiveAction(footerBannerItemList.get(position).getActions())))</span>
+<span class="nc" id="L103">                isRelateMobileNumber = true;</span>
+            else {
+<span class="nc" id="L105">                isRelateMobileNumber = false;</span>
+            }
+<span class="nc bnc" id="L107" title="All 2 branches missed.">            if (footerBannerItemList.get(position).getActions().size()&gt;1) {</span>
+                // action &gt; 1
+<span class="nc" id="L109">                getView().createChoiceBannerDialog(</span>
+<span class="nc" id="L110">                        footerBannerItemList.get(position).getId(),</span>
+<span class="nc" id="L111">                        footerBannerItemList.get(position).getPreviewHeader(),</span>
+<span class="nc" id="L112">                        footerBannerItemList.get(position).getTopic(),</span>
+<span class="nc" id="L113">                        imageTagExtractor(footerBannerItemList.get(position).getContentHTML(), true),</span>
+<span class="nc" id="L114">                        footerBannerItemList.get(position).getDetailURL(),</span>
+<span class="nc" id="L115">                        footerBannerItemList.get(position).getActions(),</span>
+<span class="nc" id="L116">                        imageTagExtractor(footerBannerItemList.get(position).getContentHTML(), false),</span>
+                        isRelateMobileNumber
+                );
+            } else {
+                // action = 1
+<span class="nc" id="L121">                getView().createSimpleBannerDialog(</span>
+<span class="nc" id="L122">                        footerBannerItemList.get(position).getId(),</span>
+<span class="nc" id="L123">                        footerBannerItemList.get(position).getPreviewHeader(),</span>
+<span class="nc" id="L124">                        footerBannerItemList.get(position).getTopic(),</span>
+<span class="nc" id="L125">                        imageTagExtractor(footerBannerItemList.get(position).getContentHTML(), true),</span>
+<span class="nc" id="L126">                        footerBannerItemList.get(position).getDetailURL(),</span>
+<span class="nc" id="L127">                        footerBannerItemList.get(position).getActions(),</span>
+<span class="nc" id="L128">                        imageTagExtractor(footerBannerItemList.get(position).getContentHTML(), false),</span>
+                        isRelateMobileNumber
+                );
+            }
+        } else {
+            // action = 0
+<span class="nc" id="L134">            getView().createSimpleBannerDialog(</span>
+<span class="nc" id="L135">                    footerBannerItemList.get(position).getId(),</span>
+<span class="nc" id="L136">                    footerBannerItemList.get(position).getPreviewHeader(),</span>
+<span class="nc" id="L137">                    footerBannerItemList.get(position).getTopic(),</span>
+<span class="nc" id="L138">                    imageTagExtractor(footerBannerItemList.get(position).getContentHTML(), true),</span>
+<span class="nc" id="L139">                    footerBannerItemList.get(position).getDetailURL(),</span>
+<span class="nc" id="L140">                    footerBannerItemList.get(position).getActions(),</span>
+<span class="nc" id="L141">                    imageTagExtractor(footerBannerItemList.get(position).getContentHTML(), false),</span>
+                    isRelateMobileNumber
+            );
+        }
+<span class="nc" id="L145">    }</span>
+
+    @Override
+    public void onCampaignPositiveClicked(String id, boolean isRelateMobileNumber) {
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        if (isRelateMobileNumber) {</span>
+            // create relateDialog
+//            getView().createBannerRelateDialog(
+//                mockAction.getRelatedMobileNumbers()
+//        );
+        } else {
+<span class="nc" id="L155">            DataList campaign = findCampaignById(id);</span>
+<span class="nc bnc" id="L156" title="All 4 branches missed.">            if (campaign!=null &amp;&amp; campaign.getActions()!=null) {</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">                for (int i = 0; i &lt; campaign.getActions().size(); i++) {</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">                    if (campaign.getActions().get(i).getType().equals(&quot;ACCEPT_CAMPAIGN&quot;)) {</span>
+<span class="nc bnc" id="L159" title="All 4 branches missed.">                        if (campaign.getActions().get(i).getName().equalsIgnoreCase(&quot;top up&quot;)||campaign.getActions().get(i).getName().equals(&quot;เติมเงิน&quot;)) {</span>
+                            // Top up action here
+<span class="nc" id="L161">                            getView().getmListener().onTopUpClick(campaign.getActions().get(i).getActionLink().getUrl());</span>
+<span class="nc" id="L162">                            RequestResult requestResult = new RequestResult();</span>
+<span class="nc" id="L163">                            requestResult.setActionType(&quot;PREVIEW&quot;);</span>
+<span class="nc" id="L164">                            requestResult.setCampaignId(id);</span>
+//                      requestResult.setRelatedMobileNumbers(null);
+<span class="nc" id="L166">                            getResults(id, requestResult, true, &quot;POST&quot;);</span>
+<span class="nc" id="L167">                        } else {</span>
+<span class="nc" id="L168">                            getView().showLoadingDialog();</span>
+<span class="nc" id="L169">                            RequestResult requestResult = new RequestResult();</span>
+<span class="nc" id="L170">                            requestResult.setActionType(&quot;ACCEPT_CAMPAIGN&quot;);</span>
+<span class="nc" id="L171">                            requestResult.setCampaignId(id);</span>
+//                      requestResult.setRelatedMobileNumbers(null);
+<span class="nc" id="L173">                            getResults(id, requestResult, false, &quot;POST&quot;);</span>
+                        }
+//                        if (campaign.getActions().get(i).getActionLink().getUrl()!=null &amp;&amp; campaign.getActions().get(i).getActionLink().getUrl().length()&gt;0) {
+//                            String url = campaign.getActions().get(i).getActionLink().getUrl();
+//                            Intent intent = new Intent(Intent.ACTION_VIEW);
+//                            intent.setData(Uri.parse(url));
+//                            Log.d(&quot;openBrowser&quot;, url);
+//                            getView().startOpenBrowser(intent);
+//                        } else {
+//                            // url==null
+//                        }
+                    }
+                }
+            }
+        }
+<span class="nc" id="L188">    }</span>
+
+    @Override
+    public void onCampaignNegativeClicked(String id) {
+<span class="nc" id="L192">        DataList campaign = findCampaignById(id);</span>
+<span class="nc bnc" id="L193" title="All 4 branches missed.">        if (campaign!=null &amp;&amp; campaign.getActions()!=null) {</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">            for (int i = 0; i &lt; campaign.getActions().size(); i++) {</span>
+<span class="nc bnc" id="L195" title="All 2 branches missed.">                if (campaign.getActions().get(i).getType().equals(&quot;DENY_CAMPAIGN&quot;)) {</span>
+<span class="nc" id="L196">                    getView().showLoadingDialog();</span>
+<span class="nc" id="L197">                    RequestResult requestResult = new RequestResult();</span>
+<span class="nc" id="L198">                    requestResult.setActionType(&quot;DENY_CAMPAIGN&quot;);</span>
+<span class="nc" id="L199">                    requestResult.setCampaignId(id);</span>
+//                  requestResult.setRelatedMobileNumbers(null);
+<span class="nc" id="L201">                    getResults(id, requestResult, false, &quot;POST&quot;);</span>
+                }
+            }
+        }
+
+<span class="nc" id="L206">    }</span>
+
+    private Action getPositiveAction(List&lt;Action&gt; actionsList) {
+<span class="nc bnc" id="L209" title="All 2 branches missed.">        if (actionsList.size()&gt;0) {</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">            for (int i=0 ; i&lt;actionsList.size() ; i++) {</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">                if (actionsList.get(i).getType().equals(&quot;ACCEPT_CAMPAIGN&quot;)) {</span>
+<span class="nc" id="L212">                    return actionsList.get(i);</span>
+                }
+            }
+        }
+<span class="nc" id="L216">        return null;</span>
+    }
+
+    private boolean isRelateMobileNumber(Action positiveAction) {
+<span class="nc bnc" id="L220" title="All 2 branches missed.">        if (positiveAction.getRelatedMobileNumbers()!=null) {</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">            if (positiveAction.getRelatedMobileNumbers().size() &gt; 0) {</span>
+<span class="nc" id="L222">                return true;</span>
+            }
+        }
+<span class="nc" id="L225">        return false;</span>
+    }
+
+    @Override
+    public String getPositiveTitle(List&lt;Action&gt; actions) {
+<span class="nc bnc" id="L230" title="All 2 branches missed.">        if (actions.size()&gt;0) {</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">            for (int i=0 ; i&lt;actions.size() ; i++) {</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">                if (actions.size()&gt;0) {</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">                    if (actions.get(i).getType().equals(&quot;ACCEPT_CAMPAIGN&quot;)) {</span>
+<span class="nc bnc" id="L234" title="All 2 branches missed.">                        if (actions.get(i).getName() != null) { // get name or title</span>
+<span class="nc" id="L235">                            return actions.get(i).getName();</span>
+<span class="nc" id="L236">                        } else return &quot;&quot;;</span>
+                    }
+                }
+            }
+        }
+<span class="nc" id="L241">        return &quot;&quot;;</span>
+    }
+
+    @Override
+    public String getNegativeTitle(List&lt;Action&gt; actions) {
+<span class="nc bnc" id="L246" title="All 2 branches missed.">        if (actions.size()&gt;0) {</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">            for (int i=0 ; i&lt;actions.size() ; i++) {</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">                if (actions.size()&gt;0) {</span>
+<span class="nc bnc" id="L249" title="All 2 branches missed.">                    if (actions.get(i).getType().equals(&quot;DENY_CAMPAIGN&quot;)) {</span>
+<span class="nc bnc" id="L250" title="All 2 branches missed.">                        if (actions.get(i).getName() != null) { // get name or title</span>
+<span class="nc" id="L251">                            return actions.get(i).getName();</span>
+                        } else {
+<span class="nc" id="L253">                            return &quot;&quot;;</span>
+                        }
+<span class="nc bnc" id="L255" title="All 2 branches missed.">                    } else if (actions.get(i).getType().equals(&quot;CLOSE_CAMPAIGN&quot;)) {</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">                        if (actions.get(i).getName() != null) { // get name or title</span>
+<span class="nc" id="L257">                            return actions.get(i).getName();</span>
+                        } else {
+<span class="nc" id="L259">                            return &quot;&quot;;</span>
+                        }
+                    }
+                }
+            }
+        }
+<span class="nc" id="L265">        return &quot;&quot;;</span>
+    }
+
+    @Override
+    public void onMoreDetailClicked(String id) {
+<span class="nc" id="L270">        DataList campaign = findCampaignById(id);</span>
+<span class="nc bnc" id="L271" title="All 4 branches missed.">        if (campaign!=null &amp;&amp; campaign.getDetailURL()!=null) {</span>
+<span class="nc" id="L272">            String url = campaign.getDetailURL();</span>
+<span class="nc" id="L273">            Intent i = new Intent(Intent.ACTION_VIEW);</span>
+<span class="nc" id="L274">            i.setData(Uri.parse(url));</span>
+<span class="nc" id="L275">            getView().startOpenBrowser(i);</span>
+        }
+<span class="nc" id="L277">    }</span>
+
+    private DataList findCampaignById(String id) {
+<span class="nc bnc" id="L280" title="All 2 branches missed.">        for (int i=0 ; i&lt;footerBannerItemList.size() ; i++) {</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">            if (footerBannerItemList.get(i).getId().equals(id)) {</span>
+<span class="nc" id="L282">                return footerBannerItemList.get(i);</span>
+            }
+        }
+<span class="nc" id="L285">        return null;</span>
+    }
+
+    @Override
+    public void getResults(String id, RequestResult request, boolean isPreview, String method) {
+//        getView().showLoading();
+<span class="nc" id="L291">        FooterBannerManager.getInstance().getResults(id, request, isPreview, method);</span>
+<span class="nc" id="L292">    }</span>
+
+    @Override
+    public void onCampaignNeutralClicked(String id) {
+        // for more action event.
+<span class="nc" id="L297">        DataList campaign = findCampaignById(id);</span>
+<span class="nc bnc" id="L298" title="All 6 branches missed.">        if (campaign!=null &amp;&amp; campaign.getActions()!=null &amp;&amp; campaign.getActions().size()&gt;0) {</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">            if (campaign.getActions().get(0)!=null){</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">                if (campaign.getActions().get(0).getActionLink()!=null) {</span>
+<span class="nc bnc" id="L301" title="All 2 branches missed.">                    if (campaign.getActions().get(0).getActionLink().getUrl()!=null) {</span>
+<span class="nc" id="L302">                        String url = URL.getSSB() + campaign.getActions().get(0).getActionLink().getUrl();</span>
+<span class="nc" id="L303">                        Intent i = new Intent(Intent.ACTION_VIEW);</span>
+<span class="nc" id="L304">                        i.setData(Uri.parse(url));</span>
+<span class="nc" id="L305">                        Log.d(&quot;openBrowser&quot;, url);</span>
+//                        getView().startOpenBrowser(i);
+                    } else {
+                        // url==null
+                    }
+                }
+            }
+        }
+<span class="nc" id="L313">        RequestResult requestResult = new RequestResult();</span>
+<span class="nc" id="L314">        requestResult.setActionType(&quot;ACCEPT_CAMPAIGN&quot;);</span>
+<span class="nc" id="L315">        requestResult.setCampaignId(id);</span>
+//        requestResult.setRelatedMobileNumbers(null);
+<span class="nc" id="L317">        getResults(id, requestResult, false, &quot;POST&quot;);</span>
+<span class="nc" id="L318">    }</span>
+
+    @Override
+    public void onAdapterAttach() {
+        try {
+<span class="nc" id="L323">            RxBus.get().register(this);</span>
+<span class="nc" id="L324">        } catch (OnErrorNotImplementedException ignored) {</span>
+<span class="nc" id="L325">        }</span>
+<span class="nc" id="L326">    }</span>
+
+    @Override
+    public void onAdapterDetach() {
+<span class="nc" id="L330">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L331">    }</span>
+
+    @Override
+    public void onResponseOKClicked() {
+
+<span class="nc" id="L336">    }</span>
+
+    @Override
+    public String getHolderTitle(int position) {
+<span class="nc" id="L340">        DataList item = getFooterBannerItem(position);</span>
+<span class="nc bnc" id="L341" title="All 2 branches missed.">        if (item!=null) {</span>
+<span class="nc bnc" id="L342" title="All 4 branches missed.">            if (item.getPreviewHeader()!=null &amp;&amp; item.getPreviewHeader().length()&gt;0) {</span>
+<span class="nc" id="L343">                return item.getPreviewHeader();</span>
+            }
+        }
+<span class="nc" id="L346">        return getView().getDefaultPreviewHeader();</span>
+    }
+
+    @Override
+    public void clearItem() {
+<span class="nc bnc" id="L351" title="All 2 branches missed.">        if (footerBannerItemList!=null) {</span>
+<span class="nc" id="L352">            footerBannerItemList.clear();</span>
+        }
+<span class="nc" id="L354">    }</span>
+
+    @Subscribe
+    public void onResponseResultPreview(ResponseResultPreview result) {
+//        setResponseResult(null);
+<span class="nc" id="L359">    }</span>
+
+    @Subscribe
+    public void onResponseResult(ResponseResult result) {
+<span class="nc" id="L363">        setResponseResult(result);</span>
+<span class="nc" id="L364">    }</span>
+
+    private void setResponseResult(ResponseResult responseResult) {
+        // onResponseResult
+<span class="nc bnc" id="L368" title="All 2 branches missed.">        if (responseResult != null) {</span>
+<span class="nc" id="L369">            getView().createSimpleBannerDialog(</span>
+                    null,
+                    null,
+                    null,
+<span class="nc" id="L373">                    responseResult.getResultDescription(),</span>
+                    null,
+                    null,
+                    null,
+                    false
+            );
+        }
+<span class="nc" id="L380">    }</span>
+
+    private String imageTagExtractor(String html, boolean isContent) {
+<span class="nc bnc" id="L383" title="All 2 branches missed.">        if (html != null) {</span>
+<span class="nc bnc" id="L384" title="All 2 branches missed.">            if (html.contains(&quot;&lt;img src=\&quot;&quot;)) {</span>
+<span class="nc" id="L385">                int start = html.indexOf(&quot;src=\&quot;&quot;) + 5;</span>
+<span class="nc" id="L386">                int end = html.indexOf(&quot;\&quot;&quot;, start);</span>
+<span class="nc" id="L387">                html = html.substring(start, end);</span>
+<span class="nc" id="L388">                String newHtml = html.replace(&quot;src=\&quot;&quot;, &quot;&quot;);</span>
+<span class="nc" id="L389">                newHtml = newHtml.replace(&quot;\&quot;&quot;, &quot;&quot;);</span>
+<span class="nc" id="L390">                newHtml = newHtml.replace(&quot;\\&quot;, &quot;&quot;);</span>
+<span class="nc" id="L391">                Log.d(&quot;imageTagExtractor&quot;, newHtml + &quot;&quot;);</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">                if (isContent) {</span>
+<span class="nc" id="L393">                    return html.substring(end + 1);</span>
+                }
+<span class="nc" id="L395">                return newHtml;</span>
+<span class="nc" id="L396">            } else return html;</span>
+        }
+<span class="nc" id="L398">        return null;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

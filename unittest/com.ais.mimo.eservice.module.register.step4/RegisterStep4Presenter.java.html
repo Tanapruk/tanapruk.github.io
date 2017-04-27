@@ -21,10 +21,10 @@ import com.nextzy.myais.common.constant.BusinessType;
 import com.nextzy.myais.common.database.NextzyDatabase;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.ais.mimo.eservice.helper.register.network.RegisterManager.FLAG_N;
 import static com.ais.mimo.eservice.helper.register.network.RegisterManager.FLAG_Y;
-import static com.ais.mimo.eservice.helper.register.network.RegisterManager.MASTER_MOBILE_NUMBER;
 import static com.ais.mimo.eservice.helper.register.network.RegisterManager.SERVICE_VERIFY_IDENTITY_MASTER;
 import static com.ais.mimo.eservice.helper.register.network.RegisterManager.SERVICE_VERIFY_IDENTITY_NUMBER_SELECTED;
 import static com.ais.mimo.eservice.module.register.step4.addmobilenumber.fragment.RegisterAddMobileNumberPresenter.REGISTER_MAX_FBB;
@@ -38,55 +38,54 @@ import static com.ais.mimo.eservice.module.register.utility.RegisterValidateUtil
  */
 
 public class RegisterStep4Presenter extends RegisterBasePresenter&lt;RegisterStep4Contractor.View&gt; implements RegisterStep4Contractor.Presenter {
-<span class="fc" id="L41">    private final static String TAG = RegisterStep4Presenter.class.getSimpleName();</span>
     private final RegisterValidateUtility validateUtil;
     private final RegisterConverterUtility converter;
     private RegisterManager manager;
     private String focusBusinessType;
 
     public void setMockManager(RegisterManager mockManager) {
-<span class="fc" id="L48">        manager = mockManager;</span>
-<span class="fc" id="L49">    }</span>
+<span class="fc" id="L47">        manager = mockManager;</span>
+<span class="fc" id="L48">    }</span>
 
     protected RegisterStep4Presenter(RegisterStep4Contractor.View view) {
-<span class="fc" id="L52">        super(view);</span>
-<span class="fc" id="L53">        manager = RegisterManager.getInstance();</span>
-<span class="fc" id="L54">        validateUtil = RegisterValidateUtility.getInstance();</span>
-<span class="fc" id="L55">        converter = RegisterConverterUtility.getInstance();</span>
-<span class="fc" id="L56">    }</span>
+<span class="fc" id="L51">        super(view);</span>
+<span class="fc" id="L52">        manager = RegisterManager.getInstance();</span>
+<span class="fc" id="L53">        validateUtil = RegisterValidateUtility.getInstance();</span>
+<span class="fc" id="L54">        converter = RegisterConverterUtility.getInstance();</span>
+<span class="fc" id="L55">    }</span>
 
     public static RegisterStep4Presenter createPresenter(RegisterStep4Contractor.View view) {
-<span class="fc" id="L59">        return new RegisterStep4Presenter(view);</span>
+<span class="fc" id="L58">        return new RegisterStep4Presenter(view);</span>
     }
 
     @Override
     public void onViewCreate() {
-<span class="nc" id="L64">    }</span>
+<span class="nc" id="L63">    }</span>
 
     @Override
     public void onViewDestroy() {
-<span class="nc" id="L68">    }</span>
+<span class="nc" id="L67">    }</span>
 
     @Override
     public void onViewStart() {
 
-<span class="nc" id="L73">    }</span>
+<span class="nc" id="L72">    }</span>
 
     @Override
     public void onViewStop() {
 
-<span class="nc" id="L78">    }</span>
+<span class="nc" id="L77">    }</span>
 
 
     @Override
     public void registerRx() {
-<span class="fc" id="L83">        RxBus.get().register(this);</span>
-<span class="fc" id="L84">    }</span>
+<span class="fc" id="L82">        RxBus.get().register(this);</span>
+<span class="fc" id="L83">    }</span>
 
     @Override
     public void unregisterRx() {
-<span class="fc" id="L88">        RxBus.get().unregister(this);</span>
-<span class="fc" id="L89">    }</span>
+<span class="fc" id="L87">        RxBus.get().unregister(this);</span>
+<span class="fc" id="L88">    }</span>
 
     /*******************/
     /** For view call **/
@@ -94,46 +93,46 @@ public class RegisterStep4Presenter extends RegisterBasePresenter&lt;RegisterSte
     //&lt;editor-fold desc=&quot;For view folding&quot;&gt;
     @Override
     public void requestVerifyIdentityWithOtpFlag(String mobileNumber) {
-<span class="fc" id="L97">        getView().showLoadingNoFade();</span>
-<span class="fc" id="L98">        RegisterVerifyIdentityBody body = new RegisterVerifyIdentityBody()</span>
-<span class="fc" id="L99">                .setNumber(mobileNumber)</span>
-<span class="fc" id="L100">                .setCardId(getView().getArgumentsStringIdCard())</span>
-<span class="fc" id="L101">                .setEmail(getView().getArgumentsStringEmail())</span>
-<span class="fc" id="L102">                .setVerifyCaptchaFlag(FLAG_N)</span>
-<span class="fc" id="L103">                .setSendOtpFlag(FLAG_Y)</span>
-<span class="fc" id="L104">                .setReferenceId(null)</span>
-<span class="fc" id="L105">                .setCaptcha(null);</span>
+<span class="fc" id="L96">        getView().showLoadingNoFade();</span>
+<span class="fc" id="L97">        RegisterVerifyIdentityBody body = new RegisterVerifyIdentityBody()</span>
+<span class="fc" id="L98">                .setNumber(mobileNumber)</span>
+<span class="fc" id="L99">                .setCardId(getView().getIdCardStringArgument())</span>
+<span class="fc" id="L100">                .setEmail(getView().getEmailStringArgument())</span>
+<span class="fc" id="L101">                .setVerifyCaptchaFlag(FLAG_N)</span>
+<span class="fc" id="L102">                .setSendOtpFlag(FLAG_Y)</span>
+<span class="fc" id="L103">                .setReferenceId(null)</span>
+<span class="fc" id="L104">                .setCaptcha(null);</span>
 
 
-<span class="fc" id="L108">        manager.verifyIdentityNumberSelected(</span>
+<span class="fc" id="L107">        manager.verifyIdentityNumberSelected(</span>
                 mobileNumber,
                 body
         );
-<span class="fc" id="L112">    }</span>
+<span class="fc" id="L111">    }</span>
 
     @Override
     public void validateRequestVerifyOtp(String mobileNumber, String otp) {
 
-<span class="fc" id="L117">        getView().showDefaultOtpEdt();</span>
-<span class="pc bpc" id="L118" title="1 of 2 branches missed.">        switch (validateUtil.validateOtp(otp)) {</span>
+<span class="fc" id="L116">        getView().showDefaultOtpEdt();</span>
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">        switch (validateUtil.validateOtp(otp)) {</span>
             case INVALIDATE_OTP_FORMAT:
-<span class="nc" id="L120">                getView().showDialogErrorOtpEdt();</span>
-<span class="nc" id="L121">                return;</span>
+<span class="nc" id="L119">                getView().showDialogErrorOtpEdt();</span>
+<span class="nc" id="L120">                return;</span>
         }
 
-<span class="fc" id="L124">        requestVerifyOtp(mobileNumber, otp);</span>
-<span class="fc" id="L125">    }</span>
+<span class="fc" id="L123">        requestVerifyOtp(mobileNumber, otp);</span>
+<span class="fc" id="L124">    }</span>
 
 
     @Override
     public void goToAddMobileNumberActivity(
-            ArrayList&lt;MobileData&gt; confirmPostList,
-            ArrayList&lt;MobileData&gt; confirmPreList,
-            ArrayList&lt;MobileData&gt; confirmFbbList,
-            ArrayList&lt;MobileData&gt; noConfirmPostList,
-            ArrayList&lt;MobileData&gt; noConfirmPreList,
-            ArrayList&lt;MobileData&gt; noConfirmFbbList) {
-<span class="fc" id="L136">        getView().launchAddMobileNumberActivity(</span>
+            List&lt;MobileData&gt; confirmPostList,
+            List&lt;MobileData&gt; confirmPreList,
+            List&lt;MobileData&gt; confirmFbbList,
+            List&lt;MobileData&gt; noConfirmPostList,
+            List&lt;MobileData&gt; noConfirmPreList,
+            List&lt;MobileData&gt; noConfirmFbbList) {
+<span class="fc" id="L135">        getView().launchAddMobileNumberActivity(</span>
                 confirmPostList,
                 confirmPreList,
                 confirmFbbList,
@@ -141,249 +140,239 @@ public class RegisterStep4Presenter extends RegisterBasePresenter&lt;RegisterSte
                 noConfirmPreList,
                 noConfirmFbbList
         );
-<span class="fc" id="L144">    }</span>
+<span class="fc" id="L143">    }</span>
 
     @Override
-    public void setMobileGroupUi(ArrayList&lt;MobileData&gt; post,
-                                 ArrayList&lt;MobileData&gt; fbb,
-                                 ArrayList&lt;MobileData&gt; pre) {
-<span class="fc" id="L150">        ArrayList&lt;MobileData&gt; noConfirmPostpaid = null;</span>
-<span class="fc" id="L151">        ArrayList&lt;MobileData&gt; noConfirmFbb = null;</span>
-<span class="fc" id="L152">        ArrayList&lt;MobileData&gt; noConfirmPrepaid = null;</span>
-<span class="fc" id="L153">        ArrayList&lt;MobileData&gt; markConfirmPostpaid = null;</span>
-<span class="fc" id="L154">        ArrayList&lt;MobileData&gt; markConfirmFbb = null;</span>
-<span class="fc" id="L155">        ArrayList&lt;MobileData&gt; markConfirmPrepaid = null;</span>
+    public void setMobileGroupUi(List&lt;MobileData&gt; post,
+                                 List&lt;MobileData&gt; fbb,
+                                 List&lt;MobileData&gt; pre) {
+<span class="fc" id="L149">        List&lt;MobileData&gt; noConfirmPostpaid = null;</span>
+<span class="fc" id="L150">        List&lt;MobileData&gt; noConfirmFbb = null;</span>
+<span class="fc" id="L151">        List&lt;MobileData&gt; noConfirmPrepaid = null;</span>
+<span class="fc" id="L152">        List&lt;MobileData&gt; markConfirmPostpaid = null;</span>
+<span class="fc" id="L153">        List&lt;MobileData&gt; markConfirmFbb = null;</span>
+<span class="fc" id="L154">        List&lt;MobileData&gt; markConfirmPrepaid = null;</span>
 
-<span class="fc bfc" id="L157" title="All 2 branches covered.">        if (isActivePostpaidNumber()) {</span>
-<span class="fc" id="L158">            noConfirmPostpaid = post;</span>
-<span class="fc" id="L159">            noConfirmPrepaid = pre;</span>
-<span class="fc" id="L160">            noConfirmFbb = fbb;</span>
-<span class="fc" id="L161">            markConfirmFbb = fbb;</span>
-<span class="fc bfc" id="L162" title="All 2 branches covered.">        } else if (isActivePrepaidNumber()) {</span>
-<span class="fc" id="L163">            noConfirmPrepaid = pre;</span>
-<span class="pc bpc" id="L164" title="1 of 2 branches missed.">        } else if (isActiveFibreNumber()) {</span>
-<span class="fc" id="L165">            noConfirmPrepaid = pre;</span>
-<span class="fc" id="L166">            noConfirmFbb = fbb;</span>
-<span class="fc" id="L167">            markConfirmFbb = fbb;</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">        if (masterIsPostpaid()) {</span>
+<span class="fc" id="L157">            noConfirmPostpaid = post;</span>
+<span class="fc" id="L158">            noConfirmPrepaid = pre;</span>
+<span class="fc" id="L159">            noConfirmFbb = fbb;</span>
+<span class="fc" id="L160">            markConfirmFbb = fbb;</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">        } else if (masterIsPrepaid()) {</span>
+<span class="fc" id="L162">            noConfirmPrepaid = pre;</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">        } else if (masterIsFibre()) {</span>
+<span class="fc" id="L164">            noConfirmPrepaid = pre;</span>
+<span class="fc" id="L165">            noConfirmFbb = fbb;</span>
+<span class="fc" id="L166">            markConfirmFbb = fbb;</span>
         }
 
-<span class="fc bfc" id="L170" title="All 2 branches covered.">        if (post.size() &gt; REGISTER_MAX_POSTPAID) {</span>
-<span class="fc" id="L171">            noConfirmPostpaid = null;</span>
-<span class="fc" id="L172">            markConfirmPostpaid = null;</span>
-<span class="fc bfc" id="L173" title="All 2 branches covered.">        } else if (pre.size() &gt; REGISTER_MAX_PREPAID) {</span>
-<span class="fc" id="L174">            noConfirmPrepaid = null;</span>
-<span class="fc" id="L175">            markConfirmPrepaid = null;</span>
-<span class="fc bfc" id="L176" title="All 2 branches covered.">        } else if (fbb.size() &gt; REGISTER_MAX_FBB) {</span>
-<span class="fc" id="L177">            noConfirmFbb = null;</span>
-<span class="fc" id="L178">            markConfirmFbb = null;</span>
+<span class="fc bfc" id="L169" title="All 2 branches covered.">        if (post.size() &gt; REGISTER_MAX_POSTPAID) {</span>
+<span class="fc" id="L170">            noConfirmPostpaid = null;</span>
+<span class="fc" id="L171">            markConfirmPostpaid = null;</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">        } else if (pre.size() &gt; REGISTER_MAX_PREPAID) {</span>
+<span class="fc" id="L173">            noConfirmPrepaid = null;</span>
+<span class="fc" id="L174">            markConfirmPrepaid = null;</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">        } else if (fbb.size() &gt; REGISTER_MAX_FBB) {</span>
+<span class="fc" id="L176">            noConfirmFbb = null;</span>
+<span class="fc" id="L177">            markConfirmFbb = null;</span>
         }
 
-<span class="fc" id="L181">        getView().setMobileDataListToAdapter(</span>
+<span class="fc" id="L180">        getView().setMobileDataListToAdapter(</span>
                 markConfirmPostpaid, markConfirmPrepaid, markConfirmFbb,
                 noConfirmPostpaid, noConfirmPrepaid, noConfirmFbb);
-<span class="fc" id="L184">    }</span>
+<span class="fc" id="L183">    }</span>
 
     @Override
-    public void requestConfirmRegister(ArrayList&lt;MobileData&gt; postList,
-                                       ArrayList&lt;MobileData&gt; preList,
-                                       ArrayList&lt;MobileData&gt; fbbList) {
-
-<span class="fc" id="L191">        addMasterNumberToIfCan(postList, preList, fbbList);</span>
-<span class="fc" id="L192">        RegisterConfirmBody body = new RegisterConfirmBody()</span>
-<span class="fc" id="L193">                .setCardId(getView().getArgumentsStringIdCard())</span>
-<span class="fc" id="L194">                .setUser(getView().getArgumentsStringMobileNumber())</span>
-<span class="fc" id="L195">                .setPassword(getView().getArgumentsStringPassword())</span>
-<span class="fc" id="L196">                .setEmail(getView().getArgumentsStringEmail())</span>
-<span class="fc" id="L197">                .setReferenceId(getMainRefId())</span>
-<span class="fc" id="L198">                .setPostpaidList(converter.conventMyNumberToStringArray(postList))</span>
-<span class="fc" id="L199">                .setPrepaidList(converter.conventMyNumberToStringArray(preList))</span>
-<span class="fc" id="L200">                .setFibreList(converter.conventMyNumberToStringArray(fbbList));</span>
-<span class="fc" id="L201">        getView().showLoadingNoFade();</span>
-<span class="fc" id="L202">        manager.requestConfirmRegister(</span>
-<span class="fc" id="L203">                getView().getArgumentsStringMobileNumber(),</span>
+    public void requestConfirmRegister(List&lt;MobileData&gt; postList,
+                                       List&lt;MobileData&gt; preList,
+                                       List&lt;MobileData&gt; fbbList) {
+        /** Requirment change: not add MasterNumber back **/
+//        addMasterNumberToIfCan(postList, preList, fbbList);
+<span class="fc" id="L191">        RegisterConfirmBody body = new RegisterConfirmBody()</span>
+<span class="fc" id="L192">                .setCardId(getView().getIdCardStringArgument())</span>
+<span class="fc" id="L193">                .setUser(getView().getMasterNumber())</span>
+<span class="fc" id="L194">                .setPassword(getView().getPasswordStringArgument())</span>
+<span class="fc" id="L195">                .setEmail(getView().getEmailStringArgument())</span>
+<span class="fc" id="L196">                .setReferenceId(getMainRefId())</span>
+<span class="fc" id="L197">                .setPostpaidList(converter.conventMyNumberToStringArray(postList))</span>
+<span class="fc" id="L198">                .setPrepaidList(converter.conventMyNumberToStringArray(preList))</span>
+<span class="fc" id="L199">                .setFibreList(converter.conventMyNumberToStringArray(fbbList));</span>
+<span class="fc" id="L200">        getView().showLoadingNoFade();</span>
+<span class="fc" id="L201">        manager.requestConfirmRegister(</span>
+<span class="fc" id="L202">                getView().getMobileNumberStringArgument(),</span>
                 body);
-<span class="fc" id="L205">    }</span>
+<span class="fc" id="L204">    }</span>
 
 
     @Override
     public void setFocusBusinessType(String focus) {
-<span class="fc" id="L210">        focusBusinessType = focus;</span>
-<span class="fc" id="L211">    }</span>
+<span class="fc" id="L209">        focusBusinessType = focus;</span>
+<span class="fc" id="L210">    }</span>
 
     @Override
     public String getFocusBusinessType() {
-<span class="nc" id="L215">        return focusBusinessType;</span>
+<span class="nc" id="L214">        return focusBusinessType;</span>
     }
 
     @Override
     public void hideAddBtnIfCan() {
-<span class="nc bnc" id="L220" title="All 2 branches missed.">        if (isActivePostpaidNumber() &amp;&amp;</span>
-<span class="nc bnc" id="L221" title="All 2 branches missed.">                getView().getMarkConfirmItemCountPostpaid() &gt; REGISTER_MAX_POSTPAID</span>
-<span class="nc bnc" id="L222" title="All 2 branches missed.">                &amp;&amp; getView().getMarkConfirmItemCountPrepaid() &gt; REGISTER_MAX_PREPAID</span>
-<span class="nc bnc" id="L223" title="All 2 branches missed.">                &amp;&amp; getView().getMarkConfirmItemCountFbb() &gt; REGISTER_MAX_FBB) {</span>
-<span class="nc" id="L224">            getView().hideAddBtn();</span>
-<span class="nc bnc" id="L225" title="All 2 branches missed.">        } else if (isActivePrepaidNumber()</span>
-<span class="nc bnc" id="L226" title="All 2 branches missed.">                &amp;&amp; getView().getMarkConfirmItemCountPrepaid() &gt; REGISTER_MAX_PREPAID) {</span>
-<span class="nc" id="L227">            getView().hideAddBtn();</span>
-<span class="nc bnc" id="L228" title="All 2 branches missed.">        } else if (isActiveFibreNumber()</span>
-<span class="nc bnc" id="L229" title="All 2 branches missed.">                &amp;&amp; getView().getMarkConfirmItemCountPrepaid() &gt; REGISTER_MAX_PREPAID</span>
-<span class="nc bnc" id="L230" title="All 2 branches missed.">                &amp;&amp; getView().getMarkConfirmItemCountFbb() &gt; REGISTER_MAX_FBB) {</span>
-<span class="nc" id="L231">            getView().hideAddBtn();</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">        if (masterIsPostpaid() &amp;&amp;</span>
+<span class="nc bnc" id="L220" title="All 2 branches missed.">                getView().getMarkConfirmItemCountPostpaid() &gt; REGISTER_MAX_POSTPAID</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">                &amp;&amp; getView().getMarkConfirmItemCountPrepaid() &gt; REGISTER_MAX_PREPAID</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">                &amp;&amp; getView().getMarkConfirmItemCountFbb() &gt; REGISTER_MAX_FBB) {</span>
+<span class="nc" id="L223">            getView().hideAddBtn();</span>
+<span class="nc bnc" id="L224" title="All 2 branches missed.">        } else if (masterIsPrepaid()</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">                &amp;&amp; getView().getMarkConfirmItemCountPrepaid() &gt; REGISTER_MAX_PREPAID) {</span>
+<span class="nc" id="L226">            getView().hideAddBtn();</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">        } else if (masterIsFibre()</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">                &amp;&amp; getView().getMarkConfirmItemCountPrepaid() &gt; REGISTER_MAX_PREPAID</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">                &amp;&amp; getView().getMarkConfirmItemCountFbb() &gt; REGISTER_MAX_FBB) {</span>
+<span class="nc" id="L230">            getView().hideAddBtn();</span>
         }
-<span class="nc" id="L233">    }</span>
+<span class="nc" id="L232">    }</span>
 
     //&lt;/editor-fold&gt;
 
     @Subscribe
     public void onReceiveIdentityResponse(RegisterVerifyIdentityResult response) {
-<span class="fc bfc" id="L239" title="All 2 branches covered.">        if (response.isCanNextStep()) {</span>
-<span class="fc" id="L240">            getView().dismissLoadingNoFade();</span>
-<span class="fc" id="L241">            setClickRequestOtpAtFocusView();</span>
+<span class="fc bfc" id="L238" title="All 2 branches covered.">        if (response.isCanNextStep()) {</span>
+<span class="fc" id="L239">            getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L240">            setClickRequestOtpAtFocusView();</span>
         } else {
-<span class="fc" id="L243">            getView().showResponseException(response.getResultDescription());</span>
+<span class="fc" id="L242">            getView().showResponseException(response.getResultDescription());</span>
         }
-<span class="fc" id="L245">    }</span>
+<span class="fc" id="L244">    }</span>
 
 
     @Subscribe
     public void onReceiveVerifyOtp(RegisterVerifyOtpResult response) {
-<span class="fc bfc" id="L250" title="All 2 branches covered.">        if (response.isCanNextStep()) {</span>
-<span class="fc" id="L251">            markConfirmCurrentMobileNumber();</span>
+<span class="fc bfc" id="L249" title="All 2 branches covered.">        if (response.isCanNextStep()) {</span>
+<span class="fc" id="L250">            markConfirmCurrentMobileNumber();</span>
         } else {
-<span class="fc" id="L253">            getView().showResponseException(response.getResultDescription());</span>
+<span class="fc" id="L252">            getView().showResponseException(response.getResultDescription());</span>
         }
-<span class="fc" id="L255">    }</span>
+<span class="fc" id="L254">    }</span>
 
     @Subscribe
     public void onReceiveConfirmRegisterResponse(RegisterConfirmResult response) {
-<span class="fc bfc" id="L259" title="All 2 branches covered.">        if (response.isCanNextStep()) {</span>
-<span class="fc" id="L260">            getView().dismissLoadingNoFade();</span>
-<span class="fc" id="L261">            goToFragmentWelcome();</span>
+<span class="fc bfc" id="L258" title="All 2 branches covered.">        if (response.isCanNextStep()) {</span>
+<span class="fc" id="L259">            getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L260">            goToFragmentWelcome();</span>
         } else {
-<span class="fc" id="L263">            getView().showResponseException(response.getResultDescription());</span>
+<span class="fc" id="L262">            getView().showResponseException(response.getResultDescription());</span>
         }
-<span class="fc" id="L265">    }</span>
+<span class="fc" id="L264">    }</span>
 
 
     @Subscribe
     public void onReceiveIdentityResponseException(RegisterVerifyIdentityDataException exception) {
-<span class="fc" id="L270">        showResponseExceptionDismiss(exception.getMessage());</span>
-<span class="fc" id="L271">    }</span>
+<span class="fc" id="L269">        showResponseExceptionDismiss(exception.getMessage());</span>
+<span class="fc" id="L270">    }</span>
 
     @Subscribe
     public void onReceiveOtpResponseException(RegisterVerifyOtpDataException exception) {
-<span class="fc" id="L275">        showResponseExceptionDismiss(exception.getMessage());</span>
-<span class="fc" id="L276">    }</span>
+<span class="fc" id="L274">        showResponseExceptionDismiss(exception.getMessage());</span>
+<span class="fc" id="L275">    }</span>
 
 
     @Subscribe
     public void onReceiveConfirmRegisterResponseException(RegisterConfirmDataException exception) {
-<span class="fc" id="L281">        showResponseExceptionDismiss(exception.getMessage());</span>
-<span class="fc" id="L282">    }</span>
+<span class="fc" id="L280">        showResponseExceptionDismiss(exception.getMessage());</span>
+<span class="fc" id="L281">    }</span>
 
     /********************/
     /** Private method **/
     /********************/
     //&lt;editor-fold desc=&quot;Private function folding&quot;&gt;
     private void setClickRequestOtpAtFocusView() {
-<span class="pc bpc" id="L289" title="1 of 2 branches missed.">        if (BusinessType.POSTPAID.equals(focusBusinessType)) {</span>
-<span class="nc" id="L290">            getView().setPostpaidClickRequestOtpAtFocusView();</span>
-<span class="pc bpc" id="L291" title="1 of 2 branches missed.">        } else if (BusinessType.PREPAID.equals(focusBusinessType)) {</span>
-<span class="nc" id="L292">            getView().setPrepaidClickRequestOtpAtFocusView();</span>
+<span class="pc bpc" id="L288" title="1 of 2 branches missed.">        if (BusinessType.POSTPAID.equals(focusBusinessType)) {</span>
+<span class="nc" id="L289">            getView().setPostpaidClickRequestOtpAtFocusView();</span>
+<span class="pc bpc" id="L290" title="1 of 2 branches missed.">        } else if (BusinessType.PREPAID.equals(focusBusinessType)) {</span>
+<span class="nc" id="L291">            getView().setPrepaidClickRequestOtpAtFocusView();</span>
         } else {
-<span class="fc" id="L294">            getView().setFbbClickRequestOtpAtFocusView();</span>
+<span class="fc" id="L293">            getView().setFbbClickRequestOtpAtFocusView();</span>
         }
-<span class="fc" id="L296">    }</span>
+<span class="fc" id="L295">    }</span>
 
     private void requestVerifyOtp(String mobileNumber, String otp) {
-<span class="fc" id="L299">        getView().showLoadingNoFade();</span>
-<span class="fc" id="L300">        RegisterVerifyOtpBody body = new RegisterVerifyOtpBody(</span>
-<span class="fc" id="L301">                getRefIdNumberSelected(),</span>
+<span class="fc" id="L298">        getView().showLoadingNoFade();</span>
+<span class="fc" id="L299">        RegisterVerifyOtpBody body = new RegisterVerifyOtpBody(</span>
+<span class="fc" id="L300">                getRefIdNumberSelected(),</span>
                 otp);
 
-<span class="fc" id="L304">        manager.verifyOtpNumberSelected(</span>
+<span class="fc" id="L303">        manager.verifyOtpNumberSelected(</span>
                 mobileNumber,
                 body
         );
-<span class="fc" id="L308">    }</span>
+<span class="fc" id="L307">    }</span>
 
     private void goToFragmentWelcome() {
-<span class="fc" id="L311">        RxBus.get().post(new GoToWelcomeFragmentEvent());</span>
-<span class="fc" id="L312">    }</span>
+<span class="fc" id="L310">        RxBus.get().post(new GoToWelcomeFragmentEvent());</span>
+<span class="fc" id="L311">    }</span>
 
     private String getRefIdNumberSelected() {
         RegisterVerifyIdentityResult identity
-<span class="fc" id="L316">                = NextzyDatabase.getInstance().findByName(</span>
+<span class="fc" id="L315">                = NextzyDatabase.getInstance().findByName(</span>
                 SERVICE_VERIFY_IDENTITY_NUMBER_SELECTED,
                 RegisterVerifyIdentityResult.class);
-<span class="pc bpc" id="L319" title="1 of 2 branches missed.">        if (identity != null) {</span>
-<span class="fc" id="L320">            return identity.getData().getReferenceId();</span>
+<span class="pc bpc" id="L318" title="1 of 2 branches missed.">        if (identity != null) {</span>
+<span class="fc" id="L319">            return identity.getData().getReferenceId();</span>
         }
-<span class="nc" id="L322">        return null;</span>
+<span class="nc" id="L321">        return null;</span>
     }
 
     private void addMasterNumberToIfCan(ArrayList&lt;MobileData&gt; postList, ArrayList&lt;MobileData&gt; preList, ArrayList&lt;MobileData&gt; fbbList) {
-<span class="fc" id="L326">        String mainNumber = getMasterNumber();</span>
-<span class="fc bfc" id="L327" title="All 2 branches covered.">        if (isActiveFibreNumber()) {</span>
-<span class="fc" id="L328">            MobileData mobile = new MobileData();</span>
-<span class="fc" id="L329">            mobile.setNumber(mainNumber);</span>
-<span class="fc" id="L330">            fbbList.add(mobile);</span>
-<span class="fc bfc" id="L331" title="All 2 branches covered.">        } else if (isActivePrepaidNumber()) {</span>
-<span class="fc" id="L332">            MobileData mobile = new MobileData();</span>
-<span class="fc" id="L333">            mobile.setNumber(mainNumber);</span>
-<span class="fc" id="L334">            preList.add(mobile);</span>
-<span class="pc bpc" id="L335" title="1 of 2 branches missed.">        } else if (isActivePostpaidNumber()) {</span>
-<span class="fc" id="L336">            MobileData mobile = new MobileData();</span>
-<span class="fc" id="L337">            mobile.setNumber(mainNumber);</span>
-<span class="fc" id="L338">            postList.add(mobile);</span>
+<span class="nc" id="L325">        String mainNumber = getView().getMasterNumber();</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">        if (masterIsFibre()) {</span>
+<span class="nc" id="L327">            MobileData mobile = new MobileData();</span>
+<span class="nc" id="L328">            mobile.setNumber(mainNumber);</span>
+<span class="nc" id="L329">            fbbList.add(mobile);</span>
+<span class="nc bnc" id="L330" title="All 2 branches missed.">        } else if (masterIsPrepaid()) {</span>
+<span class="nc" id="L331">            MobileData mobile = new MobileData();</span>
+<span class="nc" id="L332">            mobile.setNumber(mainNumber);</span>
+<span class="nc" id="L333">            preList.add(mobile);</span>
+<span class="nc bnc" id="L334" title="All 2 branches missed.">        } else if (masterIsPostpaid()) {</span>
+<span class="nc" id="L335">            MobileData mobile = new MobileData();</span>
+<span class="nc" id="L336">            mobile.setNumber(mainNumber);</span>
+<span class="nc" id="L337">            postList.add(mobile);</span>
         }
-<span class="fc" id="L340">    }</span>
+<span class="nc" id="L339">    }</span>
 
-    private String getMasterNumber() {
-        String mobileNumber
-<span class="fc" id="L344">                = NextzyDatabase.getInstance().findByName(</span>
-                MASTER_MOBILE_NUMBER,
-                String.class);
-<span class="fc bfc" id="L347" title="All 2 branches covered.">        if (mobileNumber != null) {</span>
-<span class="fc" id="L348">            return mobileNumber;</span>
-        }
-<span class="fc" id="L350">        return null;</span>
-    }
 
     private String getMainRefId() {
-<span class="fc" id="L354">        RegisterVerifyIdentityResult identity = NextzyDatabase.getInstance().findByName(</span>
+<span class="fc" id="L343">        RegisterVerifyIdentityResult identity = NextzyDatabase.getInstance().findByName(</span>
                 SERVICE_VERIFY_IDENTITY_MASTER,
                 RegisterVerifyIdentityResult.class);
-<span class="fc bfc" id="L357" title="All 2 branches covered.">        if (identity != null) {</span>
-<span class="fc" id="L358">            return identity.getData().getReferenceId();</span>
+<span class="fc bfc" id="L346" title="All 2 branches covered.">        if (identity != null) {</span>
+<span class="fc" id="L347">            return identity.getData().getReferenceId();</span>
         }
-<span class="fc" id="L360">        return null;</span>
+<span class="fc" id="L349">        return null;</span>
     }
 
     private void markConfirmCurrentMobileNumber() {
-<span class="fc bfc" id="L364" title="All 2 branches covered.">        if (BusinessType.POSTPAID.equals(focusBusinessType)) {</span>
-<span class="fc bfc" id="L365" title="All 2 branches covered.">            if (getView().getMarkConfirmItemCountPostpaid() &lt; REGISTER_MAX_POSTPAID) {</span>
-<span class="fc" id="L366">                getView().dismissLoadingNoFade();</span>
-<span class="fc" id="L367">                getView().markConfirmCurrentMobileNumberPostpaid();</span>
+<span class="fc bfc" id="L353" title="All 2 branches covered.">        if (BusinessType.POSTPAID.equals(focusBusinessType)) {</span>
+<span class="fc bfc" id="L354" title="All 2 branches covered.">            if (getView().getMarkConfirmItemCountPostpaid() &lt; REGISTER_MAX_POSTPAID) {</span>
+<span class="fc" id="L355">                getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L356">                getView().markConfirmCurrentMobileNumberPostpaid();</span>
             } else {
-<span class="fc" id="L369">                getView().showPostpaidLimitError(REGISTER_MAX_POSTPAID);</span>
+<span class="fc" id="L358">                getView().showPostpaidLimitError(REGISTER_MAX_POSTPAID);</span>
             }
-<span class="fc bfc" id="L371" title="All 2 branches covered.">        } else if (BusinessType.PREPAID.equals(focusBusinessType)) {</span>
-<span class="fc bfc" id="L372" title="All 2 branches covered.">            if (getView().getMarkConfirmItemCountPrepaid() &lt; REGISTER_MAX_PREPAID) {</span>
-<span class="fc" id="L373">                getView().dismissLoadingNoFade();</span>
-<span class="fc" id="L374">                getView().markConfirmCurrentMobileNumberPrepaid();</span>
+<span class="fc bfc" id="L360" title="All 2 branches covered.">        } else if (BusinessType.PREPAID.equals(focusBusinessType)) {</span>
+<span class="fc bfc" id="L361" title="All 2 branches covered.">            if (getView().getMarkConfirmItemCountPrepaid() &lt; REGISTER_MAX_PREPAID) {</span>
+<span class="fc" id="L362">                getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L363">                getView().markConfirmCurrentMobileNumberPrepaid();</span>
             } else {
-<span class="fc" id="L376">                getView().showPrepaidLimitError(REGISTER_MAX_PREPAID);</span>
+<span class="fc" id="L365">                getView().showPrepaidLimitError(REGISTER_MAX_PREPAID);</span>
             }
         } else {
-<span class="fc bfc" id="L379" title="All 2 branches covered.">            if (getView().getMarkConfirmItemCountFbb() &lt; REGISTER_MAX_FBB) {</span>
-<span class="fc" id="L380">                getView().dismissLoadingNoFade();</span>
-<span class="fc" id="L381">                getView().markConfirmCurrentMobileNumberFbb();</span>
+<span class="fc bfc" id="L368" title="All 2 branches covered.">            if (getView().getMarkConfirmItemCountFbb() &lt; REGISTER_MAX_FBB) {</span>
+<span class="fc" id="L369">                getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L370">                getView().markConfirmCurrentMobileNumberFbb();</span>
             } else {
-<span class="fc" id="L383">                getView().showFbbLimitError(REGISTER_MAX_FBB);</span>
+<span class="fc" id="L372">                getView().showFbbLimitError(REGISTER_MAX_FBB);</span>
             }
         }
-<span class="fc" id="L386">    }</span>
+<span class="fc" id="L375">    }</span>
 
     //&lt;/editor-fold&gt;
 

@@ -40,19 +40,19 @@ import java.util.List;
 
 <span class="fc" id="L41">        return model;</span>
     }
-    public ArrayList&lt;MobileData&gt; getPostpaidGroup(List&lt;MobileData&gt; array) {
+    public List&lt;MobileData&gt; getPostpaidGroup(List&lt;MobileData&gt; array) {
 <span class="fc" id="L44">        return groupMobileNumberByType(array).getPostpaidList();</span>
     }
 
-    public ArrayList&lt;MobileData&gt; getPrepaidGroup(List&lt;MobileData&gt; array) {
+    public List&lt;MobileData&gt; getPrepaidGroup(List&lt;MobileData&gt; array) {
 <span class="fc" id="L48">        return groupMobileNumberByType(array).getPrepaidList();</span>
     }
 
-    public ArrayList&lt;MobileData&gt; getFbbGroup(List&lt;MobileData&gt; array) {
+    public List&lt;MobileData&gt; getFbbGroup(List&lt;MobileData&gt; array) {
 <span class="fc" id="L52">        return groupMobileNumberByType(array).getFbbList();</span>
     }
 
-    public ArrayList&lt;String&gt; conventMyNumberToStringArray(ArrayList&lt;MobileData&gt; myNumber) {
+    public List&lt;String&gt; conventMyNumberToStringArray(List&lt;MobileData&gt; myNumber) {
 <span class="fc" id="L56">        ArrayList&lt;String&gt; mobiles = new ArrayList&lt;&gt;();</span>
 <span class="fc bfc" id="L57" title="All 2 branches covered.">        for (MobileData MobileData : myNumber) {</span>
 <span class="fc" id="L58">            mobiles.add(MobileData.getNumber());</span>

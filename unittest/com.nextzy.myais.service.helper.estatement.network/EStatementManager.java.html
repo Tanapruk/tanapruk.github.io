@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EStatementManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.service.helper.estatement.network</a> &gt; <span class="el_source">EStatementManager.java</span></div><h1>EStatementManager.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.service.helper.estatement.network;
+
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.database.model.SaveRealmResult;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.network.subscriber.NextzySimpleSubscriber;
+import com.nextzy.myais.common.network.worker.GenericNetworkController;
+import com.nextzy.myais.common.network.worker.SchedulersAndErrorHandling;
+import com.nextzy.myais.common.utility.NextzyLanguage;
+import com.nextzy.myais.service.helper.estatement.model.request.EStatementApplyBody;
+import com.nextzy.myais.service.helper.estatement.model.response.EStatementApplyResult;
+import com.nextzy.myais.service.helper.estatement.model.response.EStatementBillMediaResult;
+import com.nextzy.myais.service.helper.estatement.model.response.EStatementRemarkResult;
+import com.nextzy.myais.service.helper.estatement.operator.EStatementApplyResultCheck;
+import com.nextzy.myais.service.helper.estatement.operator.EStatementBillMediaResultCheck;
+import com.nextzy.myais.service.helper.estatement.operator.EStatementRemarkResultCheck;
+
+import rx.Single;
+
+/**
+ * Created by kajornsak on 10/10/2016 AD.
+ */
+
+<span class="fc" id="L25">public class EStatementManager extends GenericNetworkController {</span>
+    private static EStatementManager instance;
+    public static final String SERVICE_GET_BILL_MEDIA = &quot;check_estatement&quot;;
+    public static final String SERVICE_APPLY_ESTATEMENT = &quot;register_estatement&quot;;
+    public static final String SERVICE_GET_REMARK_ESTATEMENT = &quot;get_detail_estatement&quot;;
+
+    public static EStatementManager getInstance() {
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        if (instance == null) {</span>
+<span class="nc" id="L33">            instance = new EStatementManager();</span>
+        }
+<span class="nc" id="L35">        return instance;</span>
+    }
+
+    EStatementApi eStatementApi;
+
+    public EStatementApi geteStatementApi() {
+<span class="fc" id="L41">        return eStatementApi;</span>
+    }
+
+    public void seteStatementApi(EStatementApi eStatementApi) {
+<span class="fc" id="L45">        this.eStatementApi = eStatementApi;</span>
+<span class="fc" id="L46">    }</span>
+
+    private String getEStatementEventLog() {
+<span class="fc" id="L49">        return new EventLogParam(&quot;APP_VIEW_ESTATEMENT&quot;, &quot;5004&quot;, &quot;5067&quot;).getEventLogHeader();</span>
+    }
+
+    protected Single&lt;EStatementBillMediaResult&gt; getBillMediaSingle() {
+<span class="fc" id="L53">        return EStatementApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L54">                .getRxApi(geteStatementApi())</span>
+<span class="fc" id="L55">                .getBillMedia(</span>
+<span class="fc" id="L56">                        getEStatementEventLog(),</span>
+<span class="fc" id="L57">                        Mobile.getInstance().getMobileNumber())</span>
+<span class="fc" id="L58">                .compose(new SchedulersAndErrorHandling&lt;&gt;(EStatementBillMediaResult.class, SERVICE_GET_BILL_MEDIA))</span>
+<span class="fc" id="L59">                .flatMap(new EStatementBillMediaResultCheck())</span>
+<span class="fc" id="L60">                .map(new SaveRealmResult&lt;&gt;(SERVICE_GET_BILL_MEDIA));</span>
+    }
+
+
+    protected Single&lt;EStatementRemarkResult&gt; getEStatementRemarkSingle() {
+<span class="fc" id="L65">        return EStatementApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L66">                .getRxApi(geteStatementApi())</span>
+<span class="fc" id="L67">                .getEStatementRemark(</span>
+<span class="fc" id="L68">                        getEStatementEventLog(),</span>
+<span class="fc" id="L69">                        NextzyLanguage.getInstance().getCurrentLanguage().toUpperCase())</span>
+<span class="fc" id="L70">                .compose(new SchedulersAndErrorHandling&lt;&gt;(EStatementRemarkResult.class, SERVICE_GET_REMARK_ESTATEMENT))</span>
+<span class="fc" id="L71">                .flatMap(new EStatementRemarkResultCheck())</span>
+<span class="fc" id="L72">                .map(new SaveRealmResult&lt;&gt;(SERVICE_GET_REMARK_ESTATEMENT));</span>
+    }
+
+    protected Single&lt;EStatementApplyResult&gt; applyEStatementSingle(String email, String mobileNumber, String language) {
+<span class="nc" id="L76">        EStatementApplyBody body = new EStatementApplyBody()</span>
+<span class="nc" id="L77">                .setEmail(email)</span>
+<span class="nc" id="L78">                .setMobileNumber(mobileNumber)</span>
+<span class="nc" id="L79">                .setLanguage(language);</span>
+
+<span class="nc" id="L81">        return EStatementApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L82">                .getRxApi(geteStatementApi())</span>
+<span class="nc" id="L83">                .applyEStatement(</span>
+<span class="nc" id="L84">                        new EventLogParam(&quot;APP_SUBSCRIBE_ESTATEMENT&quot;, &quot;5004&quot;, &quot;5068&quot;).getEventLogHeader(),</span>
+<span class="nc" id="L85">                        Mobile.getInstance().getMobileNumber(), body)</span>
+<span class="nc" id="L86">                .compose(new SchedulersAndErrorHandling&lt;&gt;(EStatementApplyResult.class, SERVICE_APPLY_ESTATEMENT))</span>
+<span class="nc" id="L87">                .flatMap(new EStatementApplyResultCheck())</span>
+<span class="nc" id="L88">                .map(new SaveRealmResult&lt;&gt;(SERVICE_APPLY_ESTATEMENT));</span>
+    }
+
+
+    public void getBillMedia() {
+<span class="nc" id="L93">        getBillMediaSingle().subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_GET_BILL_MEDIA));</span>
+<span class="nc" id="L94">    }</span>
+
+    public void getRemarkEStatement() {
+<span class="nc" id="L97">        getEStatementRemarkSingle().subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_GET_REMARK_ESTATEMENT));</span>
+<span class="nc" id="L98">    }</span>
+
+    public void applyEStatement(String email, String mobileNumber, String language) {
+<span class="nc" id="L101">        applyEStatementSingle(email, mobileNumber, language).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_APPLY_ESTATEMENT));</span>
+<span class="nc" id="L102">    }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

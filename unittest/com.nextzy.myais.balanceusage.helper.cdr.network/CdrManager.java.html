@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CdrManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.balanceusage.helper.cdr.network</a> &gt; <span class="el_source">CdrManager.java</span></div><h1>CdrManager.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.balanceusage.helper.cdr.network;
+
+import com.nextzy.myais.balanceusage.helper.cdr.network.api.CdrApi;
+import com.nextzy.myais.balanceusage.helper.cdr.network.api.CdrApiService;
+import com.nextzy.myais.balanceusage.helper.cdr.network.delegate.EventLogCdrGenerator;
+import com.nextzy.myais.balanceusage.helper.cdr.network.operator.LimitedVerifyCheck;
+import com.nextzy.myais.balanceusage.helper.cdr.network.request.CdrBody;
+import com.nextzy.myais.balanceusage.helper.cdr.network.request.IdCardVerificationBody;
+import com.nextzy.myais.balanceusage.helper.cdr.network.response.CdrResult;
+import com.nextzy.myais.balanceusage.helper.cdr.network.response.IdCardVerificationResult;
+import com.nextzy.myais.balanceusage.helper.cdr.network.response.PrepaidStatusResult;
+import com.nextzy.myais.balanceusage.module.cdr.portal.CdrPortalKey;
+import com.nextzy.myais.balanceusage.module.cdr.utility.CdrUtility;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.database.model.SaveRealmResult;
+import com.nextzy.myais.common.network.subscriber.NextzySimpleSubscriber;
+import com.nextzy.myais.common.network.worker.GenericNetworkController;
+import com.nextzy.myais.common.network.worker.SchedulersAndErrorHandling;
+
+import rx.Single;
+
+/**
+ * Created by trusttanapruk on 8/25/2016.
+ */
+<span class="nc" id="L26">public class CdrManager extends GenericNetworkController {</span>
+    public static final String SERVICE_NAME_GET_CDR_VOICE = &quot;get_cdr_voice&quot;;
+    public static final String SERVICE_NAME_GET_CDR_VAS = &quot;get_cdr_vas&quot;;
+    public static final String SERVICE_NAME_GET_CDR_ISWOP = &quot;get_cdr_iswop&quot;;
+    public static final String SERVICE_NAME_GET_CDR_TRANSFER = &quot;get_cdr_transfer&quot;;
+    public static final String SERVICE_NAME_GET_CDR_TOP_UP = &quot;get_cdr_top_up&quot;;
+    public static final String SERVICE_NAME_GET_CDR_FEE = &quot;get_cdr_fee&quot;;
+    public static final String SERVICE_NAME_ID_CARD_VERIFICATION = &quot;id_card_verification&quot;;
+    public static final String SERVICE_NAME_GET_PREPAID_STATUS = &quot;get_prepaid_status&quot;;
+    private static final String APP_CHANNEL = &quot;APP&quot;;
+    private static final String TYPE_VOICE = &quot;VOICE&quot;;
+    private static final String TYPE_VAS = &quot;VAS&quot;;
+    private static final String TYPE_ISWOP = &quot;ISWOP&quot;;
+    private static final String TYPE_TOP_UP = &quot;RECHARGE&quot;;
+    private static final String TYPE_TRANSFER = &quot;TRANSFER&quot;;
+    private static final String TYPE_FEE = &quot;FEE&quot;;
+    private static final String BALANCE_TRANSFER = &quot;money&quot;;
+    private static final String VALIDITY_TRANSFER = &quot;day&quot;;
+
+
+    private static CdrManager instance;
+
+    public static CdrManager getInstance() {
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        if (instance == null) {</span>
+<span class="nc" id="L50">            instance = new CdrManager();</span>
+        }
+<span class="nc" id="L52">        return instance;</span>
+    }
+
+    private CdrApi cdrApi;
+
+    public CdrApi getCdrApi() {
+<span class="nc" id="L58">        return cdrApi;</span>
+    }
+
+    public void setCdrApi(CdrApi cdrApi) {
+<span class="nc" id="L62">        this.cdrApi = cdrApi;</span>
+<span class="nc" id="L63">    }</span>
+
+    private Single&lt;CdrResult&gt; getCdrVoiceVasIswopSingle(String eventLogString, String type, String serviceName) {
+
+<span class="nc" id="L67">        CdrBody body = new CdrBody()</span>
+<span class="nc" id="L68">                .setChannel(APP_CHANNEL)</span>
+<span class="nc" id="L69">                .setGroupCode(type)</span>
+<span class="nc" id="L70">                .setStartDate(CdrUtility.getInstance().getDateBefore3Days())</span>
+<span class="nc" id="L71">                .setEndDate(CdrUtility.getInstance().getCurrentDate());</span>
+
+<span class="nc" id="L73">        return CdrApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L74">                .getRxApi(cdrApi)</span>
+<span class="nc" id="L75">                .getCdrVoiceVas(</span>
+                        eventLogString,
+<span class="nc" id="L77">                        Mobile.getInstance().getMobileNumber(),</span>
+                        type,
+                        body)
+<span class="nc" id="L80">                .compose(new SchedulersAndErrorHandling&lt;&gt;(CdrResult.class, serviceName))</span>
+<span class="nc" id="L81">                .map(new SaveRealmResult&lt;&gt;(serviceName));</span>
+    }
+
+    public void getCdrVoice(String eventLogString) {
+<span class="nc" id="L85">        getCdrVoiceVasIswopSingle(eventLogString, TYPE_VOICE, SERVICE_NAME_GET_CDR_VOICE).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_GET_CDR_VOICE));</span>
+<span class="nc" id="L86">    }</span>
+
+    public void getCdrVas(String eventLogString) {
+<span class="nc" id="L89">        getCdrVoiceVasIswopSingle(eventLogString, TYPE_VAS, SERVICE_NAME_GET_CDR_VAS).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_GET_CDR_VAS));</span>
+<span class="nc" id="L90">    }</span>
+
+    public void getCdrIswop(String eventLogString) {
+<span class="nc" id="L93">        getCdrVoiceVasIswopSingle(eventLogString, TYPE_ISWOP, SERVICE_NAME_GET_CDR_ISWOP).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_GET_CDR_ISWOP));</span>
+<span class="nc" id="L94">    }</span>
+
+    private Single&lt;CdrResult&gt; getCdrTransferSingle(String eventLogString, String type) {
+<span class="nc" id="L97">        CdrBody body = new CdrBody()</span>
+<span class="nc" id="L98">                .setChannel(APP_CHANNEL)</span>
+<span class="nc" id="L99">                .setGroupCode(TYPE_TRANSFER)</span>
+<span class="nc" id="L100">                .setStartDate(CdrUtility.getInstance().getDateBefore3Days())</span>
+<span class="nc" id="L101">                .setEndDate(CdrUtility.getInstance().getCurrentDate())</span>
+<span class="nc" id="L102">                .setViewAll(true)</span>
+<span class="nc" id="L103">                .setTransferType(type);</span>
+
+<span class="nc" id="L105">        return CdrApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L106">                .getRxApi(cdrApi)</span>
+<span class="nc" id="L107">                .getCdrTransfer(</span>
+                        eventLogString,
+<span class="nc" id="L109">                        Mobile.getInstance().getMobileNumber(),</span>
+                        body)
+<span class="nc" id="L111">                .compose(new SchedulersAndErrorHandling&lt;&gt;(CdrResult.class, SERVICE_NAME_GET_CDR_TRANSFER))</span>
+<span class="nc" id="L112">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_CDR_TRANSFER));</span>
+    }
+
+    public void getCdrValidityTransfer() {
+<span class="nc" id="L116">        getCdrTransferSingle(new EventLogCdrGenerator().generate(CdrPortalKey.KEY_CDR_PREPAID_VALIDITY_TRANSFER), VALIDITY_TRANSFER).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_GET_CDR_TRANSFER));</span>
+<span class="nc" id="L117">    }</span>
+
+    public void getCdrBalanceTransfer() {
+<span class="nc" id="L120">        getCdrTransferSingle(new EventLogCdrGenerator().generate(CdrPortalKey.KEY_CDR_PREPAID_BALANCE_TRANSFER), BALANCE_TRANSFER).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_GET_CDR_TRANSFER));</span>
+<span class="nc" id="L121">    }</span>
+
+    private Single&lt;CdrResult&gt; getCdrTopUpSingle() {
+<span class="nc" id="L124">        CdrBody body = new CdrBody()</span>
+<span class="nc" id="L125">                .setChannel(APP_CHANNEL)</span>
+<span class="nc" id="L126">                .setGroupCode(TYPE_TOP_UP)</span>
+<span class="nc" id="L127">                .setStartDate(CdrUtility.getInstance().getDateBefore3Days())</span>
+<span class="nc" id="L128">                .setEndDate(CdrUtility.getInstance().getCurrentDate())</span>
+<span class="nc" id="L129">                .setViewAll(true);</span>
+<span class="nc" id="L130">        return CdrApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L131">                .getRxApi(cdrApi)</span>
+<span class="nc" id="L132">                .getCdrTopUp(</span>
+<span class="nc" id="L133">                        new EventLogCdrGenerator().generate(CdrPortalKey.KEY_CDR_PREPAID_TOP_UP),</span>
+<span class="nc" id="L134">                        Mobile.getInstance().getMobileNumber(),</span>
+                        body)
+<span class="nc" id="L136">                .compose(new SchedulersAndErrorHandling&lt;&gt;(CdrResult.class, SERVICE_NAME_GET_CDR_TOP_UP))</span>
+<span class="nc" id="L137">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_CDR_TOP_UP));</span>
+    }
+
+    public void getCdrTopUp() {
+<span class="nc" id="L141">        getCdrTopUpSingle().subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_GET_CDR_TOP_UP));</span>
+<span class="nc" id="L142">    }</span>
+
+    private Single&lt;CdrResult&gt; getCdrFeeSingle() {
+<span class="nc" id="L145">        CdrBody body = new CdrBody()</span>
+<span class="nc" id="L146">                .setChannel(APP_CHANNEL)</span>
+<span class="nc" id="L147">                .setGroupCode(TYPE_FEE)</span>
+<span class="nc" id="L148">                .setStartDate(CdrUtility.getInstance().getDateBefore3Days())</span>
+<span class="nc" id="L149">                .setEndDate(CdrUtility.getInstance().getCurrentDate())</span>
+<span class="nc" id="L150">                .setViewAll(true);</span>
+<span class="nc" id="L151">        return CdrApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L152">                .getRxApi(cdrApi)</span>
+<span class="nc" id="L153">                .getCdrFee(</span>
+<span class="nc" id="L154">                        new EventLogCdrGenerator().generate(CdrPortalKey.KEY_CDR_PREPAID_FEE),</span>
+<span class="nc" id="L155">                        Mobile.getInstance().getMobileNumber(),</span>
+                        body)
+<span class="nc" id="L157">                .compose(new SchedulersAndErrorHandling&lt;&gt;(CdrResult.class, SERVICE_NAME_GET_CDR_FEE))</span>
+<span class="nc" id="L158">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_CDR_FEE));</span>
+    }
+
+    public void getCdrFee() {
+<span class="nc" id="L162">        getCdrFeeSingle().subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_GET_CDR_FEE));</span>
+<span class="nc" id="L163">    }</span>
+
+    private Single&lt;IdCardVerificationResult&gt; verifyIdCardSingle(String eventLogString, String idCard) {
+<span class="nc" id="L166">        IdCardVerificationBody body = new IdCardVerificationBody();</span>
+<span class="nc" id="L167">        body.setIdCard(idCard);</span>
+
+<span class="nc" id="L169">        return CdrApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L170">                .getRxApi(cdrApi)</span>
+<span class="nc" id="L171">                .verifyIdCard(</span>
+                        eventLogString,
+<span class="nc" id="L173">                        Mobile.getInstance().getMobileNumber(),</span>
+                        body)
+<span class="nc" id="L175">                .compose(new SchedulersAndErrorHandling&lt;&gt;(IdCardVerificationResult.class, SERVICE_NAME_ID_CARD_VERIFICATION))</span>
+<span class="nc" id="L176">                .flatMap(new LimitedVerifyCheck())</span>
+<span class="nc" id="L177">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_ID_CARD_VERIFICATION));</span>
+    }
+
+    public void verifyIdCard(String eventLogString, String idCard) {
+<span class="nc" id="L181">        verifyIdCardSingle(eventLogString, idCard).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_ID_CARD_VERIFICATION));</span>
+<span class="nc" id="L182">    }</span>
+
+    private Single&lt;PrepaidStatusResult&gt; getPrepaidStatusSingle(String eventLogString) {
+<span class="nc" id="L185">        return CdrApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L186">                .getRxApi(cdrApi)</span>
+<span class="nc" id="L187">                .getPrepaidStatus(</span>
+                        eventLogString,
+<span class="nc" id="L189">                        Mobile.getInstance().getMobileNumber())</span>
+<span class="nc" id="L190">                .compose(new SchedulersAndErrorHandling&lt;&gt;(PrepaidStatusResult.class, SERVICE_NAME_GET_PREPAID_STATUS))</span>
+<span class="nc" id="L191">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_PREPAID_STATUS));</span>
+    }
+
+    public void getPrepaidStatus(String eventLogString) {
+<span class="nc" id="L195">        getPrepaidStatusSingle(eventLogString).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_GET_PREPAID_STATUS));</span>
+<span class="nc" id="L196">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

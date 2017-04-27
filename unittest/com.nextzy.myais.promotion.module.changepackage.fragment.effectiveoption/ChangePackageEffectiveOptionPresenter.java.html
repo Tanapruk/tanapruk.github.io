@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChangePackageEffectiveOptionPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.promotion.module.changepackage.fragment.effectiveoption</a> &gt; <span class="el_source">ChangePackageEffectiveOptionPresenter.java</span></div><h1>ChangePackageEffectiveOptionPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.promotion.module.changepackage.fragment.effectiveoption;
+
+import com.hwangjr.rxbus.RxBus;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.promotion.helper.changepackage.response.BillingCycleResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.PackageGroupData;
+import com.nextzy.myais.promotion.helper.changepackage.response.PackageGroupResult;
+import com.nextzy.myais.promotion.module.changepackage.constant.EffectiveOptionType;
+import com.nextzy.myais.promotion.module.changepackage.ChangePackageUtility;
+import com.nextzy.myais.promotion.module.changepackage.common.BaseChangePackagePresenter;
+import com.nextzy.myais.promotion.module.changepackage.event.GoToApplyPackageEvent;
+import com.nextzy.myais.promotion.module.changepackage.model.BaseChangePackageItem;
+import com.nextzy.myais.promotion.module.changepackage.model.EffectiveOptionItem;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by Akexorcist on 9/29/2016 AD.
+ */
+
+public class ChangePackageEffectiveOptionPresenter extends BaseChangePackagePresenter&lt;ChangePackageEffectiveOptionContractor.View&gt; implements ChangePackageEffectiveOptionContractor.Presenter {
+    private String packageId;
+    private String effectiveOption;
+    private ArrayList&lt;String&gt; specialNumberList;
+
+    public static ChangePackageEffectiveOptionPresenter createPresenter(ChangePackageEffectiveOptionContractor.View view) {
+<span class="nc" id="L28">        return new ChangePackageEffectiveOptionPresenter(view);</span>
+    }
+
+    private ChangePackageEffectiveOptionPresenter(ChangePackageEffectiveOptionContractor.View view) {
+<span class="nc" id="L32">        super(view);</span>
+<span class="nc" id="L33">    }</span>
+
+    @Override
+    public void setPackageId(String packageId) {
+<span class="nc" id="L37">        this.packageId = packageId;</span>
+<span class="nc" id="L38">    }</span>
+
+    @Override
+    public String getPackageId() {
+<span class="nc" id="L42">        return packageId;</span>
+    }
+
+    @Override
+    public void setEffectiveOption(String effectiveOption) {
+<span class="nc" id="L47">        this.effectiveOption = effectiveOption;</span>
+<span class="nc" id="L48">    }</span>
+
+    @Override
+    public String getEffectiveOption() {
+<span class="nc" id="L52">        return effectiveOption;</span>
+    }
+
+    @Override
+    public void setSpecialNumberList(ArrayList&lt;String&gt; specialNumberList) {
+<span class="nc" id="L57">        this.specialNumberList = specialNumberList;</span>
+<span class="nc" id="L58">    }</span>
+
+    @Override
+    public ArrayList&lt;String&gt; getSpecialNumberList() {
+<span class="nc" id="L62">        return specialNumberList;</span>
+    }
+
+    // Create layout here with recycler view item
+    @Override
+    public void initEffectiveOption() {
+<span class="nc" id="L68">        List&lt;BaseChangePackageItem&gt; itemList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L69">        setBillingCycle(ChangePackageUtility.getInstance().getBillingCycleText(getView().getBillingCycleResult()));</span>
+<span class="nc" id="L70">        itemList.addAll(createTitleItem());</span>
+<span class="nc" id="L71">        itemList.addAll(createStepIndicatorItem(getView().getStepDescriptionList(getGroupCode()), getStepIndex()));</span>
+<span class="nc" id="L72">        itemList.add(createEffectiveOptionItem());</span>
+<span class="nc" id="L73">        itemList.add(createButtonNextItem());</span>
+<span class="nc" id="L74">        itemList.add(createTermAndConditionItem(getTermAndCondition()));</span>
+<span class="nc" id="L75">        itemList.add(createEmptyItem());</span>
+<span class="nc" id="L76">        getView().setItemList(itemList);</span>
+<span class="nc" id="L77">    }</span>
+
+    @Override
+    public void onNextStep() {
+<span class="nc bnc" id="L81" title="All 4 branches missed.">        if (getEffectiveOption() == null || getEffectiveOption().isEmpty()) {</span>
+<span class="nc" id="L82">            setEffectiveOption(EffectiveOptionType.IMMEDIATELY);</span>
+        }
+<span class="nc" id="L84">        GoToApplyPackageEvent event = new GoToApplyPackageEvent();</span>
+<span class="nc" id="L85">        event.setGroupCode(getGroupCode());</span>
+<span class="nc" id="L86">        event.setTabCode(getTabCode());</span>
+<span class="nc" id="L87">        event.setPackageId(getPackageId());</span>
+<span class="nc" id="L88">        event.setEffectiveOption(getEffectiveOption());</span>
+<span class="nc" id="L89">        event.setSpecialNumberList(getSpecialNumberList());</span>
+<span class="nc" id="L90">        event.setTermAndCondition(getTermAndCondition());</span>
+<span class="nc" id="L91">        RxBus.get().post(event);</span>
+<span class="nc" id="L92">    }</span>
+
+    private EffectiveOptionItem createEffectiveOptionItem() {
+<span class="nc" id="L95">        String language = getView().getCurrentLanguage();</span>
+<span class="nc" id="L96">        BillingCycleResult billingCycleResult = getView().getBillingCycleResult();</span>
+<span class="nc" id="L97">        EffectiveOptionItem item = new EffectiveOptionItem();</span>
+<span class="nc" id="L98">        item.setEffectiveOptionList(getEffectiveOptionFromCategory());</span>
+<span class="nc" id="L99">        item.setNextBillDate(ChangePackageUtility.getInstance().getNextBillDate(billingCycleResult, language));</span>
+<span class="nc" id="L100">        item.setNextDayDate(ChangePackageUtility.getInstance().getNextDayDate(language));</span>
+<span class="nc" id="L101">        return item;</span>
+    }
+
+    private List&lt;String&gt; getEffectiveOptionFromCategory() {
+<span class="nc" id="L105">        PackageGroupResult packageGroupResult = getView().getPackageGroupResult();</span>
+<span class="nc" id="L106">        PackageGroupData packageGroupData = ChangePackageUtility.getInstance().getCategoryByTabCode(getTabCode(), packageGroupResult);</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        if (packageGroupData != null) {</span>
+<span class="nc" id="L108">            return packageGroupData.getEffectiveOptionList();</span>
+        }
+<span class="nc" id="L110">        return null;</span>
+    }
+
+    @Override
+    public void onViewStart() {
+<span class="nc" id="L115">        super.onViewStart();</span>
+<span class="nc" id="L116">        RxBus.get().register(this);</span>
+<span class="nc" id="L117">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L121">        super.onViewStop();</span>
+<span class="nc" id="L122">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L123">    }</span>
+
+    private int getStepIndex() {
+<span class="nc bnc" id="L126" title="All 2 branches missed.">        if (Mobile.getInstance().isPostpaid()) {</span>
+<span class="nc" id="L127">            return 1;</span>
+        }
+<span class="nc" id="L129">        return -1;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

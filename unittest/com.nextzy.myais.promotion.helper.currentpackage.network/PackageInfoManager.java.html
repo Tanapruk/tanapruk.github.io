@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PackageInfoManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.promotion.helper.currentpackage.network</a> &gt; <span class="el_source">PackageInfoManager.java</span></div><h1>PackageInfoManager.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.promotion.helper.currentpackage.network;
+
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.database.model.SaveRealmData;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.network.subscriber.NextzyWithDataSubscriber;
+import com.nextzy.myais.common.network.worker.SchedulersAndErrorHandling;
+import com.nextzy.myais.promotion.helper.currentpackage.model.MyPackageInfoData;
+import com.nextzy.myais.promotion.helper.currentpackage.model.MyPackageInfoResult;
+
+import rx.Single;
+
+/**
+ * Created by trusttanapruk on 9/8/2016.
+ */
+<span class="fc" id="L17">public class PackageInfoManager {</span>
+    public static final String SERVICE_NAME_GET_MY_PACKAGE_INFO = &quot;get_my_package_info&quot;;
+
+    private static PackageInfoManager instance;
+
+    public static PackageInfoManager getInstance() {
+<span class="nc bnc" id="L23" title="All 2 branches missed.">        if (instance == null) {</span>
+<span class="nc" id="L24">            instance = new PackageInfoManager();</span>
+        }
+<span class="nc" id="L26">        return instance;</span>
+    }
+
+    PackageInfoApi infoApi;
+
+    public PackageInfoApi getInfoApi() {
+<span class="fc" id="L32">        return infoApi;</span>
+    }
+
+    public void setInfoApi(PackageInfoApi infoApi) {
+<span class="fc" id="L36">        this.infoApi = infoApi;</span>
+<span class="fc" id="L37">    }</span>
+
+    public static void setInstance(PackageInfoManager instance) {
+<span class="nc" id="L40">        PackageInfoManager.instance = instance;</span>
+<span class="nc" id="L41">    }</span>
+
+    protected Single&lt;MyPackageInfoData&gt; getMyPackageInfo() {
+<span class="fc" id="L44">        return PackageInfoApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L45">                .getRxApi(getInfoApi())</span>
+<span class="fc" id="L46">                .getMyPackageInfo(new EventLogParam(&quot;APP_VIEW_CURRENT_PACKAGE&quot;, &quot;5001&quot;, &quot;5010&quot;).getEventLogHeader(), Mobile.getInstance().getMobileNumber())</span>
+<span class="fc" id="L47">                .compose(new SchedulersAndErrorHandling&lt;&gt;(MyPackageInfoResult.class, SERVICE_NAME_GET_MY_PACKAGE_INFO))</span>
+<span class="fc" id="L48">                .map(new SaveRealmData&lt;&gt;(SERVICE_NAME_GET_MY_PACKAGE_INFO));</span>
+    }
+
+
+    public void getMyPackageInfoImpl() {
+<span class="nc" id="L53">        getMyPackageInfo().subscribe(new NextzyWithDataSubscriber&lt;&gt;(SERVICE_NAME_GET_MY_PACKAGE_INFO));</span>
+<span class="nc" id="L54">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

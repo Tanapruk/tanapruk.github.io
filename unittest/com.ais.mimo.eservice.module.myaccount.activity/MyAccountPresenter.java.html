@@ -39,39 +39,38 @@ public class MyAccountPresenter extends NextzyActivityPresenter&lt;MyAccountCont
     public void onViewStart() {
         // for handle network error
 <span class="nc" id="L41">        super.onViewStart();</span>
-
-
-<span class="nc" id="L44">        EventLogBlob.getInstance().addEventLog(</span>
+<span class="nc" id="L42">        EventLogBlob.getInstance().addEventLog(</span>
                 LoginManager.SERVICE_NAME_VERIFY_MYAIS,
                 new EventLogParam(&quot;APP_VIEW_MYAIS_PROFILE&quot;, &quot;5010&quot;, &quot;5108&quot;)
         );
-<span class="nc" id="L48">    }</span>
+<span class="nc" id="L46">    }</span>
 
     @Override
     public void onViewStop() {
-<span class="nc" id="L52">        super.onViewStop();</span>
-<span class="nc" id="L53">    }</span>
+        // for handle network error
+<span class="nc" id="L51">        super.onViewStop();</span>
+<span class="nc" id="L52">    }</span>
 
 
     @Subscribe
     public void onGoToEditAccountFragmentEvent(GoToEditAccountFragmentEvent event) {
-<span class="nc" id="L58">        getView().openEditAccountFragment();</span>
-<span class="nc" id="L59">    }</span>
+<span class="nc" id="L57">        getView().openEditAccountFragment();</span>
+<span class="nc" id="L58">    }</span>
 
     @Subscribe
     public void onGoToEditEmailFragmentEvent(GoToEditEmailFragmentEvent event) {
-<span class="nc" id="L63">        getView().openEditEmailFragment();</span>
-<span class="nc" id="L64">    }</span>
+<span class="nc" id="L62">        getView().openEditEmailFragment();</span>
+<span class="nc" id="L63">    }</span>
 
     @Subscribe
     public void onGoToEditPasswordFragmentEvent(GoToEditPasswordFragmentEvent event) {
-<span class="nc" id="L68">        getView().openEditPasswordFragment();</span>
-<span class="nc" id="L69">    }</span>
+<span class="nc" id="L67">        getView().openEditPasswordFragment();</span>
+<span class="nc" id="L68">    }</span>
 
     @Subscribe
     public void onGotoLoginPageEvent(GotoLoginPageEvent event){
-<span class="nc" id="L73">        getView().openLoginPage();</span>
-<span class="nc" id="L74">    }</span>
+<span class="nc" id="L72">        getView().openLoginPage();</span>
+<span class="nc" id="L73">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

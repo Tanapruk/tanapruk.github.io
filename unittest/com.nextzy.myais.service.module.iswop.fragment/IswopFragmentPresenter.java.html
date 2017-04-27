@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IswopFragmentPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.service.module.iswop.fragment</a> &gt; <span class="el_source">IswopFragmentPresenter.java</span></div><h1>IswopFragmentPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.service.module.iswop.fragment;
+
+import com.akexorcist.swopview.utils.IswopUtils;
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.constant.Contextor;
+import com.nextzy.myais.common.event.GotoChangePackageEvent;
+import com.nextzy.myais.common.iswop.http.IswopManager;
+import com.nextzy.myais.common.iswop.http.exception.IswopDataException;
+import com.nextzy.myais.common.iswop.http.exception.IswopParameterResultException;
+import com.nextzy.myais.common.iswop.http.exception.IswopRemarkException;
+import com.nextzy.myais.common.iswop.http.exception.IswopTransformResultException;
+import com.nextzy.myais.common.iswop.http.model.IswopParameterResult;
+import com.nextzy.myais.common.iswop.http.model.IswopRemarkResult;
+import com.nextzy.myais.common.iswop.http.model.IswopResult;
+import com.nextzy.myais.common.iswop.http.model.IswopTransformResult;
+import com.nextzy.myais.common.iswop.model.IswopModel;
+import com.nextzy.myais.common.mvp.NextzyPresenter;
+import com.nextzy.myais.common.utility.NextzyUtility;
+import com.nextzy.myais.service.R;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import static com.nextzy.myais.common.iswop.http.IswopManager.KEY_NET_TO_VOICE;
+import static com.nextzy.myais.common.iswop.http.IswopManager.KEY_VOICE_TO_NET;
+
+/**
+ * Created by TheKhaeng on 9/20/2016.
+ */
+
+public class IswopFragmentPresenter extends NextzyPresenter&lt;IswopFragmentContractor.View&gt; implements IswopFragmentContractor.Presenter {
+<span class="fc" id="L34">    private final static String TAG = IswopFragmentPresenter.class.getSimpleName();</span>
+
+    private IswopManager manager;
+<span class="nc" id="L37">    @Getter</span>
+    private IswopDataException iswopDataException;
+<span class="nc" id="L39">    @Getter</span>
+    private IswopRemarkException iswopRemarkException;
+<span class="nc" id="L41">    @Getter</span>
+    private IswopTransformResult iswopTransformResult;
+<span class="nc" id="L43">    @Getter</span>
+    private IswopParameterResultException iswopParameterException;
+    @Getter
+<span class="fc" id="L46">    @Setter</span>
+    private int currentVoiceVal;
+    private int currentInternetVal;
+<span class="nc" id="L49">    @Getter</span>
+<span class="fc" id="L50">    @Setter</span>
+    private int newVoiceVal;
+<span class="nc" id="L52">    @Getter</span>
+<span class="nc" id="L53">    @Setter</span>
+    private int newInternetVal;
+<span class="nc" id="L55">    @Getter</span>
+    private String termAndCondition;
+<span class="pc" id="L57">    @Getter</span>
+    private float transformScale = 1 / (2765f / 1024);
+<span class="nc" id="L59">    @Getter</span>
+    private int totalProgress;
+    private IswopModel iswopModel;
+    private int fraction;
+
+    protected IswopFragmentPresenter(IswopFragmentContractor.View view) {
+<span class="fc" id="L65">        super(view);</span>
+<span class="fc" id="L66">    }</span>
+
+    public static IswopFragmentPresenter createPresenter(IswopFragmentContractor.View view) {
+<span class="fc" id="L69">        return new IswopFragmentPresenter(view);</span>
+    }
+
+    public void injectManager(IswopManager manager){
+<span class="fc" id="L73">        this.manager = manager;</span>
+<span class="fc" id="L74">    }</span>
+
+    @Override
+    public void onViewCreate() {
+<span class="fc" id="L78">        RxBus.get().register(this);</span>
+<span class="fc" id="L79">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="fc" id="L83">        RxBus.get().unregister(this);</span>
+<span class="fc" id="L84">    }</span>
+
+    @Override
+    public void onViewStart() {
+
+<span class="nc" id="L89">    }</span>
+
+    @Override
+    public void onViewStop() {
+
+<span class="nc" id="L94">    }</span>
+
+    public IswopModel getIswopModel() {
+<span class="nc" id="L97">        return iswopModel;</span>
+    }
+
+
+    /*******************/
+    /** For view call **/
+    /*******************/
+    //&lt;editor-fold desc=&quot;For view folding&quot;&gt;
+    @Override
+    public void gotoChangeMainPackage() {
+<span class="fc" id="L107">        RxBus.get().post(new GotoChangePackageEvent());</span>
+<span class="fc" id="L108">    }</span>
+
+    @Override
+    public void requestIswopData() {
+<span class="fc" id="L112">        getView().showLoadingNoFade();</span>
+<span class="fc" id="L113">        String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
+<span class="fc" id="L114">        manager.requestIswopModel(mobileNumber);</span>
+<span class="fc" id="L115">    }</span>
+
+
+    @Override
+    public void clickSwop(int currentProgress) {
+<span class="fc bfc" id="L120" title="All 2 branches covered.">        if (currentVoiceVal != newVoiceVal) {</span>
+<span class="fc" id="L121">            getView().showLoadingNoFade();</span>
+<span class="fc" id="L122">            int tickChange = currentProgress - currentVoiceVal;</span>
+            String transformType;
+<span class="fc bfc" id="L124" title="All 2 branches covered.">            if (tickChange &gt; 0) {</span>
+<span class="fc" id="L125">                transformType = KEY_NET_TO_VOICE;</span>
+            } else {
+<span class="fc" id="L127">                transformType = KEY_VOICE_TO_NET;</span>
+            }
+<span class="fc" id="L129">            String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
+<span class="fc" id="L130">            int transformTimes = Math.abs(tickChange);</span>
+<span class="fc" id="L131">            manager.requestTransformIswop(mobileNumber, transformType, transformTimes);</span>
+<span class="fc" id="L132">        } else {</span>
+<span class="fc" id="L133">            getView().showCannotSwopDialog();</span>
+        }
+<span class="fc" id="L135">    }</span>
+
+    @Override
+    public void updateNewChangeVal(int progress) {
+<span class="nc" id="L139">        newVoiceVal = progress;</span>
+<span class="nc" id="L140">        newInternetVal = totalProgress - progress;</span>
+<span class="nc" id="L141">    }</span>
+
+    @Override
+    public int getActualInternetVal() {
+<span class="fc" id="L145">        return (int) (newInternetVal / transformScale) + fraction;</span>
+    }
+
+
+    //&lt;/editor-fold&gt;
+
+    @Subscribe
+    public void onReceiveIswopModel(IswopModel iswopModel) {
+<span class="fc" id="L153">        this.iswopModel = iswopModel;</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">        if (iswopModel.getIswopResult().getData() != null</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">                &amp;&amp; iswopModel.getIswopResult().getData().getVoiceRemaining() != null</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">                &amp;&amp; iswopModel.getIswopResult().getData().getInternetRemaining() != null) {</span>
+<span class="fc" id="L157">            getView().hideLoadingNoFade();</span>
+<span class="fc" id="L158">            setTransformScale(iswopModel.getIswopParameterResult());</span>
+<span class="fc" id="L159">            setInfoResult(iswopModel.getIswopResult());</span>
+<span class="fc" id="L160">            setRemarkResult(iswopModel.getIswopRemarkResult());</span>
+<span class="fc" id="L161">            totalProgress = (int) (currentVoiceVal + (currentInternetVal * transformScale));</span>
+<span class="fc" id="L162">            getView().updateUi(currentVoiceVal, currentInternetVal, totalProgress);</span>
+        } else {
+<span class="fc" id="L164">            getView().updateUi(0, 0, 0);</span>
+            String message;
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">            if (Mobile.getInstance().isPrepaid()) {</span>
+<span class="fc" id="L167">                message = Contextor.getInstance().getContext()</span>
+<span class="fc" id="L168">                        .getString(R.string.my_ais_swop_no_swop_package);</span>
+            } else {
+<span class="nc" id="L170">                message = Contextor.getInstance().getContext()</span>
+<span class="nc" id="L171">                        .getString(R.string.my_ais_swop_no_iswop_package);</span>
+            }
+<span class="fc" id="L173">            getView().showNoIswopPackageDialog(message);</span>
+        }
+
+<span class="fc" id="L176">    }</span>
+
+    @Subscribe
+    public void onReceiveIswopTransformResult(IswopTransformResult iswopResult) {
+<span class="fc" id="L180">        iswopTransformResult = iswopResult;</span>
+<span class="fc" id="L181">        getView().showSuccessSwopDialog();</span>
+<span class="fc" id="L182">    }</span>
+
+    @Subscribe
+    public void onReceiveIswopException(IswopDataException exception) {
+<span class="fc" id="L186">        iswopDataException = exception;</span>
+<span class="fc" id="L187">        showResponseExceptionFinishActivity(exception.getMessage());</span>
+<span class="fc" id="L188">    }</span>
+
+    @Subscribe
+    public void onReceiveIswopRemarkException(IswopRemarkException exception) {
+<span class="fc" id="L192">        iswopRemarkException = exception;</span>
+<span class="fc" id="L193">        showResponseExceptionFinishActivity(exception.getMessage());</span>
+<span class="fc" id="L194">    }</span>
+
+    @Subscribe
+    public void onReceiveIswopParameterException(IswopParameterResultException exception) {
+<span class="fc" id="L198">        iswopParameterException = exception;</span>
+<span class="fc" id="L199">        showResponseExceptionFinishActivity(exception.getMessage());</span>
+<span class="fc" id="L200">    }</span>
+
+    @Subscribe
+    public void onReceiveTransformIswopException(IswopTransformResultException exception) {
+<span class="fc" id="L204">        showResponseExceptionDismiss(exception.getMessage());</span>
+<span class="fc" id="L205">    }</span>
+
+
+    /********************/
+    /** Private method **/
+    /********************/
+    //&lt;editor-fold desc=&quot;Private function folding&quot;&gt;
+    private boolean isSuccessResultDesc(String str) {
+<span class="fc" id="L213">        return &quot;Success&quot;.equalsIgnoreCase(NextzyUtility.getInstance().wrapBlank(str));</span>
+    }
+
+    private void showResponseExceptionFinishActivity(String msg) {
+<span class="fc bfc" id="L217" title="All 2 branches covered.">        if (isSuccessResultDesc(msg)) {</span>
+<span class="fc" id="L218">            getView().showDialogServiceUnavailable();</span>
+        } else {
+<span class="fc" id="L220">            getView().showDialogResponseExceptionFinishActivity(msg);</span>
+        }
+<span class="fc" id="L222">    }</span>
+
+    private void showResponseExceptionDismiss(String msg) {
+<span class="fc bfc" id="L225" title="All 2 branches covered.">        if (isSuccessResultDesc(msg)) {</span>
+<span class="fc" id="L226">            getView().showDialogServiceUnavailable();</span>
+        } else {
+<span class="fc" id="L228">            getView().showDialogResponseExceptionDismiss(msg);</span>
+        }
+<span class="fc" id="L230">    }</span>
+
+
+    private void setTransformScale(IswopParameterResult iswopParameterResult) {
+<span class="pc bpc" id="L234" title="1 of 2 branches missed.">        if (iswopParameterResult.getData().getParamValue() != null) {</span>
+<span class="fc" id="L235">            transformScale = 1 / (Float.parseFloat(iswopParameterResult.getData().getParamValue()) / 1024);</span>
+        }
+<span class="fc" id="L237">    }</span>
+
+    private void setInfoResult(IswopResult iswopResult) {
+<span class="pc bpc" id="L240" title="1 of 2 branches missed.">        if (iswopResult.getData() != null) {</span>
+<span class="fc" id="L241">            currentVoiceVal = iswopResult.getData().getVoiceRemaining().getRemaining() / 60;</span>
+<span class="fc" id="L242">            currentInternetVal = iswopResult.getData().getInternetRemaining().getRemaining() / 1024;</span>
+<span class="fc" id="L243">            newVoiceVal = currentVoiceVal;</span>
+<span class="fc" id="L244">            newInternetVal = currentInternetVal;</span>
+<span class="fc" id="L245">            fraction = (int) (newInternetVal % (1 / transformScale));</span>
+        }
+<span class="fc" id="L247">    }</span>
+
+    private void setRemarkResult(IswopRemarkResult iswopRemarkResult) {
+<span class="pc bpc" id="L250" title="1 of 2 branches missed.">        if (iswopRemarkResult != null</span>
+<span class="pc bpc" id="L251" title="1 of 2 branches missed.">                &amp;&amp; iswopRemarkResult.getDataList() != null</span>
+<span class="pc bpc" id="L252" title="1 of 2 branches missed.">                &amp;&amp; iswopRemarkResult.getDataList().size() &gt; 0) {</span>
+<span class="pc bpc" id="L253" title="1 of 2 branches missed.">            if (iswopRemarkResult.getDataList() != null</span>
+<span class="pc bpc" id="L254" title="1 of 2 branches missed.">                    &amp;&amp; iswopRemarkResult.getDataList().get(0) != null</span>
+<span class="pc bpc" id="L255" title="1 of 2 branches missed.">                    &amp;&amp; !iswopRemarkResult.getDataList().get(0).getRemarkDisplay1().isEmpty()) {</span>
+<span class="fc" id="L256">                termAndCondition = iswopRemarkResult.getDataList().get(0).getRemarkDisplay1();</span>
+<span class="fc" id="L257">                getView().showTermAndCondition();</span>
+            } else {
+<span class="nc" id="L259">                getView().hideTermAndCondition();</span>
+            }
+        } else {
+<span class="nc" id="L262">            getView().hideTermAndCondition();</span>
+        }
+<span class="fc" id="L264">    }</span>
+    //&lt;/editor-fold&gt;
+
+    /*******************/
+    /** Getter Setter **/
+    /*******************/
+    //&lt;editor-fold desc=&quot;Getter Setter folding&quot;&gt;
+    public int getCurrentVoiceVal() {
+<span class="nc" id="L272">        return IswopUtils.getInstance().convertSecToMinute(currentVoiceVal);</span>
+    }
+
+    public int getCurrentInternetVal() {
+<span class="nc" id="L276">        return IswopUtils.getInstance().convertKbyteToMb(currentInternetVal);</span>
+    }
+    //&lt;/editor-fold&gt;
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

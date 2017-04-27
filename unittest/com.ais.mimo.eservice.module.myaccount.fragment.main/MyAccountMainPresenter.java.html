@@ -18,7 +18,6 @@ import com.nextzy.myais.common.config.mobile.Mobile;
 import com.nextzy.myais.common.mvp.NextzyPresenter;
 import com.nextzy.myais.common.utility.NextzyUtility;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,174 +36,178 @@ public class MyAccountMainPresenter extends NextzyPresenter&lt;MyAccountMainCont
     private RegisterManager registerManager;
 
     private MyAccountMainPresenter(MyAccountMainContractor.View view) {
-<span class="fc" id="L40">        super(view);</span>
-<span class="fc" id="L41">        converter = MyAccountConverter.getInstance();</span>
-<span class="fc" id="L42">        nextzyUtil = NextzyUtility.getInstance();</span>
-<span class="fc" id="L43">    }</span>
+<span class="fc" id="L39">        super(view);</span>
+<span class="fc" id="L40">        converter = MyAccountConverter.getInstance();</span>
+<span class="fc" id="L41">        nextzyUtil = NextzyUtility.getInstance();</span>
+<span class="fc" id="L42">    }</span>
 
     public static MyAccountMainPresenter createPresenter(MyAccountMainContractor.View view) {
-<span class="fc" id="L46">        return new MyAccountMainPresenter(view);</span>
+<span class="fc" id="L45">        return new MyAccountMainPresenter(view);</span>
     }
 
     @Override
     public void onViewCreate() {
+        // Do nothing.
 <span class="nc" id="L51">    }</span>
 
     @Override
     public void onViewDestroy() {
-<span class="nc" id="L55">    }</span>
+        // Do nothing.
+<span class="nc" id="L56">    }</span>
 
     @Override
     public void onViewStart() {
-<span class="nc" id="L59">    }</span>
+        // Do nothing.
+<span class="nc" id="L61">    }</span>
 
     @Override
     public void onViewStop() {
-
-<span class="nc" id="L64">    }</span>
+        // Do nothing.
+<span class="nc" id="L66">    }</span>
 
     @Override
     public void registerRx() {
-<span class="fc" id="L68">        RxBus.get().register(this);</span>
-<span class="fc" id="L69">    }</span>
+<span class="fc" id="L70">        RxBus.get().register(this);</span>
+<span class="fc" id="L71">    }</span>
 
     @Override
     public void unregisterRx() {
-<span class="fc" id="L73">        RxBus.get().unregister(this);</span>
-<span class="fc" id="L74">    }</span>
+<span class="fc" id="L75">        RxBus.get().unregister(this);</span>
+<span class="fc" id="L76">    }</span>
 
 
     @Override
     public void updateMyAccountUi() {
-<span class="fc" id="L79">        String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
-<span class="fc" id="L80">        String email = Mobile.getInstance().getEmailMyAccount();</span>
-<span class="fc" id="L81">        getView().updateUi(</span>
-<span class="fc" id="L82">                nextzyUtil.wrapBlank(mobileNumber, &quot;-&quot;),</span>
-<span class="fc" id="L83">                nextzyUtil.wrapBlank(email, &quot;-&quot;)</span>
+<span class="fc" id="L81">        String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
+<span class="fc" id="L82">        String email = Mobile.getInstance().getEmailMyAccount();</span>
+<span class="fc" id="L83">        getView().updateUi(</span>
+<span class="fc" id="L84">                nextzyUtil.wrapBlank(mobileNumber, &quot;-&quot;),</span>
+<span class="fc" id="L85">                nextzyUtil.wrapBlank(email, &quot;-&quot;)</span>
         );
-<span class="fc" id="L85">    }</span>
+<span class="fc" id="L87">    }</span>
 
 
     @Override
     public void requestVerifyMyAis() {
-<span class="fc" id="L90">        getView().showLoadingDialog();</span>
-<span class="fc" id="L91">        String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
-<span class="fc" id="L92">        getLoginManager().verifyMyAis(mobileNumber);</span>
-<span class="fc" id="L93">    }</span>
+<span class="fc" id="L92">        getView().showLoadingDialog();</span>
+<span class="fc" id="L93">        String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
+<span class="fc" id="L94">        getLoginManager().verifyMyAis(mobileNumber);</span>
+<span class="fc" id="L95">    }</span>
 
     @Override
     public void goToEditAccountFragment() {
-<span class="fc" id="L97">        RxBus.get().post(new GoToEditAccountFragmentEvent());</span>
-<span class="fc" id="L98">    }</span>
+<span class="fc" id="L99">        RxBus.get().post(new GoToEditAccountFragmentEvent());</span>
+<span class="fc" id="L100">    }</span>
 
     @Override
     public void goToEditEmailFragment() {
-<span class="fc" id="L102">        RxBus.get().post(new GoToEditEmailFragmentEvent());</span>
-<span class="fc" id="L103">    }</span>
+<span class="fc" id="L104">        RxBus.get().post(new GoToEditEmailFragmentEvent());</span>
+<span class="fc" id="L105">    }</span>
 
     @Override
     public void goToEditPasswordFragment() {
-<span class="fc" id="L107">        RxBus.get().post(new GoToEditPasswordFragmentEvent());</span>
-<span class="fc" id="L108">    }</span>
+<span class="fc" id="L109">        RxBus.get().post(new GoToEditPasswordFragmentEvent());</span>
+<span class="fc" id="L110">    }</span>
 
     @Override
-    public void goToAddMobileActivity(ArrayList&lt;MobileData&gt; markConfirmPostpaidList,
-                                      ArrayList&lt;MobileData&gt; markConfirmPrepaidList,
-                                      ArrayList&lt;MobileData&gt; markConfirmFbbList,
-                                      ArrayList&lt;MobileData&gt; noConfirmPostpaidList,
-                                      ArrayList&lt;MobileData&gt; noConfirmPrepaidList,
-                                      ArrayList&lt;MobileData&gt; noConfirmFbbList) {
-<span class="fc" id="L117">        String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
-<span class="fc" id="L118">        String email = Mobile.getInstance().getEmailMyAccount();</span>
-<span class="fc" id="L119">        getView().openAddMobileActivity(</span>
+    public void goToAddMobileActivity(List&lt;MobileData&gt; markConfirmPostpaidList,
+                                      List&lt;MobileData&gt; markConfirmPrepaidList,
+                                      List&lt;MobileData&gt; markConfirmFbbList,
+                                      List&lt;MobileData&gt; noConfirmPostpaidList,
+                                      List&lt;MobileData&gt; noConfirmPrepaidList,
+                                      List&lt;MobileData&gt; noConfirmFbbList) {
+<span class="fc" id="L119">        String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
+<span class="fc" id="L120">        String email = Mobile.getInstance().getEmailMyAccount();</span>
+<span class="fc" id="L121">        getView().openAddMobileActivity(</span>
                 mobileNumber,
                 email,
+                markConfirmPostpaidList,
                 markConfirmPrepaidList,
                 markConfirmFbbList,
                 noConfirmPostpaidList,
                 noConfirmPrepaidList,
-                noConfirmFbbList,
-                markConfirmPostpaidList);
-<span class="fc" id="L128">    }</span>
+                noConfirmFbbList
+        );
+<span class="fc" id="L131">    }</span>
 
     @Subscribe
     public void onReceiveVerifyMyAisSuccess(VerifyMyAISResult result) {
-<span class="pc bpc" id="L132" title="1 of 2 branches missed.">        if (result.isSuccess()) {</span>
-<span class="fc" id="L133">            getView().dismissDialog(DISMISS_DELAY_DEFAULT);</span>
-<span class="fc" id="L134">            VerifyMyAISData data = result.getData();</span>
-<span class="fc" id="L135">            updateEmailAndMobileDataListByData(data);</span>
-<span class="fc" id="L136">            Mobile.getInstance().setMobileContactList(result.toMobileContactList());</span>
-<span class="fc" id="L137">            updateMyAccountUi();</span>
-<span class="fc" id="L138">        } else {</span>
-<span class="nc" id="L139">            getView().showResponseException(result.getResultDescription());</span>
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">        if (result.isSuccess()) {</span>
+<span class="fc" id="L136">            getView().dismissDialog(DISMISS_DELAY_DEFAULT);</span>
+<span class="fc" id="L137">            VerifyMyAISData data = result.getData();</span>
+<span class="fc" id="L138">            updateEmailAndMobileDataListByData(data);</span>
+<span class="fc" id="L139">            Mobile.getInstance().setMobileContactList(result.toMobileContactList());</span>
+<span class="fc" id="L140">            updateMyAccountUi();</span>
+<span class="fc" id="L141">        } else {</span>
+<span class="nc" id="L142">            getView().showResponseException(result.getResultDescription());</span>
         }
-<span class="fc" id="L141">    }</span>
+<span class="fc" id="L144">    }</span>
 
     @Subscribe
     public void onReceiveInvalidMyAisAccountException(InvalidMyAisAccountException exception){
-<span class="nc" id="L145">        getView().showResponseException(exception.getMessage());</span>
-<span class="nc" id="L146">    }</span>
+<span class="nc" id="L148">        getView().showResponseException(exception.getMessage());</span>
+<span class="nc" id="L149">    }</span>
 
     /********************/
     /** Private method **/
     /********************/
     //&lt;editor-fold desc=&quot;Private function folding&quot;&gt;
     private void updateEmailAndMobileDataListByData(VerifyMyAISData data) {
-<span class="pc bpc" id="L153" title="3 of 6 branches missed.">        if (data != null &amp;&amp; data.getDataList() != null &amp;&amp; !data.getDataList().isEmpty()) {</span>
-<span class="fc" id="L154">            Mobile.getInstance().setMyAccountEmail(converter.getMasterEmailFromMobileList(data.getDataList()));</span>
-<span class="fc" id="L155">            setMobileDataActiveToAdapter(data.getDataList());</span>
+<span class="pc bpc" id="L156" title="3 of 6 branches missed.">        if (data != null &amp;&amp; data.getDataList() != null &amp;&amp; !data.getDataList().isEmpty()) {</span>
+<span class="fc" id="L157">            Mobile.getInstance().setMyAccountEmail(converter.getMasterEmailFromMobileList(data.getDataList()));</span>
+<span class="fc" id="L158">            setMobileDataActiveToAdapter(data.getDataList());</span>
         } else {
-<span class="nc" id="L157">            setMobileDataActiveToAdapter(Collections.emptyList());</span>
+<span class="nc" id="L160">            setMobileDataActiveToAdapter(Collections.emptyList());</span>
         }
-<span class="fc" id="L159">    }</span>
+<span class="fc" id="L162">    }</span>
     private void setMobileDataActiveToAdapter(List&lt;MobileData&gt; mobileDataList) {
-<span class="fc" id="L161">        MobileTypeGroup group = converter.groupMobileDataListByStatus(mobileDataList, STATUS_ACTIVE, true);</span>
-<span class="fc bfc" id="L162" title="All 2 branches covered.">        if (Mobile.getInstance().isPostpaid()) {</span>
-<span class="fc" id="L163">            getView().setMobileAccountsToAdapter(group.getPostpaidList(), group.getPrepaidList(), group.getFbbList());</span>
-<span class="fc bfc" id="L164" title="All 2 branches covered.">        } else if (Mobile.getInstance().isPrepaid()) {</span>
-<span class="fc" id="L165">            getView().setMobileAccountsToAdapter(null, group.getPrepaidList(), null);</span>
-<span class="pc bpc" id="L166" title="1 of 2 branches missed.">        } else if (Mobile.getInstance().isFibre()) {</span>
-<span class="fc" id="L167">            getView().setMobileAccountsToAdapter(null, group.getPrepaidList(), group.getFbbList());</span>
+<span class="fc" id="L164">        MobileTypeGroup group = converter.groupMobileDataListByStatus(mobileDataList, STATUS_ACTIVE, true);</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">        if (Mobile.getInstance().isPostpaid()) {</span>
+<span class="fc" id="L166">            getView().setMobileAccountsToAdapter(group.getPostpaidList(), group.getPrepaidList(), group.getFbbList());</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">        } else if (Mobile.getInstance().isPrepaid()) {</span>
+<span class="fc" id="L168">            getView().setMobileAccountsToAdapter(null, group.getPrepaidList(), null);</span>
+<span class="pc bpc" id="L169" title="1 of 2 branches missed.">        } else if (Mobile.getInstance().isFibre()) {</span>
+<span class="fc" id="L170">            getView().setMobileAccountsToAdapter(null, group.getPrepaidList(), group.getFbbList());</span>
         } else {
-<span class="nc" id="L169">            throw new NullPointerException(&quot;Master type is not Prepaid, Postpaid and Fibre&quot;);</span>
+<span class="nc" id="L172">            throw new NullPointerException(&quot;Master type is not Prepaid, Postpaid and Fibre&quot;);</span>
         }
-<span class="fc" id="L171">    }</span>
+<span class="fc" id="L174">    }</span>
     //&lt;/editor-fold&gt;
 
     /*************************/
     /** GetterSetter method **/
     /*************************/
     public RegisterManager getRegisterManager() {
-<span class="nc bnc" id="L178" title="All 2 branches missed.">        if (registerManager == null) {</span>
-<span class="nc" id="L179">            registerManager = RegisterManager.getInstance();</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">        if (registerManager == null) {</span>
+<span class="nc" id="L182">            registerManager = RegisterManager.getInstance();</span>
         }
-<span class="nc" id="L181">        return registerManager;</span>
+<span class="nc" id="L184">        return registerManager;</span>
     }
 
     public MyAccountManager getMyAccountManager() {
-<span class="nc bnc" id="L185" title="All 2 branches missed.">        if (myAccountManager == null) {</span>
-<span class="nc" id="L186">            myAccountManager = MyAccountManager.getInstance();</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        if (myAccountManager == null) {</span>
+<span class="nc" id="L189">            myAccountManager = MyAccountManager.getInstance();</span>
         }
-<span class="nc" id="L188">        return myAccountManager;</span>
+<span class="nc" id="L191">        return myAccountManager;</span>
     }
 
     public void setMockMyAccountManager(MyAccountManager mockMyAccountManager) {
-<span class="fc" id="L192">        this.myAccountManager = mockMyAccountManager;</span>
-<span class="fc" id="L193">    }</span>
+<span class="fc" id="L195">        this.myAccountManager = mockMyAccountManager;</span>
+<span class="fc" id="L196">    }</span>
 
     public LoginManager getLoginManager() {
-<span class="pc bpc" id="L196" title="1 of 2 branches missed.">        if (loginManager == null) {</span>
-<span class="nc" id="L197">            loginManager = LoginManager.getInstance();</span>
+<span class="pc bpc" id="L199" title="1 of 2 branches missed.">        if (loginManager == null) {</span>
+<span class="nc" id="L200">            loginManager = LoginManager.getInstance();</span>
         }
-<span class="fc" id="L199">        return loginManager;</span>
+<span class="fc" id="L202">        return loginManager;</span>
     }
 
     public void setMockLoginManager(LoginManager mockLoginManager) {
-<span class="fc" id="L203">        this.loginManager = mockLoginManager;</span>
-<span class="fc" id="L204">    }</span>
+<span class="fc" id="L206">        this.loginManager = mockLoginManager;</span>
+<span class="fc" id="L207">    }</span>
 
     public void setMockRegisterManager(RegisterManager mockRegisterManager) {
-<span class="fc" id="L207">        this.registerManager = mockRegisterManager;</span>
-<span class="fc" id="L208">    }</span>
+<span class="fc" id="L210">        this.registerManager = mockRegisterManager;</span>
+<span class="fc" id="L211">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EventLogManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.common.eventlog</a> &gt; <span class="el_source">EventLogManager.java</span></div><h1>EventLogManager.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.common.eventlog;
+
+import com.google.gson.Gson;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.eventlog.model.EventlogResult;
+import com.nextzy.myais.common.network.subscriber.NextzySimpleSubscriber;
+import com.nextzy.myais.common.network.worker.GenericNetworkController;
+
+import rx.Single;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+
+/**
+ * Created by trusttanapruk on 12/20/2016.
+ */
+
+<span class="nc" id="L18">public class EventLogManager extends GenericNetworkController {</span>
+    private static EventLogManager instance;
+    public static final String SERVICE_NAME_LOG_EVENT = &quot;log_event&quot;;
+
+    private EventLogApi api;
+
+    public EventLogApi getApi() {
+<span class="nc" id="L25">        return api;</span>
+    }
+
+    public void setApi(EventLogApi api) {
+<span class="nc" id="L29">        this.api = api;</span>
+<span class="nc" id="L30">    }</span>
+
+    public static EventLogManager getInstance() {
+<span class="nc bnc" id="L33" title="All 2 branches missed.">        if (instance == null) {</span>
+<span class="nc" id="L34">            instance = new EventLogManager();</span>
+        }
+<span class="nc" id="L36">        return instance;</span>
+    }
+
+    Single&lt;EventlogResult&gt; logEventSingle(String eventName, String menuId, String eventId) {
+<span class="nc" id="L40">        EventLogParam eventLogParam = new EventLogParam(eventName, menuId, eventId);</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">        String eventLogString = eventLogParam.getFirstEventLog() == null ? &quot;&quot; : new Gson().toJson(eventLogParam.getFirstEventLog());</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        String mobileNumber = Mobile.getInstance().isLoggedIn() ? Mobile.getInstance().getMobileNumber() : &quot;0000000000&quot;;</span>
+
+<span class="nc" id="L44">        return EventLogApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L45">                .getRxApi(getApi())</span>
+<span class="nc" id="L46">                .logEvent(mobileNumber, eventLogString, eventLogParam)</span>
+<span class="nc" id="L47">                .subscribeOn(Schedulers.io())</span>
+<span class="nc" id="L48">                .observeOn(AndroidSchedulers.mainThread());</span>
+    }
+
+
+    public void logEvent(String eventName, String menuId, String eventId) {
+<span class="nc" id="L53">        logEventSingle(eventName, menuId, eventId).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_LOG_EVENT));</span>
+<span class="nc" id="L54">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

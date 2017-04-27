@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NextzyNumberUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.common.utility</a> &gt; <span class="el_source">NextzyNumberUtility.java</span></div><h1>NextzyNumberUtility.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.common.utility;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Locale;
+import java.util.regex.Pattern;
+
+<span class="fc" id="L10">public class NextzyNumberUtility {</span>
+    private static final String DEFAULT_FORMAT = &quot;#,###,##0.00&quot;;
+    private static final int DEFAULT_MAX_FRACTION_DIGIT = 2;
+    private static final int DEFAULT_MIN_FRACTION_DIGIT = 2;
+    private static final int DEFAULT_MIN_INTEGER_DIGIT = 1;
+    private static final int DEFAULT_ROUNDING_MODE = BigDecimal.ROUND_DOWN;
+
+    private static NextzyNumberUtility util;
+
+    public static NextzyNumberUtility getInstance() {
+<span class="fc bfc" id="L20" title="All 2 branches covered.">        if (util == null) {</span>
+<span class="fc" id="L21">            util = new NextzyNumberUtility();</span>
+        }
+<span class="fc" id="L23">        return util;</span>
+    }
+
+    /**
+     * Specialization of format
+     * &lt;p&gt;
+     * use {@link NextzyNumberUtility#formatNumber(double, int, int, int, int)} instead
+     *
+     * @param number  Value to convert
+     * @param pattern Convert pattern
+     * @param mode    Rounding mode
+     */
+    @Deprecated
+    public String format(Number number, String pattern, RoundingMode mode) {
+<span class="fc" id="L37">        DecimalFormat decimalFormat = new DecimalFormat();</span>
+<span class="pc bpc" id="L38" title="1 of 2 branches missed.">        if (pattern == null) {</span>
+<span class="nc" id="L39">            pattern = DEFAULT_FORMAT;</span>
+        }
+<span class="fc" id="L41">        decimalFormat.applyPattern(pattern);</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        if (mode != null) {</span>
+<span class="fc" id="L43">            decimalFormat.setRoundingMode(mode);</span>
+        }
+<span class="fc" id="L45">        return decimalFormat.format(number);</span>
+    }
+
+    /**
+     * Specialization of format
+     * &lt;p&gt;
+     * use {@link NextzyNumberUtility#formatNumber(double)} instead
+     *
+     * @param number Value to convert
+     */
+    @Deprecated
+    public String format(Number number) {
+<span class="fc" id="L57">        return format(number, DEFAULT_FORMAT, RoundingMode.HALF_UP);</span>
+    }
+
+    /**
+     * Specialization of format
+     * &lt;p&gt;
+     * use {@link NextzyNumberUtility#formatNumber(double, int, int, int)} instead
+     *
+     * @param number  Value to convert
+     * @param pattern Convert pattern
+     */
+    @Deprecated
+    public String format(Number number, String pattern) {
+<span class="fc" id="L70">        return format(number, pattern, RoundingMode.HALF_UP);</span>
+    }
+
+    /**
+     * Specialization of format
+     * &lt;p&gt;
+     * use {@link NextzyNumberUtility#formatNumberWithInteger(double)} instead
+     *
+     * @param number Value to convert
+     */
+    @Deprecated
+    public String formatNoRounding(Number number) {
+<span class="fc" id="L82">        return format(number, DEFAULT_FORMAT, RoundingMode.DOWN);</span>
+    }
+
+    /**
+     * Specialization of format
+     * &lt;p&gt;
+     * use {@link NextzyNumberUtility#formatNumberWithInteger2Digits(double)} instead
+     *
+     * @param number  Value to convert
+     * @param pattern Convert pattern
+     */
+    @Deprecated
+    public String formatNoRounding(Number number, String pattern) {
+<span class="fc" id="L95">        return format(number, pattern, RoundingMode.DOWN);</span>
+    }
+
+    /**
+     * Specialization of format
+     * &lt;p&gt;
+     * use {@link NextzyNumberUtility#formatNumberWithRemoveComma(String)} instead
+     *
+     * @param str Value to convert in string type
+     */
+    @Deprecated
+    public String format(String str) {
+<span class="fc bfc" id="L107" title="All 4 branches covered.">        if (str == null || str.isEmpty()) {</span>
+<span class="fc" id="L108">            str = &quot;0.0&quot;;</span>
+        } else {
+<span class="fc" id="L110">            str = str.replaceAll(&quot;,&quot;, &quot;&quot;);</span>
+        }
+<span class="fc" id="L112">        return format(new BigDecimal(str));</span>
+    }
+
+    /**
+     * Specialization of format
+     * &lt;p&gt;
+     * use {@link NextzyNumberUtility#formatNumberWithRemoveComma(String)} instead
+     *
+     * @param str     Value to convert in string type
+     * @param pattern Convert pattern
+     */
+    @Deprecated
+    public String format(String str, String pattern) {
+<span class="fc bfc" id="L125" title="All 4 branches covered.">        if (str == null || str.isEmpty()) {</span>
+<span class="fc" id="L126">            str = &quot;0.0&quot;;</span>
+        } else {
+<span class="fc" id="L128">            str = str.replaceAll(&quot;,&quot;, &quot;&quot;);</span>
+        }
+<span class="fc" id="L130">        return format(new BigDecimal(str), pattern);</span>
+    }
+
+    public String formatNumberWithInteger(double value) {
+<span class="fc" id="L134">        return formatNumber((int) value + &quot;&quot;, DEFAULT_ROUNDING_MODE, DEFAULT_MIN_INTEGER_DIGIT, 0, 0);</span>
+    }
+
+    public String formatNumberWithInteger(double value, int roundingMode) {
+<span class="nc" id="L138">        return formatNumber((int) value + &quot;&quot;, roundingMode, DEFAULT_MIN_INTEGER_DIGIT, 0, 0);</span>
+    }
+
+    public String formatNumberWithInteger(double value, int roundingMode, int minIntegerDigit) {
+<span class="nc" id="L142">        return formatNumber((int) value + &quot;&quot;, roundingMode, minIntegerDigit, 0, 0);</span>
+    }
+
+    public String formatNumberWithInteger(float value) {
+<span class="nc" id="L146">        return formatNumber((int) value + &quot;&quot;, DEFAULT_ROUNDING_MODE, DEFAULT_MIN_INTEGER_DIGIT, 0, 0);</span>
+    }
+
+    public String formatNumberWithInteger(float value, int roundingMode) {
+<span class="nc" id="L150">        return formatNumber((int) value + &quot;&quot;, roundingMode, DEFAULT_MIN_INTEGER_DIGIT, 0, 0);</span>
+    }
+
+    public String formatNumberWithInteger(float value, int roundingMode, int minIntegerDigit) {
+<span class="nc" id="L154">        return formatNumber((int) value + &quot;&quot;, roundingMode, minIntegerDigit, 0, 0);</span>
+    }
+
+    public String formatNumberWithInteger(int value) {
+<span class="fc" id="L158">        return formatNumber(value + &quot;&quot;, DEFAULT_ROUNDING_MODE, DEFAULT_MIN_INTEGER_DIGIT, 0, 0);</span>
+    }
+
+    public String formatNumberWithInteger(int value, int roundingMode) {
+<span class="nc" id="L162">        return formatNumber(value + &quot;&quot;, roundingMode, DEFAULT_MIN_INTEGER_DIGIT, 0, 0);</span>
+    }
+
+    public String formatNumberWithInteger(int value, int roundingMode, int minIntegerDigit) {
+<span class="nc" id="L166">        return formatNumber(value + &quot;&quot;, roundingMode, minIntegerDigit, 0, 0);</span>
+    }
+
+    public String formatNumberWithInteger(String value) {
+<span class="nc" id="L170">        return formatNumber(Integer.parseInt(value) + &quot;&quot;, DEFAULT_ROUNDING_MODE, DEFAULT_MIN_INTEGER_DIGIT, 0, 0);</span>
+    }
+
+    public String formatNumberWithInteger(String value, int roundingMode) {
+<span class="nc" id="L174">        return formatNumber(Integer.parseInt(value) + &quot;&quot;, roundingMode, DEFAULT_MIN_INTEGER_DIGIT, 0, 0);</span>
+    }
+
+    public String formatNumberWithInteger(String value, int roundingMode, int minIntegerDigit) {
+<span class="nc" id="L178">        return formatNumber(Integer.parseInt(value) + &quot;&quot;, roundingMode, minIntegerDigit, 0, 0);</span>
+    }
+
+    public String formatNumberWithInteger2Digits(String value) {
+<span class="nc" id="L182">        return formatNumber(Integer.parseInt(value) + &quot;&quot;, DEFAULT_ROUNDING_MODE, 2, 0, 0);</span>
+    }
+
+    public String formatNumberWithInteger2Digits(float value) {
+<span class="nc" id="L186">        return formatNumber((int) value + &quot;&quot;, DEFAULT_ROUNDING_MODE, 2, 0, 0);</span>
+    }
+
+    public String formatNumberWithInteger2Digits(double value) {
+<span class="fc" id="L190">        return formatNumber((int) value + &quot;&quot;, DEFAULT_ROUNDING_MODE, 2, 0, 0);</span>
+    }
+
+    public String formatNumberWithInteger2Digits(int value) {
+<span class="fc" id="L194">        return formatNumber(value + &quot;&quot;, DEFAULT_ROUNDING_MODE, 2, 0, 0);</span>
+    }
+
+    public String formatNumberWithOptionalFriction(String value) {
+<span class="nc" id="L198">        return formatNumber(value, DEFAULT_ROUNDING_MODE, DEFAULT_MIN_INTEGER_DIGIT, DEFAULT_MAX_FRACTION_DIGIT, 0);</span>
+    }
+
+    public String formatNumberWithOptionalFriction(String value, int roundingMode) {
+<span class="nc" id="L202">        return formatNumber(value, roundingMode, DEFAULT_MIN_INTEGER_DIGIT, DEFAULT_MAX_FRACTION_DIGIT, 0);</span>
+    }
+
+    public String formatNumberWithOptionalFriction(float value) {
+<span class="fc" id="L206">        return formatNumber(value + &quot;&quot;, DEFAULT_ROUNDING_MODE, DEFAULT_MIN_INTEGER_DIGIT, DEFAULT_MAX_FRACTION_DIGIT, 0);</span>
+    }
+
+    public String formatNumberWithOptionalFriction(float value, int roundingMode) {
+<span class="nc" id="L210">        return formatNumber(value + &quot;&quot;, roundingMode, DEFAULT_MIN_INTEGER_DIGIT, DEFAULT_MAX_FRACTION_DIGIT, 0);</span>
+    }
+
+    public String formatNumberWithOptionalFriction(double value) {
+<span class="fc" id="L214">        return formatNumber(value + &quot;&quot;, DEFAULT_ROUNDING_MODE, DEFAULT_MIN_INTEGER_DIGIT, DEFAULT_MAX_FRACTION_DIGIT, 0);</span>
+    }
+
+    public String formatNumberWithOptionalFriction(double value, int roundingMode) {
+<span class="nc" id="L218">        return formatNumber(value + &quot;&quot;, roundingMode, DEFAULT_MIN_INTEGER_DIGIT, DEFAULT_MAX_FRACTION_DIGIT, 0);</span>
+    }
+
+    public String formatNumberWith2Friction(String value) {
+<span class="nc" id="L222">        return formatNumber(value, DEFAULT_ROUNDING_MODE, DEFAULT_MIN_INTEGER_DIGIT, DEFAULT_MAX_FRACTION_DIGIT, DEFAULT_MIN_FRACTION_DIGIT);</span>
+    }
+
+    public String formatNumberWith2Friction(String value, int roundingMode) {
+<span class="nc" id="L226">        return formatNumber(value, roundingMode, DEFAULT_MIN_INTEGER_DIGIT, DEFAULT_MAX_FRACTION_DIGIT, DEFAULT_MIN_FRACTION_DIGIT);</span>
+    }
+
+    public String formatNumberWith2Friction(float value) {
+<span class="nc" id="L230">        return formatNumber(value + &quot;&quot;, DEFAULT_ROUNDING_MODE, DEFAULT_MIN_INTEGER_DIGIT, DEFAULT_MAX_FRACTION_DIGIT, DEFAULT_MIN_FRACTION_DIGIT);</span>
+    }
+
+    public String formatNumberWith2Friction(float value, int roundingMode) {
+<span class="nc" id="L234">        return formatNumber(value + &quot;&quot;, roundingMode, DEFAULT_MIN_INTEGER_DIGIT, DEFAULT_MAX_FRACTION_DIGIT, DEFAULT_MIN_FRACTION_DIGIT);</span>
+    }
+
+    public String formatNumberWith2Friction(double value) {
+<span class="nc" id="L238">        return formatNumber(value + &quot;&quot;, DEFAULT_ROUNDING_MODE, DEFAULT_MIN_INTEGER_DIGIT, DEFAULT_MAX_FRACTION_DIGIT, DEFAULT_MIN_FRACTION_DIGIT);</span>
+    }
+
+    public String formatNumberWith2Friction(double value, int roundingMode) {
+<span class="nc" id="L242">        return formatNumber(value + &quot;&quot;, roundingMode, DEFAULT_MIN_INTEGER_DIGIT, DEFAULT_MAX_FRACTION_DIGIT, DEFAULT_MIN_FRACTION_DIGIT);</span>
+    }
+
+    public String formatNumber(double value) {
+<span class="fc" id="L246">        return formatNumber(value + &quot;&quot;, DEFAULT_ROUNDING_MODE, DEFAULT_MIN_INTEGER_DIGIT, DEFAULT_MAX_FRACTION_DIGIT, DEFAULT_MIN_FRACTION_DIGIT);</span>
+    }
+
+    public String formatNumber(double value, int roundingMode) {
+<span class="nc" id="L250">        return formatNumber(value + &quot;&quot;, roundingMode, DEFAULT_MIN_INTEGER_DIGIT, DEFAULT_MAX_FRACTION_DIGIT, DEFAULT_MIN_FRACTION_DIGIT);</span>
+    }
+
+    public String formatNumber(double value, int roundingMode, int maxFractionDigit, int minFractionDigit) {
+<span class="nc" id="L254">        return formatNumber(value + &quot;&quot;, roundingMode, DEFAULT_MIN_INTEGER_DIGIT, maxFractionDigit, minFractionDigit);</span>
+    }
+
+    public String formatNumber(String value) {
+<span class="fc" id="L258">        return formatNumber(value, DEFAULT_ROUNDING_MODE, DEFAULT_MIN_INTEGER_DIGIT, DEFAULT_MAX_FRACTION_DIGIT, DEFAULT_MIN_FRACTION_DIGIT);</span>
+    }
+
+    public String formatNumber(String value, int roundingMode) {
+<span class="nc" id="L262">        return formatNumber(value, roundingMode, DEFAULT_MIN_INTEGER_DIGIT, DEFAULT_MAX_FRACTION_DIGIT, DEFAULT_MIN_FRACTION_DIGIT);</span>
+    }
+
+    public String formatNumber(String value, int roundingMode, int maxFractionDigit, int minFractionDigit) {
+<span class="nc" id="L266">        return formatNumber(value, roundingMode, DEFAULT_MIN_INTEGER_DIGIT, maxFractionDigit, minFractionDigit);</span>
+    }
+
+    public String formatNumber(double value, int roundingMode, int minIntegerDigit, int maxFractionDigit, int minFractionDigit) {
+<span class="nc" id="L270">        return formatNumber(value + &quot;&quot;, roundingMode, minIntegerDigit, maxFractionDigit, minFractionDigit);</span>
+    }
+
+    public String formatNumber(String value, int roundingMode, int minIntegerDigit, int maxFractionDigit, int minFractionDigit) {
+<span class="fc" id="L274">        BigDecimal bigDecimal = new BigDecimal(value);</span>
+<span class="fc" id="L275">        bigDecimal = bigDecimal.setScale(2, roundingMode);</span>
+<span class="fc" id="L276">        NumberFormat formatter = NumberFormat.getInstance(Locale.getDefault());</span>
+<span class="fc" id="L277">        formatter.setMinimumIntegerDigits(minIntegerDigit);</span>
+<span class="fc" id="L278">        formatter.setMaximumFractionDigits(maxFractionDigit);</span>
+<span class="fc" id="L279">        formatter.setMinimumFractionDigits(minFractionDigit);</span>
+<span class="fc" id="L280">        return formatter.format(bigDecimal.doubleValue());</span>
+    }
+
+    public String removeNonNumeric(String string) {
+<span class="fc" id="L284">        string = string.replaceAll(&quot;,&quot;, &quot;&quot;);</span>
+<span class="fc" id="L285">        return string.replaceAll(&quot;[^\\d|\\.]*$&quot;, &quot;&quot;);</span>
+    }
+
+    public String formatNumberWithRemoveComma(String value) {
+<span class="pc bpc" id="L289" title="2 of 4 branches missed.">        if (value == null || value.isEmpty()) {</span>
+<span class="nc" id="L290">            value = &quot;0.0&quot;;</span>
+        } else {
+<span class="fc" id="L292">            value = value.replaceAll(&quot;,&quot;, &quot;&quot;);</span>
+        }
+<span class="fc" id="L294">        return formatNumber(value);</span>
+    }
+
+    public float removeNonNumericToFloat(String string) {
+<span class="fc" id="L298">        String value = removeNonNumeric(string);</span>
+<span class="fc bfc" id="L299" title="All 2 branches covered.">        if (!value.isEmpty()) {</span>
+<span class="fc" id="L300">            return Float.valueOf(value);</span>
+        } else {
+<span class="fc" id="L302">            return 0;</span>
+        }
+    }
+
+    public boolean isInteger(String str) {
+<span class="fc" id="L307">        return Pattern.matches(&quot;\\d+&quot;, str);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

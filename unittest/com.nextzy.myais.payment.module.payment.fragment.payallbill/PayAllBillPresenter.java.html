@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PayAllBillPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.payment.module.payment.fragment.payallbill</a> &gt; <span class="el_source">PayAllBillPresenter.java</span></div><h1>PayAllBillPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.payment.module.payment.fragment.payallbill;
+
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.mvp.NextzyPresenter;
+import com.nextzy.myais.common.utility.remark.RemarkUtility;
+import com.nextzy.myais.payment.helper.payment.PayAllBillBlob;
+import com.nextzy.myais.payment.helper.payment.PayAllBillHelper;
+import com.nextzy.myais.payment.helper.payment.model.BaData;
+import com.nextzy.myais.payment.helper.payment.model.PayAllBillData;
+import com.nextzy.myais.payment.helper.payment.model.PaymentRemarkResult;
+import com.nextzy.myais.payment.helper.payment.network.PaymentManager;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by TheKhaeng on 9/20/2016.
+ */
+
+public class PayAllBillPresenter extends NextzyPresenter&lt;PayAllBillContractor.View&gt; implements PayAllBillContractor.Presenter {
+
+    private PayAllBillData mPayAllBillData;
+    private String paymentRemarkStringHtml;
+
+    private PayAllBillPresenter(PayAllBillContractor.View view) {
+<span class="nc" id="L28">        super(view);</span>
+<span class="nc" id="L29">    }</span>
+
+    public static PayAllBillPresenter createPresenter(PayAllBillContractor.View view) {
+<span class="nc" id="L32">        return new PayAllBillPresenter(view);</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L37">        PayAllBillBlob.INSTANCE.reset();</span>
+<span class="nc" id="L38">        RxBus.get().register(this);</span>
+<span class="nc" id="L39">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L43">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L44">    }</span>
+
+    @Override
+    public void onViewStart() {
+
+<span class="nc" id="L49">    }</span>
+
+    @Override
+    public void onViewStop() {
+
+<span class="nc" id="L54">    }</span>
+
+    @Override
+    public void callInitialService() {
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        if (mPayAllBillData == null) {</span>
+<span class="nc" id="L59">            getView().showLoading();</span>
+<span class="nc" id="L60">            PaymentManager.getInstance().callInitialPayAllBillSubscribe(new EventLogParam(&quot;APP_VIEW_PAYBILL&quot;, &quot;5003&quot;, &quot;5034&quot;).getEventLogHeader());</span>
+        } else {
+<span class="nc" id="L62">            getView().showPayAllBillList(mPayAllBillData);</span>
+        }
+<span class="nc" id="L64">    }</span>
+
+    @Override
+    public String getPaymentRemark() {
+<span class="nc" id="L68">        return paymentRemarkStringHtml;</span>
+    }
+
+    protected void setPaymentRemark() {
+<span class="nc" id="L72">        final String KEY_REMARK = &quot;REMARK&quot;;</span>
+<span class="nc" id="L73">        final String KEY_REMARK_DISCOUNT = &quot;REMARK_DISCOUNT&quot;;</span>
+//        final String KEY_REMARK_DISCOUNT_CRITERIA = &quot;REMARK_DISCOUNT_CRITERIA&quot;;
+<span class="nc" id="L75">        PaymentRemarkResult paymentRemarkResult = mPayAllBillData.getPaymentRemarkResult();</span>
+<span class="nc bnc" id="L76" title="All 4 branches missed.">        if (paymentRemarkResult != null &amp;&amp; paymentRemarkResult.hasDataList()) {</span>
+            String[] filterRemarks;
+//            if (discountStatusData != null &amp;&amp; discountStatusData.isShowDiscountCriteriaRemark()) {
+//                filterRemarks = new String[]{KEY_REMARK_DISCOUNT, KEY_REMARK_DISCOUNT_CRITERIA, KEY_REMARK};
+//            } else {
+<span class="nc" id="L81">            filterRemarks = new String[]{KEY_REMARK_DISCOUNT, KEY_REMARK};</span>
+//            }
+<span class="nc" id="L83">            paymentRemarkStringHtml = RemarkUtility.getInstance().sum(filterRemarks, paymentRemarkResult.getDataList());</span>
+<span class="nc" id="L84">            PayAllBillBlob.INSTANCE.setTermAndConditions(paymentRemarkStringHtml);</span>
+        }
+<span class="nc" id="L86">    }</span>
+
+    @Subscribe
+    public void onPayAllBillDataSuccess(PayAllBillData payAllBillData) {
+<span class="nc" id="L90">        getView().hideLoading();</span>
+<span class="nc" id="L91">        this.mPayAllBillData = payAllBillData;</span>
+
+<span class="nc bnc" id="L93" title="All 4 branches missed.">        if (payAllBillData.getInvoicesAllBillResult() != null &amp;&amp; payAllBillData.getInvoicesAllBillResult().getBaList() != null) {</span>
+<span class="nc" id="L94">            this.mPayAllBillData = payAllBillData;</span>
+
+            // Clear BA with empty invoice
+<span class="nc" id="L97">            this.mPayAllBillData.getInvoicesAllBillResult().setBaList(PayAllBillHelper.clearEmptyBaAmount(mPayAllBillData.getInvoicesAllBillResult().getBaList()));</span>
+
+<span class="nc" id="L99">            setPaymentRemark();</span>
+
+            // Init blob
+<span class="nc" id="L102">            setupBlobInstance();</span>
+
+<span class="nc" id="L104">            getView().showPayAllBillList(mPayAllBillData);</span>
+        } else {
+            // TODO: Handle on necessary data is null
+        }
+<span class="nc" id="L108">    }</span>
+
+    private void setupBlobInstance() {
+<span class="nc" id="L111">        List&lt;PayAllBillBlob.Ba&gt; baBlobList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        for (BaData ba : mPayAllBillData.getInvoicesAllBillResult().getBaList()) {</span>
+<span class="nc" id="L113">            PayAllBillBlob.Ba baBlob = new PayAllBillBlob.Ba();</span>
+
+<span class="nc" id="L115">            baBlob.setBaNumber(ba.getBaNumber());</span>
+<span class="nc" id="L116">            baBlob.setChecked(true);</span>
+<span class="nc" id="L117">            baBlob.setBaTotalAmount(PayAllBillHelper.getTotalOutstandingFromBa(ba));</span>
+<span class="nc" id="L118">            baBlob.setBaAmount(PayAllBillHelper.getTotalOutstandingFromBa(ba));</span>
+<span class="nc" id="L119">            baBlob.setMobileList(ba.getMobileList());</span>
+<span class="nc" id="L120">            baBlob.setExpanded(false);</span>
+
+<span class="nc" id="L122">            baBlobList.add(baBlob);</span>
+<span class="nc" id="L123">        }</span>
+<span class="nc" id="L124">        PayAllBillBlob.INSTANCE.setBa(baBlobList);</span>
+<span class="nc" id="L125">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

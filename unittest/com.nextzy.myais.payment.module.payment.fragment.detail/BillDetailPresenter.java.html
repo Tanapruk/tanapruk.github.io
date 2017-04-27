@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BillDetailPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.payment.module.payment.fragment.detail</a> &gt; <span class="el_source">BillDetailPresenter.java</span></div><h1>BillDetailPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.payment.module.payment.fragment.detail;
+
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.mvp.NextzyPresenter;
+import com.nextzy.myais.common.network.tool.ApiServiceCache;
+import com.nextzy.myais.common.utility.NextzyNumberUtility;
+import com.nextzy.myais.common.utility.remark.RemarkUtility;
+import com.nextzy.myais.payment.R;
+import com.nextzy.myais.payment.helper.payment.PaymentBlob;
+import com.nextzy.myais.payment.helper.payment.event.GotoBillConfirmEvent;
+import com.nextzy.myais.payment.helper.payment.event.GotoBillOtherEvent;
+import com.nextzy.myais.payment.helper.payment.event.GotoPayAllBillEvent;
+import com.nextzy.myais.payment.helper.payment.model.BillOpenSignalData;
+import com.nextzy.myais.payment.helper.payment.model.BillingData;
+import com.nextzy.myais.payment.helper.payment.model.CheckBillStatusData;
+import com.nextzy.myais.payment.helper.payment.model.CreditCardDropdownResult;
+import com.nextzy.myais.payment.helper.payment.model.DiscountStatusData;
+import com.nextzy.myais.payment.helper.payment.model.InvoiceData;
+import com.nextzy.myais.payment.helper.payment.model.PaymentCustProfileResult;
+import com.nextzy.myais.payment.helper.payment.model.PaymentRemarkResult;
+import com.nextzy.myais.payment.helper.payment.network.PaymentManager;
+import com.nextzy.myais.payment.helper.payment.util.CreditCardDropdownFilter;
+import com.nextzy.myais.payment.module.payment.delegate.InvoiceDelegate;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.nextzy.myais.common.network.model.Checker.dataNotNull;
+import static com.nextzy.myais.common.network.model.Checker.listNotNull;
+
+public class BillDetailPresenter extends NextzyPresenter&lt;BillDetailContractor.View&gt; implements BillDetailContractor.Presenter, InvoiceDelegate.Organizer {
+
+    private String paymentRemarkStringHtml;
+    protected ArrayList&lt;String&gt; creditCardList;
+    private BillingData mBillingData;
+
+    public BillDetailPresenter(BillDetailContractor.View view) {
+<span class="fc" id="L41">        super(view);</span>
+<span class="fc" id="L42">    }</span>
+
+    PaymentRemarkResult paymentRemarkResult;
+    List&lt;InvoiceData&gt; invoiceDataList;
+    List&lt;BillOpenSignalData&gt; billOpenSignalDataList;
+    CheckBillStatusData checkBillStatusData;
+    DiscountStatusData discountStatusData;
+    CreditCardDropdownResult creditCardDropdownResult;
+    PaymentCustProfileResult paymentCustProfileResult;
+
+    InvoiceDelegate invoiceDelegate;
+
+    public static BillDetailPresenter createPresenter(BillDetailContractor.View view) {
+<span class="nc" id="L55">        return new BillDetailPresenter(view);</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L60">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L64">    }</span>
+
+    @Override
+    public void onViewStart() {
+<span class="nc" id="L68">        RxBus.get().register(this);</span>
+<span class="nc" id="L69">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L73">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L74">    }</span>
+
+    @Override
+    public void callInitialService() {
+<span class="nc" id="L78">        getView().showLoadingDialog();</span>
+<span class="nc" id="L79">        PaymentManager.getInstance().callInitialPaymentService(new EventLogParam(&quot;APP_VIEW_PAYBILL&quot;, &quot;5003&quot;, &quot;5034&quot;).getEventLogHeader(), PaymentBlob.INSTANCE.getOtherMobileNumber());</span>
+<span class="nc" id="L80">    }</span>
+
+    @Override
+    public void checkBeforeGotoBillConfirm() {
+
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        if (getView().isPaymentChannelUnselected()) {</span>
+<span class="fc" id="L86">            getView().showAlertDialogDismissOnClick(R.string.my_ais_payment_pay_bill_err_channel);</span>
+<span class="fc" id="L87">            return;</span>
+        }
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        if (hasNotSelectedCreditCard()) {</span>
+<span class="fc" id="L90">            getView().showAlertDialogDismissOnClick(R.string.my_ais_payment_pay_bill_credit_type);</span>
+<span class="fc" id="L91">            return;</span>
+        }
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        if (isPaymentEmpty()) {</span>
+<span class="fc" id="L94">            getView().showAlertDialogDismissOnClick(R.string.my_ais_payment_pay_bill_err_amount);</span>
+<span class="fc" id="L95">            return;</span>
+        }
+
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        if (isPaymentOverMaximum()) {</span>
+<span class="fc" id="L99">            getView().showAlertDialogDismissOnClick(R.string.my_ais_payment_pay_bill_err_maximum_money);</span>
+<span class="fc" id="L100">            return;</span>
+        }
+
+<span class="fc" id="L103">        checkDialogPopUpMessage();</span>
+
+<span class="fc" id="L105">    }</span>
+
+    boolean hasNotSelectedCreditCard() {
+<span class="pc bpc" id="L108" title="1 of 4 branches missed.">        return getView().isCreditCardType() &amp;&amp; !getView().isCardTypeChosen();</span>
+    }
+
+    boolean isPaymentOverMaximum() {
+<span class="fc bfc" id="L112" title="All 2 branches covered.">        return NextzyNumberUtility.getInstance().removeNonNumericToFloat(getView().getPaymentAmount()) &gt; 50000;</span>
+    }
+
+    boolean isPaymentEmpty() {
+<span class="pc bpc" id="L116" title="1 of 4 branches missed.">        return getView().getPaymentAmount().isEmpty() || NextzyNumberUtility.getInstance().removeNonNumericToFloat(getView().getPaymentAmount()) &lt;= 0.00;</span>
+    }
+
+
+    void checkDialogPopUpMessage() {
+<span class="pc bpc" id="L121" title="3 of 4 branches missed.">        if (discountStatusData != null &amp;&amp; discountStatusData.isShowDiscountPopup()) {</span>
+<span class="nc" id="L122">            getView().showSimpleDialogAndGotoConfirmBill(discountStatusData.getPopupMessage());</span>
+        } else {
+<span class="fc" id="L124">            gotoBillConfirm();</span>
+        }
+<span class="fc" id="L126">    }</span>
+
+
+    public void setUpBeforeGotoBillConfirm() {
+
+<span class="fc" id="L131">        PaymentBlob.INSTANCE.setPaymentOption(</span>
+<span class="fc" id="L132">                getView().getCardType(),</span>
+<span class="fc" id="L133">                getView().getPaymentAmount(),</span>
+<span class="fc" id="L134">                getView().getPaymentChannel(),</span>
+<span class="fc" id="L135">                getView().isCreditCardType()</span>
+        );
+
+<span class="fc" id="L138">        PaymentBlob.INSTANCE.setInvoiceDataList(invoiceDataList);</span>
+<span class="fc" id="L139">        PaymentBlob.INSTANCE.setMPay(getView().isMPayCardType());</span>
+<span class="fc" id="L140">    }</span>
+
+    public void gotoBillConfirm() {
+<span class="fc" id="L143">        setUpBeforeGotoBillConfirm();</span>
+<span class="fc" id="L144">        RxBus.get().post(new GotoBillConfirmEvent());</span>
+<span class="fc" id="L145">    }</span>
+
+    @Override
+    public void gotoBillOther() {
+<span class="nc" id="L149">        RxBus.get().post(new GotoBillOtherEvent());</span>
+<span class="nc" id="L150">    }</span>
+
+    @Override
+    public String getPaymentRemark() {
+<span class="fc" id="L154">        return paymentRemarkStringHtml;</span>
+    }
+
+    @Override
+    public ArrayList&lt;String&gt; getCreditCardDropDownList() {
+<span class="nc" id="L159">        return creditCardList;</span>
+    }
+
+    @Override
+    public void gotoPayAllBill() {
+<span class="nc" id="L164">        RxBus.get().post(new GotoPayAllBillEvent());</span>
+<span class="nc" id="L165">    }</span>
+
+    public BillingData getBillingData() {
+<span class="nc" id="L168">        return mBillingData;</span>
+    }
+
+    @Override
+    public void setBillingData(BillingData billingData) {
+<span class="fc" id="L173">        mBillingData = billingData;</span>
+<span class="fc" id="L174">        discountStatusData = billingData.getDiscountStatusData();</span>
+<span class="fc" id="L175">        creditCardDropdownResult = billingData.getCreditCardDropdownResult();</span>
+<span class="fc" id="L176">        invoiceDataList = billingData.getInvoiceDataList();</span>
+<span class="fc" id="L177">        billOpenSignalDataList = billingData.getBillOpenSignalDataList();</span>
+<span class="fc" id="L178">        checkBillStatusData = billingData.getCheckBillStatusData();</span>
+<span class="fc" id="L179">        paymentRemarkResult = billingData.getPaymentRemarkResult();</span>
+<span class="fc" id="L180">        paymentCustProfileResult = billingData.getPaymentCustProfileResult();</span>
+<span class="fc" id="L181">    }</span>
+
+    @Override
+    public void initBillingData() {
+<span class="fc" id="L185">        setSuspend();</span>
+<span class="fc" id="L186">        setCreditCardDropDownList();</span>
+<span class="fc" id="L187">        setPaymentDetail();</span>
+<span class="fc" id="L188">        setPaymentRemark();</span>
+<span class="fc" id="L189">        setPaymentCustProfileName();</span>
+<span class="fc" id="L190">        hidePaymentChannelWhenBaDontExists();</span>
+<span class="fc" id="L191">    }</span>
+
+    void setPaymentCustProfileName() {
+<span class="pc bpc" id="L194" title="1 of 2 branches missed.">        if (dataNotNull(paymentCustProfileResult)) {</span>
+<span class="nc" id="L195">            PaymentBlob.INSTANCE.setPaymentToName(paymentCustProfileResult.getData().getFullName());</span>
+<span class="nc" id="L196">            getView().setFullName();</span>
+        }
+<span class="fc" id="L198">    }</span>
+
+    void hidePaymentChannelWhenBaDontExists() {
+<span class="fc bfc" id="L201" title="All 2 branches covered.">        if (listNotNull(invoiceDataList)) {</span>
+<span class="pc bpc" id="L202" title="1 of 2 branches missed.">            if (invoiceDataList.get(0).getBillingAccountNumber() == null) {</span>
+<span class="nc" id="L203">                getView().hidePaymentChannel();</span>
+            } else {
+<span class="fc" id="L205">                getView().showPaymentChannel();</span>
+            }
+        } else {
+<span class="fc" id="L208">            getView().hidePaymentChannel();</span>
+        }
+
+
+<span class="fc" id="L212">    }</span>
+
+    void setCreditCardDropDownList() {
+<span class="pc bpc" id="L215" title="2 of 4 branches missed.">        if (creditCardDropdownResult != null &amp;&amp; creditCardDropdownResult.hasDataList()) {</span>
+<span class="fc" id="L216">            creditCardList = CreditCardDropdownFilter.getInstance().getCreditCardList(creditCardDropdownResult.getDataList(), false);</span>
+        }
+<span class="fc" id="L218">    }</span>
+
+    private boolean hasInvoice() {
+<span class="pc bpc" id="L221" title="1 of 4 branches missed.">        return invoiceDelegate != null &amp;&amp; invoiceDelegate.hasInvoice();</span>
+    }
+
+    protected void setPaymentDetail() {
+<span class="fc" id="L225">        addPaymentDetailList();</span>
+<span class="fc" id="L226">        addInvoicePenaltyView();</span>
+<span class="fc" id="L227">        addTotalBillingAmountView();</span>
+<span class="fc" id="L228">    }</span>
+
+    private void addTotalBillingAmountView() {
+<span class="fc bfc" id="L231" title="All 2 branches covered.">        if (hasNoDebt()) {</span>
+<span class="fc" id="L232">            getView().addTotalBillingAmountView(&quot;0.00&quot;);</span>
+<span class="fc" id="L233">            return;</span>
+        }
+<span class="fc" id="L235">        getView().addTotalBillingAmountView(getTotalBillingAmount());</span>
+<span class="fc" id="L236">    }</span>
+
+    protected String getTotalBillingAmount() {
+<span class="pc bpc" id="L239" title="1 of 2 branches missed.">        if (invoiceDelegate == null) {</span>
+<span class="nc" id="L240">            return &quot;-&quot;;</span>
+        }
+<span class="fc" id="L242">        BigDecimal totalBillingAmount = invoiceDelegate.sumTotalBillingAmount().add(sumTotalPenaltyAmount());</span>
+<span class="fc" id="L243">        return NextzyNumberUtility.getInstance().formatNumber(totalBillingAmount.toString());</span>
+    }
+
+
+    private BigDecimal sumTotalPenaltyAmount() {
+<span class="pc bpc" id="L248" title="1 of 2 branches missed.">        if (billOpenSignalDataList == null) {</span>
+            //this will be null when isSuspend = false
+<span class="fc" id="L250">            return BigDecimal.ZERO;</span>
+        }
+<span class="nc" id="L252">        BigDecimal totalBillAmount = BigDecimal.ZERO;</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        for (BillOpenSignalData billOpenSignalData : billOpenSignalDataList) {</span>
+<span class="nc" id="L254">            BigDecimal billBalance = new BigDecimal(billOpenSignalData.getBillBalance());</span>
+<span class="nc" id="L255">            totalBillAmount = totalBillAmount.add(billBalance);</span>
+<span class="nc" id="L256">        }</span>
+<span class="nc" id="L257">        return totalBillAmount;</span>
+    }
+
+    private boolean hasBillBalance() {
+<span class="nc bnc" id="L261" title="All 2 branches missed.">        return sumTotalPenaltyAmount().compareTo(BigDecimal.ZERO) &gt; 0;</span>
+    }
+
+    private void addInvoicePenaltyView() {
+<span class="pc bpc" id="L265" title="1 of 2 branches missed.">        if (!isSuspended()) {</span>
+<span class="fc" id="L266">            return;</span>
+        }
+<span class="nc" id="L268">        getView().disableChangingEditText();</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">        if (hasBillBalance()) {</span>
+<span class="nc" id="L270">            String billBalanceAmount = NextzyNumberUtility.getInstance().formatNumber(sumTotalPenaltyAmount().toString());</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">            int penaltyDescriptionRes = hasInvoice() ? R.string.my_ais_payment_pay_bill_penalty_need_additional_label : R.string.my_ais_payment_pay_bill_penalty_no_additional_label;</span>
+<span class="nc" id="L272">            getView().addPenaltyView(billBalanceAmount, penaltyDescriptionRes);</span>
+<span class="nc" id="L273">        } else {</span>
+<span class="nc" id="L274">            getView().addEmptyPenaltyView();</span>
+        }
+<span class="nc" id="L276">    }</span>
+
+    private void addPaymentDetailList() {
+        //initiate here so it will start the callback from here
+<span class="fc" id="L280">        invoiceDelegate = new InvoiceDelegate(invoiceDataList, this);</span>
+<span class="fc" id="L281">    }</span>
+
+    @Override
+    public void onEachInvoiceData(String billingCycle, String paymentDueDate, String outStandingBalance) {
+<span class="fc" id="L285">        getView().addInvoiceViewItem(billingCycle, paymentDueDate, outStandingBalance);</span>
+<span class="fc" id="L286">    }</span>
+
+    @Override
+    public void onBetweenInvoiceData() {
+<span class="fc" id="L290">    }</span>
+
+    @Override
+    public void onBeforeFirstInvoiceDataList() {
+
+<span class="fc" id="L295">    }</span>
+
+    @Override
+    public void onAfterLastInvoiceDataList(BigDecimal totalBillingAmount) {
+
+<span class="fc" id="L300">    }</span>
+
+    @Override
+    public void onNoInvoiceDataList() {
+<span class="pc bpc" id="L304" title="1 of 2 branches missed.">        if (isSuspendWithoutPaymentBill()) {</span>
+<span class="nc" id="L305">            return;</span>
+        }
+<span class="fc" id="L307">        getView().addEmptyInvoiceData();</span>
+<span class="fc" id="L308">        getView().addAdvancePaymentRow();</span>
+<span class="fc" id="L309">    }</span>
+
+    @Override
+    public void onFinish() {
+<span class="fc" id="L313">        getView().finishLoading();</span>
+
+<span class="fc" id="L315">    }</span>
+
+    protected void setPaymentRemark() {
+<span class="fc" id="L318">        final String KEY_REMARK = &quot;REMARK&quot;;</span>
+<span class="fc" id="L319">        final String KEY_REMARK_DISCOUNT = &quot;REMARK_DISCOUNT&quot;;</span>
+<span class="fc" id="L320">        final String KEY_REMARK_DISCOUNT_CRITERIA = &quot;REMARK_DISCOUNT_CRITERIA&quot;;</span>
+<span class="pc bpc" id="L321" title="2 of 4 branches missed.">        if (paymentRemarkResult != null &amp;&amp; paymentRemarkResult.hasDataList()) {</span>
+            String[] filterRemarks;
+<span class="pc bpc" id="L323" title="2 of 4 branches missed.">            if (discountStatusData != null &amp;&amp; discountStatusData.isShowDiscountCriteriaRemark()) {</span>
+<span class="fc" id="L324">                filterRemarks = new String[]{KEY_REMARK_DISCOUNT, KEY_REMARK_DISCOUNT_CRITERIA, KEY_REMARK};</span>
+            } else {
+<span class="nc" id="L326">                filterRemarks = new String[]{KEY_REMARK_DISCOUNT, KEY_REMARK};</span>
+            }
+<span class="fc" id="L328">            paymentRemarkStringHtml = RemarkUtility.getInstance().sum(filterRemarks, paymentRemarkResult.getDataList());</span>
+        }
+<span class="fc" id="L330">    }</span>
+
+    private boolean isSuspendWithoutPaymentBill() {
+<span class="pc bpc" id="L333" title="3 of 4 branches missed.">        return isSuspended() &amp;&amp; !hasInvoice();</span>
+    }
+
+    private boolean hasNoDebt() {
+<span class="pc bpc" id="L337" title="1 of 4 branches missed.">        return !isSuspended() &amp;&amp; !hasInvoice();</span>
+    }
+
+    private boolean isSuspended() {
+<span class="fc" id="L341">        return checkBillStatusData.isSuspended();</span>
+    }
+
+    private boolean isSuspendedWithDebt() {
+<span class="fc" id="L345">        return checkBillStatusData.isSuspendedDebt();</span>
+    }
+
+    private boolean isSuspendedWithCreditLimit() {
+<span class="fc" id="L349">        return checkBillStatusData.isSuspendedCreditLimit();</span>
+    }
+
+    void setSuspend() {
+<span class="pc bpc" id="L353" title="1 of 2 branches missed.">        if (isSuspendedWithCreditLimit()) {</span>
+<span class="nc" id="L354">            getView().showSuspendStatusWithCreditLimit(checkBillStatusData.getPaymentStatusLine());</span>
+<span class="pc bpc" id="L355" title="1 of 2 branches missed.">        } else if (isSuspendedWithDebt()) {</span>
+<span class="nc" id="L356">            getView().showSuspendStatusWithDebt(checkBillStatusData.getPaymentStatusLine());</span>
+        } else {
+<span class="fc" id="L358">            getView().hideSuspendStatus();</span>
+        }
+<span class="fc" id="L360">    }</span>
+
+    @Subscribe
+    public void onBillingDataSuccess(BillingData billingData) {
+<span class="fc" id="L364">        setBillingData(billingData);</span>
+<span class="fc" id="L365">        initBillingData();</span>
+<span class="fc" id="L366">        ApiServiceCache.getInstance().clearCache(BillingData.class);</span>
+<span class="fc" id="L367">    }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

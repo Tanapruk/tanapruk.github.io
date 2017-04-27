@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CurrentStatementPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.home.module.currentstatement</a> &gt; <span class="el_source">CurrentStatementPresenter.java</span></div><h1>CurrentStatementPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.home.module.currentstatement;
+
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.mvp.NextzyPresenter;
+import com.nextzy.myais.common.network.event.ErrorEvent;
+import com.nextzy.myais.common.statement.network.CurrentStatementManager;
+import com.nextzy.myais.common.statement.response.CurrentStatementData;
+import com.nextzy.myais.common.statement.response.ExtraPointLoginData;
+import com.nextzy.myais.common.statement.response.ExtraPointRegistrationData;
+import com.nextzy.myais.common.utility.NextzyNumberUtility;
+import com.nextzy.myais.common.utility.NextzyUtility;
+import com.nextzy.myais.home.helper.extrapoint.ExtraPointHistoryPreference;
+
+import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
+
+import rx.Observable;
+
+/**
+ * Created by Akexorcist on 9/13/2016 AD.
+ */
+
+public class CurrentStatementPresenter extends NextzyPresenter&lt;CurrentStatementContractor.View&gt; implements CurrentStatementContractor.Presenter {
+
+    public static CurrentStatementPresenter createPresenter(CurrentStatementContractor.View view) {
+<span class="nc" id="L29">        return new CurrentStatementPresenter(view);</span>
+    }
+
+    public CurrentStatementPresenter(CurrentStatementContractor.View view) {
+<span class="fc" id="L33">        super(view);</span>
+<span class="fc" id="L34">    }</span>
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L38">        RxBus.get().register(this);</span>
+<span class="nc" id="L39">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L43">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L44">    }</span>
+
+    @Override
+    public void onViewStart() {
+
+<span class="nc" id="L49">    }</span>
+
+    @Override
+    public void onViewStop() {
+
+<span class="nc" id="L54">    }</span>
+
+    @Override
+    public void getCurrentStatement() {
+<span class="fc" id="L58">        getView().showLoading();</span>
+<span class="fc" id="L59">        callCurrentStatementServiceWithDelay();</span>
+<span class="fc" id="L60">    }</span>
+
+    @Override
+    public void setCurrentStatementDataResult(CurrentStatementData currentStatementData) {
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        if (isAisPointAvailable(currentStatementData)) {</span>
+<span class="fc" id="L65">            Mobile.getInstance().setAisPoint(currentStatementData.getAisPrivilegePointResult().getAisPointResult().getData().getPoint());</span>
+        }
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (isExtraPointLoginAvailable(currentStatementData)) {</span>
+<span class="fc" id="L68">            ExtraPointLoginData extraPointLoginData = currentStatementData.getAisPrivilegePointResult().getExtraPointLoginResult().getData();</span>
+<span class="fc" id="L69">            String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
+<span class="fc" id="L70">            long currentTime = Calendar.getInstance().getTimeInMillis();</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">            if (extraPointLoginData.isReceiveExtraPoint() &amp;&amp;</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">                    ExtraPointHistoryPreference.getInstance().isReceivedLoginExtraPointShouldShow(mobileNumber, currentTime)) {</span>
+<span class="fc" id="L73">                getView().showExtraPointLoginReceivedMessage(extraPointLoginData.getExtraPointMessage());</span>
+<span class="fc" id="L74">                ExtraPointHistoryPreference.getInstance().setReceivedLoginExtraPoint(mobileNumber, currentTime);</span>
+            }
+        }
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        if (isExtraPointAvailableAndUnregister(currentStatementData)) {</span>
+<span class="fc" id="L78">            String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
+<span class="fc" id="L79">            long currentTime = Calendar.getInstance().getTimeInMillis();</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">            if (ExtraPointHistoryPreference.getInstance().isRegistrationAlertedShouldShow(mobileNumber, currentTime)) {</span>
+<span class="fc" id="L81">                ExtraPointRegistrationData extraPointRegistrationData = currentStatementData.getAisPrivilegePointResult().getExtraPointRegistrationResult().getData();</span>
+<span class="fc" id="L82">                getView().showExtraPointRegistrationMessage(extraPointRegistrationData.getMessage());</span>
+<span class="fc" id="L83">                ExtraPointHistoryPreference.getInstance().setRegistrationAlerted(mobileNumber, currentTime);</span>
+            }
+        }
+<span class="fc bfc" id="L86" title="All 2 branches covered.">        if (Mobile.getInstance().isFibre()) {</span>
+<span class="fc bfc" id="L87" title="All 4 branches covered.">            if (isBalanceSummaryAvailable(currentStatementData) &amp;&amp; isAisPointAvailable(currentStatementData)) {</span>
+<span class="fc" id="L88">                showCurrentStatementTwoBoxFibre(currentStatementData);</span>
+<span class="pc bpc" id="L89" title="1 of 4 branches missed.">            } else if (isBalanceSummaryAvailable(currentStatementData) &amp;&amp; !isAisPointAvailable(currentStatementData)) {</span>
+<span class="fc" id="L90">                showCurrentStatementOneBoxFibre(currentStatementData);</span>
+            } else {
+<span class="fc" id="L92">                hideCurrentStatementBox();</span>
+            }
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        } else if (Mobile.getInstance().isPostpaid()) {</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">            if (Mobile.getInstance().isCorporate()) {</span>
+<span class="fc bfc" id="L96" title="All 4 branches covered.">                if (isBalanceSummaryAvailable(currentStatementData) &amp;&amp; isAisPointAvailable(currentStatementData)) {</span>
+<span class="fc" id="L97">                    showCurrentStatementTwoBoxPostpaidCorporate(currentStatementData);</span>
+<span class="pc bpc" id="L98" title="1 of 4 branches missed.">                } else if (isBalanceSummaryAvailable(currentStatementData) &amp;&amp; !isAisPointAvailable(currentStatementData)) {</span>
+<span class="fc" id="L99">                    showCurrentStatementOneBoxPostpaidCorporate(currentStatementData);</span>
+                } else {
+<span class="fc" id="L101">                    hideCurrentStatementBox();</span>
+                }
+            } else {
+<span class="fc bfc" id="L104" title="All 4 branches covered.">                if (isBalanceSummaryAvailable(currentStatementData) &amp;&amp; isAisPointAvailable(currentStatementData)) {</span>
+<span class="fc" id="L105">                    showCurrentStatementThreeBoxPostpaid(currentStatementData);</span>
+<span class="pc bpc" id="L106" title="1 of 4 branches missed.">                } else if (isBalanceSummaryAvailable(currentStatementData) &amp;&amp; !isAisPointAvailable(currentStatementData)) {</span>
+<span class="fc" id="L107">                    showCurrentStatementTwoBoxPostpaid(currentStatementData);</span>
+                } else {
+<span class="fc" id="L109">                    hideCurrentStatementBox();</span>
+                }
+            }
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">        } else if (Mobile.getInstance().isPrepaid()) {</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">            if (Mobile.getInstance().isCorporate()) {</span>
+<span class="fc bfc" id="L114" title="All 4 branches covered.">                if (isRemainingSummaryAvailable(currentStatementData) &amp;&amp; isAisPointAvailable(currentStatementData)) {</span>
+<span class="fc" id="L115">                    showCurrentStatementTwoBoxPrepaidCorporate(currentStatementData);</span>
+<span class="pc bpc" id="L116" title="1 of 4 branches missed.">                } else if (isRemainingSummaryAvailable(currentStatementData) &amp;&amp; !isAisPointAvailable(currentStatementData)) {</span>
+<span class="fc" id="L117">                    showCurrentStatementOneBoxPrepaidCorporate(currentStatementData);</span>
+                } else {
+<span class="fc" id="L119">                    hideCurrentStatementBox();</span>
+                }
+            } else {
+<span class="fc bfc" id="L122" title="All 4 branches covered.">                if (isRemainingSummaryAvailable(currentStatementData) &amp;&amp; isAisPointAvailable(currentStatementData)) {</span>
+<span class="fc" id="L123">                    showCurrentStatementThreeBoxPrepaid(currentStatementData);</span>
+<span class="pc bpc" id="L124" title="1 of 4 branches missed.">                } else if (isRemainingSummaryAvailable(currentStatementData) &amp;&amp; !isAisPointAvailable(currentStatementData)) {</span>
+<span class="fc" id="L125">                    showCurrentStatementTwoBoxPrepaid(currentStatementData);</span>
+                } else {
+<span class="fc" id="L127">                    hideCurrentStatementBox();</span>
+                }
+            }
+        }
+<span class="fc" id="L131">        getView().hideLoading();</span>
+<span class="fc" id="L132">    }</span>
+
+    @Subscribe
+    public void onErrorEvent(ErrorEvent errorEvent) {
+<span class="fc bfc" id="L136" title="All 2 branches covered.">        if (errorEvent.isMatch(CurrentStatementManager.ALL_SERVICE_NAMES)) {</span>
+<span class="fc" id="L137">            hideCurrentStatementBox();</span>
+        }
+<span class="fc" id="L139">    }</span>
+
+    @Subscribe
+    public void onCurrentStatementDataResult(CurrentStatementData currentStatementData) {
+<span class="fc" id="L143">        setCurrentStatementDataResult(currentStatementData);</span>
+<span class="fc" id="L144">    }</span>
+
+    public void callCurrentStatementServiceWithDelay() {
+<span class="fc" id="L147">        Observable.empty()</span>
+<span class="fc" id="L148">                .delay(200, TimeUnit.MILLISECONDS)</span>
+<span class="fc" id="L149">                .doOnCompleted(() -&gt; CurrentStatementManager.getInstance().getCurrentStatement(new EventLogParam(&quot;APP_VIEW_HOME&quot;, &quot;5000&quot;, &quot;5000&quot;).getEventLogHeader()))</span>
+<span class="fc" id="L150">                .subscribe();</span>
+<span class="fc" id="L151">    }</span>
+
+    public void hideCurrentStatementBox() {
+<span class="fc" id="L154">        getView().createCurrentStatementWithEmpty();</span>
+<span class="fc" id="L155">    }</span>
+
+    public void showCurrentStatementTwoBoxPostpaid(CurrentStatementData currentStatementData) {
+<span class="fc" id="L158">        String balance = NextzyNumberUtility.getInstance().formatNumberWith2Friction(currentStatementData.getBalanceSummaryResult().getData().getTotalOutstandingBalance());</span>
+<span class="fc" id="L159">        String currentCharges = NextzyNumberUtility.getInstance().formatNumberWithOptionalFriction(currentStatementData.getBalanceSummaryResult().getData().getUnbilledUsageCharge());</span>
+<span class="fc" id="L160">        getView().createCurrentStatementWithTwoBoxPostpaid(balance, currentCharges);</span>
+<span class="fc" id="L161">    }</span>
+
+    public void showCurrentStatementThreeBoxPostpaid(CurrentStatementData currentStatementData) {
+<span class="fc" id="L164">        String balance = NextzyNumberUtility.getInstance().formatNumberWith2Friction(currentStatementData.getBalanceSummaryResult().getData().getTotalOutstandingBalance());</span>
+<span class="fc" id="L165">        String currentCharges = NextzyNumberUtility.getInstance().formatNumberWith2Friction(currentStatementData.getBalanceSummaryResult().getData().getUnbilledUsageCharge());</span>
+<span class="fc" id="L166">        String aisPoint = NextzyNumberUtility.getInstance().formatNumberWithInteger(currentStatementData.getAisPrivilegePointResult().getAisPointResult().getData().getPoint());</span>
+<span class="fc" id="L167">        getView().createCurrentStatementWithThreeBoxPostpaid(balance, currentCharges, aisPoint);</span>
+<span class="fc" id="L168">    }</span>
+
+    public void showCurrentStatementOneBoxPostpaidCorporate(CurrentStatementData currentStatementData) {
+<span class="fc" id="L171">        String currentCharges = NextzyNumberUtility.getInstance().formatNumberWith2Friction(currentStatementData.getBalanceSummaryResult().getData().getUnbilledUsageCharge());</span>
+<span class="fc" id="L172">        getView().createCurrentStatementWithOneBoxCorporate(currentCharges);</span>
+<span class="fc" id="L173">    }</span>
+
+    public void showCurrentStatementTwoBoxPostpaidCorporate(CurrentStatementData currentStatementData) {
+<span class="fc" id="L176">        String currentCharges = NextzyNumberUtility.getInstance().formatNumberWith2Friction(currentStatementData.getBalanceSummaryResult().getData().getUnbilledUsageCharge());</span>
+<span class="fc" id="L177">        String aisPoint = NextzyNumberUtility.getInstance().formatNumberWithInteger(currentStatementData.getAisPrivilegePointResult().getAisPointResult().getData().getPoint());</span>
+<span class="fc" id="L178">        getView().createCurrentStatementWithTwoBoxPostpaidCorporate(currentCharges, aisPoint);</span>
+<span class="fc" id="L179">    }</span>
+
+    public void showCurrentStatementTwoBoxPrepaid(CurrentStatementData currentStatementData) {
+<span class="fc" id="L182">        String balance = NextzyNumberUtility.getInstance().formatNumberWith2Friction(currentStatementData.getRemainingSummaryResult().getData().getRemainingBalance());</span>
+<span class="fc" id="L183">        String validityDate = NextzyUtility.getInstance().convertYearAD2BE(currentStatementData.getRemainingSummaryResult().getData().getValidityDate(), &quot;/&quot;, getView().getCurrentLanguage());</span>
+<span class="fc" id="L184">        getView().createCurrentStatementWithTwoBoxPrepaid(balance, validityDate);</span>
+<span class="fc" id="L185">    }</span>
+
+    public void showCurrentStatementThreeBoxPrepaid(CurrentStatementData currentStatementData) {
+<span class="fc" id="L188">        String balance = NextzyNumberUtility.getInstance().formatNumberWith2Friction(currentStatementData.getRemainingSummaryResult().getData().getRemainingBalance());</span>
+<span class="fc" id="L189">        String validityDate = NextzyUtility.getInstance().convertYearAD2BE(currentStatementData.getRemainingSummaryResult().getData().getValidityDate(), &quot;/&quot;, getView().getCurrentLanguage());</span>
+<span class="fc" id="L190">        String aisPoint = NextzyNumberUtility.getInstance().formatNumberWithInteger(currentStatementData.getAisPrivilegePointResult().getAisPointResult().getData().getPoint());</span>
+<span class="fc" id="L191">        getView().createCurrentStatementWithThreeBoxPrepaid(balance, validityDate, aisPoint);</span>
+<span class="fc" id="L192">    }</span>
+
+    public void showCurrentStatementOneBoxPrepaidCorporate(CurrentStatementData currentStatementData) {
+<span class="fc" id="L195">        String validityDate = currentStatementData.getRemainingSummaryResult().getData().getValidityDate();</span>
+<span class="fc" id="L196">        getView().createCurrentStatementWithOneBoxCorporate(validityDate);</span>
+<span class="fc" id="L197">    }</span>
+
+    public void showCurrentStatementTwoBoxPrepaidCorporate(CurrentStatementData currentStatementData) {
+<span class="fc" id="L200">        String validityDate = currentStatementData.getRemainingSummaryResult().getData().getValidityDate();</span>
+<span class="fc" id="L201">        String aisPoint = NextzyNumberUtility.getInstance().formatNumberWithInteger(currentStatementData.getAisPrivilegePointResult().getAisPointResult().getData().getPoint());</span>
+<span class="fc" id="L202">        getView().createCurrentStatementWithTwoBoxPrepaidCorporate(validityDate, aisPoint);</span>
+<span class="fc" id="L203">    }</span>
+
+    public void showCurrentStatementOneBoxFibre(CurrentStatementData currentStatementData) {
+<span class="fc" id="L206">        String balance = NextzyNumberUtility.getInstance().formatNumberWith2Friction(currentStatementData.getBalanceSummaryResult().getData().getTotalOutstandingBalance());</span>
+<span class="fc" id="L207">        getView().createCurrentStatementWithOneBoxFibre(balance);</span>
+<span class="fc" id="L208">    }</span>
+
+    public void showCurrentStatementTwoBoxFibre(CurrentStatementData currentStatementData) {
+<span class="fc" id="L211">        String balance = NextzyNumberUtility.getInstance().formatNumberWith2Friction(currentStatementData.getBalanceSummaryResult().getData().getTotalOutstandingBalance());</span>
+<span class="fc" id="L212">        String aisPoint = NextzyNumberUtility.getInstance().formatNumberWithInteger(currentStatementData.getAisPrivilegePointResult().getAisPointResult().getData().getPoint());</span>
+<span class="fc" id="L213">        getView().createCurrentStatementWithTwoBoxFibre(balance, aisPoint);</span>
+<span class="fc" id="L214">    }</span>
+
+    public boolean isBalanceSummaryAvailable(CurrentStatementData currentStatementData) {
+<span class="fc bfc" id="L217" title="All 2 branches covered.">        return currentStatementData.getBalanceSummaryResult() != null &amp;&amp;</span>
+<span class="fc bfc" id="L218" title="All 2 branches covered.">                currentStatementData.getBalanceSummaryResult().hasData();</span>
+    }
+
+    public boolean isRemainingSummaryAvailable(CurrentStatementData currentStatementData) {
+<span class="fc bfc" id="L222" title="All 2 branches covered.">        return currentStatementData.getRemainingSummaryResult() != null &amp;&amp;</span>
+<span class="fc bfc" id="L223" title="All 2 branches covered.">                currentStatementData.getRemainingSummaryResult().hasData();</span>
+    }
+
+    public boolean isAisPointAvailable(CurrentStatementData currentStatementData) {
+<span class="fc bfc" id="L227" title="All 2 branches covered.">        return currentStatementData.getAisPrivilegePointResult() != null &amp;&amp;</span>
+<span class="fc bfc" id="L228" title="All 2 branches covered.">                currentStatementData.getAisPrivilegePointResult().isAisPointAvailable() &amp;&amp;</span>
+<span class="pc bpc" id="L229" title="1 of 2 branches missed.">                currentStatementData.getAisPrivilegePointResult().getAisPointResult().hasData();</span>
+    }
+
+    public boolean isExtraPointLoginAvailable(CurrentStatementData currentStatementData) {
+<span class="fc bfc" id="L233" title="All 2 branches covered.">        return currentStatementData.getAisPrivilegePointResult() != null &amp;&amp;</span>
+<span class="fc bfc" id="L234" title="All 2 branches covered.">                currentStatementData.getAisPrivilegePointResult().isExtraPointLoginAvailable() &amp;&amp;</span>
+<span class="pc bpc" id="L235" title="1 of 2 branches missed.">                currentStatementData.getAisPrivilegePointResult().getExtraPointLoginResult().hasData();</span>
+    }
+
+    public boolean isExtraPointAvailableAndUnregister(CurrentStatementData currentStatementData) {
+<span class="fc bfc" id="L239" title="All 2 branches covered.">        return currentStatementData.getAisPrivilegePointResult() != null &amp;&amp;</span>
+<span class="fc bfc" id="L240" title="All 2 branches covered.">                currentStatementData.getAisPrivilegePointResult().getCheckAisPointAvailableResult() != null &amp;&amp;</span>
+<span class="pc bpc" id="L241" title="1 of 2 branches missed.">                currentStatementData.getAisPrivilegePointResult().getCheckAisPointAvailableResult().hasData() &amp;&amp;</span>
+<span class="pc bpc" id="L242" title="1 of 2 branches missed.">                currentStatementData.getAisPrivilegePointResult().getCheckAisPointAvailableResult().getData().isAvailablePoint() &amp;&amp;</span>
+<span class="pc bpc" id="L243" title="1 of 2 branches missed.">                !currentStatementData.getAisPrivilegePointResult().getCheckAisPointAvailableResult().getData().isRegistered();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

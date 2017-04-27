@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PayAllBillAdapterPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.payment.module.payment.fragment.payallbill</a> &gt; <span class="el_source">PayAllBillAdapterPresenter.java</span></div><h1>PayAllBillAdapterPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.payment.module.payment.fragment.payallbill;
+
+import com.hwangjr.rxbus.RxBus;
+import com.nextzy.myais.common.mvp.NextzyPresenter;
+import com.nextzy.myais.common.utility.NextzyNumberUtility;
+import com.nextzy.myais.payment.R;
+import com.nextzy.myais.payment.helper.payment.PayAllBillBlob;
+import com.nextzy.myais.payment.helper.payment.PayAllBillHelper;
+import com.nextzy.myais.payment.helper.payment.event.GotoPayAllBillConfirmEvent;
+import com.nextzy.myais.payment.helper.payment.model.BaData;
+import com.nextzy.myais.payment.helper.payment.model.PayAllBillData;
+import com.nextzy.myais.payment.helper.payment.util.CreditCardDropdownFilter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by TheKhaeng on 10/3/2016.
+ */
+
+public class PayAllBillAdapterPresenter extends NextzyPresenter&lt;PayAllBillAdapterContractor.View&gt; implements
+        PayAllBillAdapterContractor.Presenter,
+        PayAllBillAdapterContractor.BaDelegate,
+        PayAllBillAdapterContractor.PaymentChannelDelegate {
+
+    private PayAllBillData mPayAllBillData;
+    private PayAllBillHelper.BaDataListHelper mBaDataListHelper;
+<span class="nc" id="L28">    private PayAllBillBlob mPayAllBillBlob = PayAllBillBlob.INSTANCE;</span>
+
+    public static final int TITLE_TYPE = 0;
+    public static final int ITEM_TYPE = 1;
+    public static final int FOOTER_TYPE = 2;
+
+    public static PayAllBillAdapterPresenter createPresenter(PayAllBillAdapterContractor.View view ){
+<span class="nc" id="L35">        return new PayAllBillAdapterPresenter( view );</span>
+    }
+
+    private PayAllBillAdapterPresenter(PayAllBillAdapterContractor.View view ){
+<span class="nc" id="L39">        super( view );</span>
+<span class="nc" id="L40">    }</span>
+
+    @Override
+    public void onViewCreate(){
+<span class="nc" id="L44">    }</span>
+
+    @Override
+    public void onViewDestroy(){
+
+<span class="nc" id="L49">    }</span>
+
+    @Override
+    public void onViewStart(){
+
+<span class="nc" id="L54">    }</span>
+
+    @Override
+    public void onViewStop(){
+
+<span class="nc" id="L59">    }</span>
+
+    // PayAllBillAdapterContractor.Presenter implementation
+
+    @Override
+    public void setPayAllBillData(PayAllBillData payAllBillData) {
+<span class="nc" id="L65">        this.mPayAllBillData = payAllBillData;</span>
+
+<span class="nc" id="L67">        mBaDataListHelper = new PayAllBillHelper.BaDataListHelper(mPayAllBillData.getInvoicesAllBillResult().getBaList());</span>
+<span class="nc" id="L68">    }</span>
+
+    @Override
+    public void checkBeforeGotoBillConfirm() {
+<span class="nc" id="L72">        int selectedCount = 0;</span>
+<span class="nc" id="L73">        double totalSelectedAmount = 0;</span>
+<span class="nc" id="L74">        boolean isAmountOverLoad = false;</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        for (int i=0; i&lt;mPayAllBillBlob.getBa().size(); i++) {</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">            if (mPayAllBillBlob.getBa().get(i).isChecked()) {</span>
+<span class="nc" id="L77">                totalSelectedAmount += PayAllBillHelper.roundTwoDecimal(mPayAllBillBlob.getBa().get(i).getBaAmount());</span>
+<span class="nc" id="L78">                selectedCount++;</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">                if (mPayAllBillBlob.getBa().get(i).getBaAmount() &gt; mPayAllBillBlob.getBa().get(i).getBaTotalAmount()) {</span>
+<span class="nc" id="L80">                    isAmountOverLoad = true;</span>
+                }
+            }
+        }
+<span class="nc" id="L84">        mPayAllBillBlob.setAmount(totalSelectedAmount);</span>
+
+        // case: at least 1 item selected.
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if (isCheckedAtLeastOne(selectedCount)) {</span>
+<span class="nc" id="L88">            getView().showSimpleDialog(R.string.my_ais_pay_all_bill_not_checked);</span>
+<span class="nc" id="L89">            return;</span>
+        }
+
+        // case: total billing amount &gt; 0.
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        if (isTotalBillAmountNotZero(totalSelectedAmount)) {</span>
+<span class="nc" id="L94">            getView().showSimpleDialog(R.string.my_ais_payment_pay_bill_err_amount);</span>
+<span class="nc" id="L95">            return;</span>
+        }
+
+        // case: total billing amount &lt; 50000.
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        if (isTotalBillAmountOverLoad(totalSelectedAmount)) {</span>
+<span class="nc" id="L100">            getView().showSimpleDialog(R.string.my_ais_payment_pay_bill_err_maximum_money);</span>
+<span class="nc" id="L101">            return;</span>
+        }
+
+        // case: payment channel selected.
+<span class="nc bnc" id="L105" title="All 2 branches missed.">        if (isPaymentChannelNotChecked(mPayAllBillBlob.getPaymentChannel())) {</span>
+<span class="nc" id="L106">            getView().showSimpleDialog(R.string.my_ais_pay_all_bill_please_select_payment_channel);</span>
+<span class="nc" id="L107">            return;</span>
+        }
+
+        // case: cardType selected.
+<span class="nc bnc" id="L111" title="All 2 branches missed.">        if (isCardTypeNotSelected(mPayAllBillBlob.getCardType())) {</span>
+<span class="nc" id="L112">            getView().showSimpleDialog(R.string.my_ais_payment_pay_bill_credit_type);</span>
+<span class="nc" id="L113">            return;</span>
+        }
+
+        // case: amount &lt; total amount of each Ba.
+//        if (isAmountOverLoad) {
+//            getView().showSimpleDialog(R.string.my_ais_payment_pay_bill_err_amount);
+//            return;
+//        }
+
+<span class="nc" id="L122">        gotoBillConfirm();</span>
+
+<span class="nc" id="L124">    }</span>
+
+    private boolean isTotalBillAmountOverLoad(double totalSelectedAmount) {
+<span class="nc bnc" id="L127" title="All 2 branches missed.">        return totalSelectedAmount &gt; 50000;</span>
+    }
+
+    private boolean isTotalBillAmountNotZero(double totalSelectedAmount) {
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        return totalSelectedAmount &lt;= 0;</span>
+    }
+
+    private boolean isCardTypeNotSelected(String cardType) {
+<span class="nc bnc" id="L135" title="All 2 branches missed.">        if (mPayAllBillBlob.isCreditCard()) {</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">            return cardType == null;</span>
+        }
+<span class="nc" id="L138">        else return false;</span>
+    }
+
+    private boolean isPaymentChannelNotChecked(String paymentChannel) {
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        return paymentChannel==null;</span>
+    }
+
+    private boolean isCheckedAtLeastOne(int selectedCount) {
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        return selectedCount &lt;= 0;</span>
+    }
+
+
+    public void setUpBeforeGotoBillConfirm() {
+
+//        PayAllBillBlob.INSTANCE.setPaymentOption(
+//                getView().getCardType(),
+//                getView().getPaymentAmount(),
+//                getView().getPaymentChannel(),
+//                getView().isCreditCardType()
+//        );
+<span class="nc" id="L158">    }</span>
+
+    public void gotoBillConfirm() {
+<span class="nc" id="L161">        setUpBeforeGotoBillConfirm();</span>
+<span class="nc" id="L162">        RxBus.get().post(new GotoPayAllBillConfirmEvent());</span>
+<span class="nc" id="L163">    }</span>
+
+    @Override
+    public int getItemViewType(int position, int count ){
+<span class="nc bnc" id="L167" title="All 2 branches missed.">        if (position == 0) {</span>
+<span class="nc" id="L168">            return TITLE_TYPE;</span>
+        } else {
+<span class="nc bnc" id="L170" title="All 2 branches missed.">            if (position == count - 1) {</span>
+<span class="nc" id="L171">                return FOOTER_TYPE;</span>
+            } else {
+<span class="nc" id="L173">                return ITEM_TYPE;</span>
+            }
+        }
+    }
+
+    @Override
+    public int getItemCount(){
+<span class="nc" id="L180">        return mPayAllBillData.getInvoicesAllBillResult().getBaList().size() + 2;</span>
+    }
+
+    @Override
+    public BaData getBaAtPosition(int pos) {
+<span class="nc" id="L185">        return mPayAllBillData.getInvoicesAllBillResult().getBaList().get(pos - 1);</span>
+    }
+
+    @Override
+    public String getTextTotalOutstandingBalance() {
+<span class="nc" id="L190">        return NextzyNumberUtility.getInstance().formatNumber(mBaDataListHelper.totalOutstanding);</span>
+    }
+
+    @Override
+    public int getOverDueBillCount() {
+<span class="nc" id="L195">        return mBaDataListHelper.overDueBillCount;</span>
+    }
+
+    @Override
+    public int getTotalBills() {
+<span class="nc" id="L200">        return mBaDataListHelper.totalBills;</span>
+    }
+
+    @Override
+    public List&lt;Double&gt; getOutstandingBalanceList() {
+<span class="nc" id="L205">        return mBaDataListHelper.outstandingBalanceList;</span>
+    }
+
+    @Override
+    public String getTextOutstandingFrom(BaData baData) {
+<span class="nc" id="L210">        return NextzyNumberUtility.getInstance().formatNumber(PayAllBillHelper.roundTwoDecimal(PayAllBillHelper.getTotalOutstandingFromBa(baData)));</span>
+    }
+
+    @Override
+    public List&lt;String&gt; getMobileListFrom(BaData baData) {
+<span class="nc" id="L215">        return baData.getMobileList();</span>
+    }
+
+    @Override
+    public ArrayList&lt;String&gt; getCreditCardDropDownList() {
+<span class="nc bnc" id="L220" title="All 4 branches missed.">        if (mPayAllBillData.getCreditCardDropdownResult() != null &amp;&amp; mPayAllBillData.getCreditCardDropdownResult().hasDataList()) {</span>
+<span class="nc" id="L221">            return CreditCardDropdownFilter.getInstance().getCreditCardList(mPayAllBillData.getCreditCardDropdownResult().getDataList(), false);</span>
+        } else {
+<span class="nc" id="L223">            return null;</span>
+        }
+    }
+
+    @Override
+    public String getStatusFrom(BaData ba) {
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        if (PayAllBillHelper.isSuspended(ba)) {</span>
+<span class="nc" id="L230">            return ba.getPaymentStatusLine();</span>
+        }
+<span class="nc" id="L232">        return null;</span>
+    }
+
+    @Override
+    public String getTextSelectedBillingAmount() {
+<span class="nc" id="L237">        double totalSelectedAmount = 0;</span>
+<span class="nc bnc" id="L238" title="All 2 branches missed.">        for (PayAllBillBlob.Ba ba : mPayAllBillBlob.getBa()) {</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">            if (ba.isChecked()) {</span>
+<span class="nc" id="L240">                totalSelectedAmount += ba.getBaAmount();</span>
+            }
+<span class="nc" id="L242">        }</span>
+<span class="nc" id="L243">        return NextzyNumberUtility.getInstance().formatNumber(PayAllBillHelper.roundTwoDecimal(totalSelectedAmount));</span>
+    }
+
+    @Override
+    public boolean getBaCheckingState(BaData baData) {
+<span class="nc" id="L248">        return mPayAllBillBlob.getBa().get(mPayAllBillData.getInvoicesAllBillResult().getBaList().indexOf(baData)).isChecked();</span>
+    }
+
+    @Override
+    public boolean getBaExpandState(BaData baData) {
+<span class="nc" id="L253">        return mPayAllBillBlob.getBa().get(mPayAllBillData.getInvoicesAllBillResult().getBaList().indexOf(baData)).isExpanded();</span>
+    }
+
+    @Override
+    public PayAllBillAdapterContractor.BaDelegate getBaDelegate() {
+<span class="nc" id="L258">        return this;</span>
+    }
+
+    @Override
+    public PayAllBillAdapterContractor.PaymentChannelDelegate getPaymentChannelDelegate() {
+<span class="nc" id="L263">        return this;</span>
+    }
+
+    @Override
+    public String getSelectedPaymentChannel() {
+<span class="nc" id="L268">        return PayAllBillBlob.INSTANCE.getPaymentChannel();</span>
+    }
+
+    @Override
+    public String getSelectedCardType() {
+<span class="nc" id="L273">        return PayAllBillBlob.INSTANCE.getCardType();</span>
+    }
+
+    @Override
+    public boolean shouldHidePaymentChannel() {
+<span class="nc bnc" id="L278" title="All 2 branches missed.">        return mBaDataListHelper.totalOutstanding == 0;</span>
+    }
+
+    @Override
+    public boolean hasBillOrDept() {
+<span class="nc bnc" id="L283" title="All 4 branches missed.">        return mBaDataListHelper.totalBills &gt; 0 || mBaDataListHelper.totalOutstanding &gt; 0;</span>
+    }
+
+    // Ba Delegate implementation
+
+    @Override
+    public void onSelectAllClick() {
+<span class="nc bnc" id="L290" title="All 2 branches missed.">        for (int i=0; i&lt;mPayAllBillBlob.getBa().size(); i++) {</span>
+<span class="nc" id="L291">            mPayAllBillBlob.getBa().get(i).setChecked(true);</span>
+        }
+<span class="nc" id="L293">        getView().notifyAllItemChanged();</span>
+<span class="nc" id="L294">    }</span>
+
+    @Override
+    public void onCheckBoxChange(BaData baData, boolean isChecked) {
+<span class="nc" id="L298">        mPayAllBillBlob.findBaByBaNumber(baData.getBaNumber()).setChecked(isChecked);</span>
+<span class="nc" id="L299">        getView().notifyAmountChanged();</span>
+<span class="nc" id="L300">    }</span>
+
+    @Override
+    public void onExpandChange(BaData baData, boolean isExpanded) {
+<span class="nc" id="L304">        mPayAllBillBlob.findBaByBaNumber(baData.getBaNumber()).setExpanded(isExpanded);</span>
+<span class="nc" id="L305">    }</span>
+
+    @Override
+    public void onAmountChange(BaData baData, double newAmount) {
+<span class="nc" id="L309">        mPayAllBillBlob.findBaByBaNumber(baData.getBaNumber()).setBaAmount(newAmount);</span>
+<span class="nc" id="L310">        getView().notifyAmountChanged();</span>
+<span class="nc" id="L311">    }</span>
+
+    // PayAllBillAdapterContractor.PaymentChannelDelegate implementation
+
+    @Override
+    public void onSelectPaymentChannel(String channel) {
+<span class="nc" id="L317">        mPayAllBillBlob.setPaymentChannel(channel);</span>
+<span class="nc" id="L318">    }</span>
+
+    @Override
+    public void onSelectCreditCardType(String cardType) {
+<span class="nc" id="L322">        mPayAllBillBlob.setCardType(cardType);</span>
+<span class="nc" id="L323">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

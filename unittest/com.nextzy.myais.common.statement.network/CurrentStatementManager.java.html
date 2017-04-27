@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CurrentStatementManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.common.statement.network</a> &gt; <span class="el_source">CurrentStatementManager.java</span></div><h1>CurrentStatementManager.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.common.statement.network;
+
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.database.model.SaveRealmResult;
+import com.nextzy.myais.common.network.subscriber.NextzySimpleSubscriber;
+import com.nextzy.myais.common.network.worker.ContinueWithNullOnCrash;
+import com.nextzy.myais.common.network.worker.GenericNetworkController;
+import com.nextzy.myais.common.network.worker.SchedulersAndErrorHandling;
+import com.nextzy.myais.common.statement.request.AISPointRequest;
+import com.nextzy.myais.common.statement.request.ExtraPointRegistrationRequest;
+import com.nextzy.myais.common.statement.response.AisPointResult;
+import com.nextzy.myais.common.statement.response.AisPrivilegePointResult;
+import com.nextzy.myais.common.statement.response.BalanceSummaryResult;
+import com.nextzy.myais.common.statement.response.CheckAisPointAvailableResult;
+import com.nextzy.myais.common.statement.response.CurrentStatementData;
+import com.nextzy.myais.common.statement.response.ExtraPointLoginResult;
+import com.nextzy.myais.common.statement.response.ExtraPointRegistrationResult;
+import com.nextzy.myais.common.statement.response.RemainingSummaryResult;
+
+import rx.Single;
+import rx.functions.Func1;
+
+/**
+ * Created by trusttanapruk on 8/25/2016.
+ */
+<span class="fc" id="L27">public class CurrentStatementManager extends GenericNetworkController {</span>
+    public static final String SERVICE_NAME_GET_BALANCE_SUMMARY = &quot;get_balance_summary&quot;;
+    public static final String SERVICE_NAME_GET_REMAINING_SUMMARY = &quot;get_remaining_summary&quot;;
+    public static final String SERVICE_NAME_CHECK_AIS_POINT_AVAILABLE = &quot;check_ais_point_available&quot;;
+    public static final String SERVICE_NAME_GET_AIS_POINT = &quot;get_ais_point&quot;;
+    public static final String SERVICE_NAME_GET_CURRENT_STATEMENT = &quot;get_current_statement&quot;;
+    public static final String SERVICE_NAME_GET_EXTRA_POINT_LOGIN = &quot;get_extra_point_login&quot;;
+    public static final String SERVICE_NAME_GET_EXTRA_POINT_REGISTRATION = &quot;get_extra_point_registration&quot;;
+
+    public static final String MODULE_EXTRA_POINT = &quot;EXTRAPOINT&quot;;
+    public static final String KEY_EXTRA_POINT_DETAIL = &quot;MSG_POINT_DETAIL&quot;;
+
+<span class="fc" id="L39">    public static final String[] ALL_SERVICE_NAMES = {</span>
+            SERVICE_NAME_GET_BALANCE_SUMMARY,
+            SERVICE_NAME_GET_REMAINING_SUMMARY,
+            SERVICE_NAME_CHECK_AIS_POINT_AVAILABLE,
+            SERVICE_NAME_GET_AIS_POINT,
+            SERVICE_NAME_GET_CURRENT_STATEMENT
+    };
+
+    private static CurrentStatementManager instance;
+
+    public static CurrentStatementManager getInstance() {
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        if (instance == null) {</span>
+<span class="nc" id="L51">            instance = new CurrentStatementManager();</span>
+        }
+<span class="nc" id="L53">        return instance;</span>
+    }
+
+    public static void setMockInstance(CurrentStatementManager mockInstance) {
+<span class="nc" id="L57">        instance = mockInstance;</span>
+<span class="nc" id="L58">    }</span>
+
+    private CurrentStatementApi currentStatementApi;
+
+    public CurrentStatementApi getCurrentStatementApi() {
+<span class="nc" id="L63">        return currentStatementApi;</span>
+    }
+
+    public void setCurrentStatementApi(CurrentStatementApi currentStatementApi) {
+<span class="fc" id="L67">        this.currentStatementApi = currentStatementApi;</span>
+<span class="fc" id="L68">    }</span>
+
+    protected Single&lt;BalanceSummaryResult&gt; getBalanceSummarySingle(String eventLogString) {
+<span class="fc" id="L71">        return CurrentStatementApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L72">                .getRxApi(currentStatementApi)</span>
+<span class="fc" id="L73">                .getBalanceSummary(</span>
+                        eventLogString,
+<span class="fc" id="L75">                        Mobile.getInstance().getMobileNumber())</span>
+<span class="fc" id="L76">                .compose(new SchedulersAndErrorHandling&lt;&gt;(BalanceSummaryResult.class, SERVICE_NAME_GET_BALANCE_SUMMARY))</span>
+<span class="fc" id="L77">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_BALANCE_SUMMARY));</span>
+    }
+
+    protected Single&lt;RemainingSummaryResult&gt; getRemainingSummarySingle(String eventLogString) {
+<span class="fc" id="L81">        return CurrentStatementApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L82">                .getRxApi(currentStatementApi)</span>
+<span class="fc" id="L83">                .getRemainingSummary(</span>
+                        eventLogString,
+<span class="fc" id="L85">                        Mobile.getInstance().getMobileNumber())</span>
+<span class="fc" id="L86">                .compose(new SchedulersAndErrorHandling&lt;&gt;(RemainingSummaryResult.class, SERVICE_NAME_GET_REMAINING_SUMMARY))</span>
+<span class="fc" id="L87">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_REMAINING_SUMMARY));</span>
+    }
+
+    protected Single&lt;CheckAisPointAvailableResult&gt; checkAisPointAvailableSingle(String eventLogString) {
+<span class="fc" id="L91">        return CurrentStatementApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L92">                .getRxApi(currentStatementApi)</span>
+<span class="fc" id="L93">                .checkAisPointsAvailable(</span>
+                        eventLogString,
+<span class="fc" id="L95">                        Mobile.getInstance().getMobileNumber(), new AISPointRequest())</span>
+<span class="fc" id="L96">                .compose(new SchedulersAndErrorHandling&lt;&gt;(CheckAisPointAvailableResult.class, SERVICE_NAME_CHECK_AIS_POINT_AVAILABLE))</span>
+<span class="fc" id="L97">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_CHECK_AIS_POINT_AVAILABLE));</span>
+    }
+
+    protected Single&lt;AisPrivilegePointResult&gt; getAisPrivilegePointResultSingle(String eventLogString, CheckAisPointAvailableResult checkAisPointAvailableResult) {
+<span class="nc bnc" id="L101" title="All 4 branches missed.">        if (checkAisPointAvailableResult != null &amp;&amp; checkAisPointAvailableResult.hasData()) {</span>
+<span class="nc" id="L102">            Mobile.getInstance().setPointAvailable(checkAisPointAvailableResult.getData().isAvailablePoint());</span>
+<span class="nc" id="L103">            Mobile.getInstance().setPointRegistered(checkAisPointAvailableResult.getData().isRegistered());</span>
+        }
+<span class="nc bnc" id="L105" title="All 2 branches missed.">        if (checkAisPointAvailableResult != null &amp;&amp;</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">                checkAisPointAvailableResult.hasData() &amp;&amp;</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">                checkAisPointAvailableResult.getData().isAvailablePoint() &amp;&amp;</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">                checkAisPointAvailableResult.getData().isRegistered()) {</span>
+<span class="nc" id="L109">            return Single.zip(</span>
+<span class="nc" id="L110">                    Single.just(checkAisPointAvailableResult),</span>
+<span class="nc" id="L111">                    getAisPointSingle(eventLogString),</span>
+<span class="nc" id="L112">                    getExtraPointLoginSingle(eventLogString),</span>
+                    AisPrivilegePointResult::new);
+<span class="nc bnc" id="L114" title="All 2 branches missed.">        } else if (checkAisPointAvailableResult != null &amp;&amp;</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">                checkAisPointAvailableResult.hasData() &amp;&amp;</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">                checkAisPointAvailableResult.getData().isAvailablePoint() &amp;&amp;</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">                !checkAisPointAvailableResult.getData().isRegistered()) {</span>
+<span class="nc" id="L118">            return Single.zip(</span>
+<span class="nc" id="L119">                    Single.just(checkAisPointAvailableResult),</span>
+<span class="nc" id="L120">                    getExtraPointRegistrationSingle(eventLogString),</span>
+                    AisPrivilegePointResult::new);
+        } else {
+<span class="nc" id="L123">            return Single.just(new AisPrivilegePointResult(checkAisPointAvailableResult));</span>
+        }
+    }
+
+    protected Single&lt;AisPointResult&gt; getAisPointSingle(String eventLogString) {
+<span class="fc" id="L128">        return CurrentStatementApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L129">                .getRxApi(currentStatementApi)</span>
+<span class="fc" id="L130">                .getAisPoint(</span>
+                        eventLogString,
+<span class="fc" id="L132">                        Mobile.getInstance().getMobileNumber(), new AISPointRequest())</span>
+<span class="fc" id="L133">                .compose(new SchedulersAndErrorHandling&lt;&gt;(AisPointResult.class, SERVICE_NAME_GET_AIS_POINT))</span>
+<span class="fc" id="L134">                .compose(new ContinueWithNullOnCrash&lt;&gt;(AisPointResult.class))</span>
+<span class="fc" id="L135">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_AIS_POINT));</span>
+    }
+
+    protected Single&lt;ExtraPointLoginResult&gt; getExtraPointLoginSingle(String eventLogString) {
+<span class="fc" id="L139">        return CurrentStatementApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L140">                .getRxApi(currentStatementApi)</span>
+<span class="fc" id="L141">                .getExtraPointLogin(eventLogString, Mobile.getInstance().getMobileNumber())</span>
+<span class="fc" id="L142">                .compose(new SchedulersAndErrorHandling&lt;&gt;(ExtraPointLoginResult.class, SERVICE_NAME_GET_EXTRA_POINT_LOGIN))</span>
+<span class="fc" id="L143">                .compose(new ContinueWithNullOnCrash&lt;&gt;(ExtraPointLoginResult.class))</span>
+<span class="fc" id="L144">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_EXTRA_POINT_LOGIN));</span>
+    }
+
+    protected Single&lt;ExtraPointRegistrationResult&gt; getExtraPointRegistrationSingle(String eventLogString) {
+<span class="fc" id="L148">        ExtraPointRegistrationRequest body = new ExtraPointRegistrationRequest();</span>
+<span class="fc" id="L149">        body.setKey(KEY_EXTRA_POINT_DETAIL);</span>
+<span class="fc" id="L150">        body.setModule(MODULE_EXTRA_POINT);</span>
+<span class="fc" id="L151">        return CurrentStatementApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L152">                .getRxApi(currentStatementApi)</span>
+<span class="fc" id="L153">                .getExtraPointRegistration(eventLogString, Mobile.getInstance().getMobileNumber(), body)</span>
+<span class="fc" id="L154">                .compose(new SchedulersAndErrorHandling&lt;&gt;(ExtraPointRegistrationResult.class, SERVICE_NAME_GET_EXTRA_POINT_REGISTRATION))</span>
+<span class="fc" id="L155">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_EXTRA_POINT_REGISTRATION));</span>
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Chain Method
+    ///////////////////////////////////////////////////////////////////////////
+
+    public void getCurrentStatement(String eventLogString) {
+<span class="nc" id="L163">        getCurrentStatementSingle(eventLogString).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_GET_CURRENT_STATEMENT));</span>
+<span class="nc" id="L164">    }</span>
+
+    private Single&lt;CurrentStatementData&gt; getCurrentStatementSingle(String eventLogString) {
+<span class="nc bnc" id="L167" title="All 2 branches missed.">        if (Mobile.getInstance().isPostpaid() ||</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">                Mobile.getInstance().isFibre()) {</span>
+<span class="nc" id="L169">            return Single.zip(</span>
+<span class="nc" id="L170">                    getBalanceSummarySingle(eventLogString),</span>
+<span class="nc" id="L171">                    getAisPrivilegePointResultSingle(eventLogString),</span>
+                    CurrentStatementData::new);
+        } else {
+<span class="nc" id="L174">            return Single.zip(</span>
+<span class="nc" id="L175">                    getRemainingSummarySingle(eventLogString),</span>
+<span class="nc" id="L176">                    getAisPrivilegePointResultSingle(eventLogString),</span>
+                    CurrentStatementData::new);
+        }
+    }
+
+    private Single&lt;AisPrivilegePointResult&gt; getAisPrivilegePointResultSingle(String eventLogString) {
+<span class="nc" id="L182">        return checkAisPointAvailableSingle(eventLogString)</span>
+<span class="nc" id="L183">                .flatMap(new Func1&lt;CheckAisPointAvailableResult, Single&lt;AisPrivilegePointResult&gt;&gt;() {</span>
+                    @Override
+                    public Single&lt;AisPrivilegePointResult&gt; call(CheckAisPointAvailableResult checkAisPointAvailableResult) {
+                        return getAisPrivilegePointResultSingle(eventLogString, checkAisPointAvailableResult);
+                    }
+                });
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

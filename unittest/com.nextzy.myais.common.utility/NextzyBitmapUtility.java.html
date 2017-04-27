@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NextzyBitmapUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.common.utility</a> &gt; <span class="el_source">NextzyBitmapUtility.java</span></div><h1>NextzyBitmapUtility.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.common.utility;
+
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Point;
+import android.util.Base64;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
+import timber.log.Timber;
+
+import static android.graphics.BitmapFactory.decodeStream;
+
+/**
+ * Created by Akexorcist on 2/25/2016 AD.
+ */
+<span class="nc" id="L25">public class NextzyBitmapUtility {</span>
+    public static Bitmap combineBitmap(Bitmap c, Bitmap s) {
+<span class="nc bnc" id="L27" title="All 4 branches missed.">        if (c == null || s == null) {</span>
+<span class="nc" id="L28">            return null;</span>
+        }
+        int width;
+        int height;
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        if (c.getWidth() &gt; s.getWidth()) {</span>
+<span class="nc" id="L33">            width = c.getWidth();</span>
+<span class="nc" id="L34">            height = c.getHeight() + s.getHeight();</span>
+        } else {
+<span class="nc" id="L36">            width = s.getWidth();</span>
+<span class="nc" id="L37">            height = c.getHeight() + s.getHeight();</span>
+        }
+
+<span class="nc" id="L40">        Bitmap cs = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);</span>
+<span class="nc" id="L41">        Canvas canvas = new Canvas(cs);</span>
+<span class="nc" id="L42">        canvas.drawColor(Color.WHITE);</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if (c.getWidth() &gt; s.getWidth()) {</span>
+<span class="nc" id="L44">            canvas.drawBitmap(c, 0f, 0f, null);</span>
+<span class="nc" id="L45">            canvas.drawBitmap(s, (c.getWidth() / 2) - (s.getWidth() / 2), c.getHeight(), null);</span>
+        } else {
+<span class="nc" id="L47">            canvas.drawBitmap(c, (s.getWidth() / 2) - (c.getWidth() / 2), 0f, null);</span>
+<span class="nc" id="L48">            canvas.drawBitmap(s, 0f, c.getHeight(), null);</span>
+        }
+<span class="nc" id="L50">        return cs;</span>
+    }
+
+    public static Bitmap addBitmapBorder(Bitmap bitmap, int border) {
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        if (bitmap == null) {</span>
+<span class="nc" id="L55">            return null;</span>
+        }
+<span class="nc" id="L57">        Bitmap newBitmap = Bitmap.createBitmap(bitmap.getWidth() + (border * 2), bitmap.getHeight() + (border * 2), bitmap.getConfig());</span>
+<span class="nc" id="L58">        Canvas canvas = new Canvas(newBitmap);</span>
+<span class="nc" id="L59">        canvas.drawColor(Color.WHITE);</span>
+<span class="nc" id="L60">        canvas.drawBitmap(bitmap, border, border, new Paint());</span>
+<span class="nc" id="L61">        return newBitmap;</span>
+    }
+
+    public static Bitmap decodeBitmapFromFilePath(String filePath, int reqWidth, int reqHeight) {
+<span class="nc" id="L65">        File file = new File(filePath);</span>
+        try {
+<span class="nc" id="L67">            InputStream inputStream = new BufferedInputStream(new FileInputStream(file));</span>
+<span class="nc" id="L68">            return decodeBitmapFromSteam(inputStream, reqWidth, reqHeight);</span>
+<span class="nc" id="L69">        } catch (FileNotFoundException e) {</span>
+<span class="nc" id="L70">            return null;</span>
+        }
+    }
+
+    public static Bitmap decodeBitmapFromResource(Resources res, int resId,
+                                                  int reqWidth, int reqHeight) {
+<span class="nc" id="L76">        final BitmapFactory.Options options = new BitmapFactory.Options();</span>
+<span class="nc" id="L77">        options.inJustDecodeBounds = true;</span>
+<span class="nc" id="L78">        BitmapFactory.decodeResource(res, resId, options);</span>
+        // Calculate inSampleSize
+<span class="nc" id="L80">        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);</span>
+<span class="nc" id="L81">        options.inScaled = true;</span>
+        // Decode bitmap with inSampleSize set
+<span class="nc" id="L83">        options.inJustDecodeBounds = false;</span>
+<span class="nc" id="L84">        Bitmap bitmap = BitmapFactory.decodeResource(res, resId, options);</span>
+<span class="nc" id="L85">        return Bitmap.createScaledBitmap(bitmap, reqWidth, reqHeight, true);</span>
+    }
+
+    public static Bitmap decodeBitmapFromSteam(InputStream inputStream, int reqWidth, int reqHeight) {
+        // First decode with inJustDecodeBounds=true to check dimensions
+        try {
+<span class="nc" id="L91">            final BitmapFactory.Options options = new BitmapFactory.Options();</span>
+<span class="nc" id="L92">            options.inJustDecodeBounds = true;</span>
+<span class="nc" id="L93">            decodeStream(inputStream, null, options);</span>
+            // Calculate inSampleSize
+<span class="nc" id="L95">            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);</span>
+<span class="nc" id="L96">            options.inScaled = true;</span>
+            // Decode bitmap with inSampleSize set
+<span class="nc" id="L98">            options.inJustDecodeBounds = false;</span>
+<span class="nc" id="L99">            Bitmap bitmap = decodeStream(inputStream, null, options);</span>
+<span class="nc" id="L100">            return Bitmap.createScaledBitmap(bitmap, reqWidth, reqHeight, true);</span>
+<span class="nc" id="L101">        } catch (Exception e) {</span>
+<span class="nc" id="L102">            e.printStackTrace();</span>
+<span class="nc" id="L103">            return null;</span>
+        }
+    }
+
+    public static Point decodePxBitmapFromFilePath(String filePath) {
+<span class="nc" id="L108">        File file = new File(filePath);</span>
+        try {
+<span class="nc" id="L110">            InputStream inputStream = new FileInputStream(file);</span>
+<span class="nc" id="L111">            return decodePxSizeBitmapFromSteam(inputStream);</span>
+<span class="nc" id="L112">        } catch (FileNotFoundException e) {</span>
+<span class="nc" id="L113">            e.printStackTrace();</span>
+<span class="nc" id="L114">            return new Point();</span>
+        }
+    }
+
+    public static Point decodePxSizeBitmapFromSteam(InputStream inputStream) {
+<span class="nc" id="L119">        Bitmap bitmap = BitmapFactory.decodeStream(inputStream);</span>
+<span class="nc" id="L120">        Point point = new Point();</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">        if (bitmap != null) {</span>
+<span class="nc" id="L122">            point.x = bitmap.getWidth();</span>
+<span class="nc" id="L123">            point.y = bitmap.getHeight();</span>
+<span class="nc" id="L124">            bitmap.recycle();</span>
+        }
+<span class="nc" id="L126">        return point;</span>
+    }
+
+    public static Point decodePxSizeBitmapFromResource(Resources res, int id) {
+<span class="nc" id="L130">        Bitmap bitmap = BitmapFactory.decodeResource(res, id);</span>
+<span class="nc" id="L131">        Point point = new Point();</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        if (bitmap != null) {</span>
+<span class="nc" id="L133">            point.x = bitmap.getWidth();</span>
+<span class="nc" id="L134">            point.y = bitmap.getHeight();</span>
+<span class="nc" id="L135">            bitmap.recycle();</span>
+        }
+<span class="nc" id="L137">        return point;</span>
+    }
+
+    public static Bitmap decodeBase64Image(String data) {
+        try {
+<span class="nc" id="L142">            byte[] encodeByte = Base64.decode(data, Base64.DEFAULT);</span>
+<span class="nc" id="L143">            Bitmap bitmap = BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);</span>
+<span class="nc" id="L144">            return bitmap;</span>
+<span class="nc" id="L145">        } catch (Exception e) {</span>
+<span class="nc" id="L146">            e.getMessage();</span>
+<span class="nc" id="L147">            return null;</span>
+        }
+    }
+
+    private static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+<span class="nc" id="L154">        final int height = options.outHeight;</span>
+<span class="nc" id="L155">        final int width = options.outWidth;</span>
+<span class="nc" id="L156">        int inSampleSize = 1;</span>
+
+<span class="nc bnc" id="L158" title="All 4 branches missed.">        if (height &gt; reqHeight || width &gt; reqWidth) {</span>
+
+<span class="nc" id="L160">            final int halfHeight = height / 2;</span>
+<span class="nc" id="L161">            final int halfWidth = width / 2;</span>
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+<span class="nc bnc" id="L165" title="All 4 branches missed.">            while ((halfHeight / inSampleSize) &gt;= reqHeight</span>
+                    &amp;&amp; (halfWidth / inSampleSize) &gt;= reqWidth) {
+<span class="nc" id="L167">                inSampleSize *= 2;</span>
+            }
+        }
+
+<span class="nc" id="L171">        Timber.i(&quot;calculateInSampleSize: &quot; + inSampleSize);</span>
+<span class="nc" id="L172">        return inSampleSize;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

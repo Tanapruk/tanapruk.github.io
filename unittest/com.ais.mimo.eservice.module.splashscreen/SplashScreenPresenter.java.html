@@ -98,7 +98,7 @@ public class SplashScreenPresenter extends NextzyActivityPresenter&lt;SplashScre
     public void waitThenGoToLoginActivity() {
 <span class="nc" id="L99">        Observable.empty()</span>
 <span class="nc" id="L100">                .delay(500, TimeUnit.MILLISECONDS)</span>
-<span class="nc" id="L101">                .doOnCompleted(() -&gt; getView().checkSmsPermissionBeforeGoToLoginActivity())</span>
+<span class="nc" id="L101">                .doOnCompleted(() -&gt; getView().goToLoginActivity())</span>
 <span class="nc" id="L102">                .subscribe();</span>
 <span class="nc" id="L103">    }</span>
 

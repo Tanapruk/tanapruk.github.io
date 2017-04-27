@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NextyMemoryUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.common.utility</a> &gt; <span class="el_source">NextyMemoryUtility.java</span></div><h1>NextyMemoryUtility.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.common.utility;
+
+/**
+ * Created by thekhaeng on 1/16/2017 AD.
+ */
+
+<span class="nc" id="L7">public class NextyMemoryUtility {</span>
+    private static final int KB = 1024;
+    private static final int MB = 1048576;
+    private static final int GB = 1073741824;
+
+    /**
+     * this class use Runtime.getRuntime() to mornitor memory
+     * but you can use
+     * |ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+     * |int memoryClass = am.getMemoryClass();
+     * &lt;p&gt;
+     * you can check this link more:
+     * http://stackoverflow.com/questions/2630158/detect-application-heap-size-in-android/9428660#9428660
+     **/
+
+    public enum MemoryUnit {
+        BYTE,
+        KB,
+        MB,
+        GB
+    }
+
+    private static NextyMemoryUtility utility;
+
+    public static NextyMemoryUtility getInstance() {
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        if (utility == null) {</span>
+<span class="nc" id="L33">            utility = new NextyMemoryUtility();</span>
+        }
+<span class="nc" id="L35">        return utility;</span>
+    }
+
+    public String getAllReport(NextyMemoryUtility.MemoryUnit unit) {
+<span class="nc" id="L39">        String report = &quot;&quot;;</span>
+<span class="nc" id="L40">        report += &quot;\nMemory Total: &quot; + getTotalMemory(unit) + &quot; &quot; + unit.toString();</span>
+<span class="nc" id="L41">        report += &quot;\nMemory Max: &quot; + getMaxMemory(unit) + &quot; &quot; + unit.toString();</span>
+<span class="nc" id="L42">        report += &quot;\nMemory Free: &quot; + getFreeMemory(unit) + &quot; &quot; + unit.toString();</span>
+<span class="nc" id="L43">        report += &quot;\nMemory Usage: &quot; + getUsageMemory(unit) + &quot; &quot; + unit.toString();</span>
+<span class="nc" id="L44">        return report;</span>
+    }
+
+    public double getTotalMemory(NextyMemoryUtility.MemoryUnit unit) {
+<span class="nc" id="L48">        return byteToMemorySize(Runtime.getRuntime().totalMemory(), unit);</span>
+    }
+
+    public double getMaxMemory(NextyMemoryUtility.MemoryUnit unit) {
+<span class="nc" id="L52">        return byteToMemorySize(Runtime.getRuntime().maxMemory(), unit);</span>
+    }
+
+    public double getFreeMemory(NextyMemoryUtility.MemoryUnit unit) {
+<span class="nc" id="L56">        return byteToMemorySize(Runtime.getRuntime().freeMemory(), unit);</span>
+    }
+
+    public double getUsageMemory(NextyMemoryUtility.MemoryUnit unit) {
+<span class="nc" id="L60">        Runtime rt = Runtime.getRuntime();</span>
+<span class="nc" id="L61">        return byteToMemorySize(rt.totalMemory() - rt.freeMemory(), unit);</span>
+    }
+
+    private long memorySizeToByte(long memorySize, NextyMemoryUtility.MemoryUnit unit) {
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        if (memorySize &lt; 0) return -1;</span>
+<span class="nc bnc" id="L66" title="All 4 branches missed.">        switch (unit) {</span>
+            default:
+            case BYTE:
+<span class="nc" id="L69">                return memorySize;</span>
+            case KB:
+<span class="nc" id="L71">                return memorySize * NextyMemoryUtility.KB;</span>
+            case MB:
+<span class="nc" id="L73">                return memorySize * NextyMemoryUtility.MB;</span>
+            case GB:
+<span class="nc" id="L75">                return memorySize * NextyMemoryUtility.GB;</span>
+        }
+    }
+
+    private double byteToMemorySize(long byteNum, NextyMemoryUtility.MemoryUnit unit) {
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        if (byteNum &lt; 0) return -1;</span>
+<span class="nc bnc" id="L81" title="All 4 branches missed.">        switch (unit) {</span>
+            default:
+            case BYTE:
+<span class="nc" id="L84">                return (double) byteNum;</span>
+            case KB:
+<span class="nc" id="L86">                return (double) byteNum / NextyMemoryUtility.KB;</span>
+            case MB:
+<span class="nc" id="L88">                return (double) byteNum / NextyMemoryUtility.MB;</span>
+            case GB:
+<span class="nc" id="L90">                return (double) byteNum / NextyMemoryUtility.GB;</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

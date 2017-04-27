@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CurrentPackagePresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.home.module.summaryinfo.currentpackage</a> &gt; <span class="el_source">CurrentPackagePresenter.java</span></div><h1>CurrentPackagePresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.home.module.summaryinfo.currentpackage;
+
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.event.GotoCurrentPackageEvent;
+import com.nextzy.myais.common.iswop.http.IswopManager;
+import com.nextzy.myais.common.mvp.NextzyFragmentPresenter;
+import com.nextzy.myais.home.helper.summarypackage.model.MyPackageSummaryData;
+import com.nextzy.myais.home.helper.summarypackage.model.MyPackageSummaryResult;
+import com.nextzy.myais.home.helper.summarypackage.network.SummaryPackageManager;
+import com.nextzy.myais.home.module.summaryinfo.event.DetachCurrentPackageEvent;
+import com.nextzy.myais.home.module.summaryinfo.roaming.utility.RoamingInfoUtility;
+import com.nextzy.myais.home.module.summaryinfo.summarypackage.PackageDetail;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import rx.Observable;
+
+/**
+ * Created by Akexorcist on 10/14/2016 AD.
+ */
+
+public class CurrentPackagePresenter extends NextzyFragmentPresenter&lt;CurrentPackageContractor.View&gt; implements CurrentPackageContractor.Presenter {
+
+    public static CurrentPackagePresenter createPresenter(CurrentPackageContractor.View view) {
+<span class="nc" id="L29">        return new CurrentPackagePresenter(view);</span>
+    }
+
+    public CurrentPackagePresenter(CurrentPackageContractor.View view) {
+<span class="fc" id="L33">        super(view);</span>
+<span class="fc" id="L34">    }</span>
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L38">        RxBus.get().register(this);</span>
+<span class="nc" id="L39">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L43">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L44">    }</span>
+
+    @Override
+    public void getCurrentPackageService() {
+<span class="fc" id="L48">        getView().showLoading();</span>
+<span class="fc" id="L49">        getMyPackageSummaryWithDelay();</span>
+<span class="fc" id="L50">    }</span>
+
+    @Override
+    public void onGoToCurrentPackageEvent() {
+//        if (Mobile.getInstance().isPostpaid() &amp;&amp; !Mobile.getInstance().isBos()) {
+//            RxBus.get().post(new GotoCqsEvent());
+//        } else {
+<span class="fc" id="L57">        RxBus.get().post(new GotoCurrentPackageEvent());</span>
+//        }
+<span class="fc" id="L59">    }</span>
+
+    @Override
+    public void setMyPackageSummaryResult(MyPackageSummaryResult result) {
+<span class="pc bpc" id="L63" title="1 of 4 branches missed.">        if (result != null &amp;&amp; result.hasData()) {</span>
+<span class="fc" id="L64">            List&lt;PackageDetail&gt; mainPackageDetailList = createMainPackageDetailListByMyPackageSummaryData(result.getData());</span>
+<span class="pc bpc" id="L65" title="1 of 4 branches missed.">            if (mainPackageDetailList != null &amp;&amp; mainPackageDetailList.size() &gt; 0) {</span>
+<span class="fc" id="L66">                getView().showCurrentMainPackage(mainPackageDetailList);</span>
+<span class="fc" id="L67">                getView().showMainPackageDetail();</span>
+            } else {
+<span class="fc" id="L69">                getView().hideMainPackageDetail();</span>
+            }
+<span class="fc" id="L71">            List&lt;PackageDetail&gt; onTopPackageDetailList = createOnTopPackageDetailListByMyPackageSummaryData(result.getData());</span>
+<span class="pc bpc" id="L72" title="1 of 4 branches missed.">            if (onTopPackageDetailList != null &amp;&amp; onTopPackageDetailList.size() &gt; 0) {</span>
+<span class="fc" id="L73">                getView().showCurrentOnTopPackage(onTopPackageDetailList);</span>
+<span class="fc" id="L74">                getView().showOnTopPackageDetail();</span>
+            } else {
+<span class="fc" id="L76">                getView().hideOnTopPackageDetail();</span>
+            }
+<span class="fc" id="L78">            getView().hideLoading();</span>
+<span class="fc" id="L79">        } else {</span>
+<span class="fc" id="L80">            RxBus.get().post(new DetachCurrentPackageEvent());</span>
+        }
+<span class="fc" id="L82">    }</span>
+
+    @Subscribe
+    public void onMyPackageSummaryResult(MyPackageSummaryResult result) {
+<span class="fc" id="L86">        setMyPackageSummaryResult(result);</span>
+<span class="fc" id="L87">    }</span>
+
+    public void getMyPackageSummaryWithDelay() {
+<span class="nc" id="L90">        Observable.empty()</span>
+<span class="nc" id="L91">                .delay(400, TimeUnit.MILLISECONDS)</span>
+<span class="nc" id="L92">                .doOnCompleted(() -&gt; SummaryPackageManager.getInstance().getMyPackageSummary())</span>
+<span class="nc" id="L93">                .subscribe();</span>
+<span class="nc" id="L94">    }</span>
+
+    public List&lt;PackageDetail&gt; createMainPackageDetailListByMyPackageSummaryData(MyPackageSummaryData data) {
+<span class="fc" id="L97">        List&lt;PackageDetail&gt; packageDetailList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L98" title="All 4 branches covered.">        if (data != null &amp;&amp; data.isPackageListAvailable()) {</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">            for (MyPackageSummaryData.Package packageItem : data.getPackageList()) {</span>
+<span class="pc bpc" id="L100" title="3 of 6 branches missed.">                if (packageItem != null &amp;&amp; !packageItem.isDummyPackage() &amp;&amp; !isRoamingPackage(packageItem.getName())) {</span>
+<span class="fc" id="L101">                    String name = packageItem.getName();</span>
+<span class="fc" id="L102">                    String description = packageItem.getDescription();</span>
+<span class="fc" id="L103">                    PackageDetail packageDetail = null;</span>
+<span class="pc bpc" id="L104" title="2 of 4 branches missed.">                    if (description != null &amp;&amp; !description.isEmpty()) {</span>
+<span class="fc" id="L105">                        packageDetail = new PackageDetail(null, description);</span>
+<span class="nc bnc" id="L106" title="All 4 branches missed.">                    } else if (name != null &amp;&amp; !name.isEmpty()) {</span>
+<span class="nc" id="L107">                        packageDetail = new PackageDetail(null, name);</span>
+                    }
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">                    if (packageDetail != null) {</span>
+<span class="fc" id="L110">                        packageDetailList.add(packageDetail);</span>
+                    }
+                }
+<span class="fc" id="L113">            }</span>
+        }
+<span class="fc" id="L115">        return packageDetailList;</span>
+    }
+
+    public boolean isRoamingPackage(String packageName) {
+<span class="fc" id="L119">        return RoamingInfoUtility.getInstance().isRoamingPackage(packageName);</span>
+    }
+
+    public List&lt;PackageDetail&gt; createOnTopPackageDetailListByMyPackageSummaryData(MyPackageSummaryData data) {
+<span class="fc" id="L123">        List&lt;PackageDetail&gt; packageDetailList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L124" title="All 4 branches covered.">        if (data != null &amp;&amp; data.isValueAddedListAvailable()) {</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">            for (MyPackageSummaryData.ValueAdded valueAddedItem : data.getValueAddedList()) {</span>
+<span class="pc bpc" id="L126" title="1 of 2 branches missed.">                if (valueAddedItem != null) {</span>
+<span class="fc" id="L127">                    PackageDetail packageDetail = new PackageDetail(null, valueAddedItem.getServiceName());</span>
+<span class="fc" id="L128">                    packageDetailList.add(packageDetail);</span>
+                }
+<span class="fc" id="L130">            }</span>
+        }
+<span class="fc" id="L132">        return packageDetailList;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

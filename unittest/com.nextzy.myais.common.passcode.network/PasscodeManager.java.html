@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PasscodeManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.common.passcode.network</a> &gt; <span class="el_source">PasscodeManager.java</span></div><h1>PasscodeManager.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.common.passcode.network;
+
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.database.model.SaveRealmResult;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.network.subscriber.NextzySimpleSubscriber;
+import com.nextzy.myais.common.network.worker.GenericNetworkController;
+import com.nextzy.myais.common.network.worker.SchedulersAndErrorHandling;
+import com.nextzy.myais.common.passcode.network.api.PasscodeApi;
+import com.nextzy.myais.common.passcode.network.api.PasscodeService;
+import com.nextzy.myais.common.passcode.network.operators.BindFingerScanCheck;
+import com.nextzy.myais.common.passcode.network.operators.DisableFingerScanCheck;
+import com.nextzy.myais.common.passcode.network.request.BindFingerScanBody;
+import com.nextzy.myais.common.passcode.network.request.DisableFingerScanBody;
+import com.nextzy.myais.common.passcode.network.response.BindFingerScanResult;
+import com.nextzy.myais.common.passcode.network.response.DisableFingerScanResult;
+
+import rx.Single;
+
+/**
+ * Created by thekhaeng on 1/26/2017 AD.
+ */
+
+public class PasscodeManager extends GenericNetworkController {
+    public static final String SERVICE_BIND_FINGER_SCAN = &quot;service_bind_finger_scan&quot;;
+    public static final String SERVICE_DISABLE_FINGER_SCAN = &quot;service_disable_finger_scan&quot;;
+    public static final String ERROR_TOUCH_ID_EXPIRED = &quot;SSBE360&quot;;
+    public static final String ERROR_TOUCH_ID_FAIL = &quot;SSBE361&quot;;
+
+    private static PasscodeManager instance;
+    private PasscodeApi passcodeApi;
+
+    public static PasscodeManager getInstance(){
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        if( instance == null ){</span>
+<span class="nc" id="L35">            instance = new PasscodeManager();</span>
+        }
+<span class="nc" id="L37">        return instance;</span>
+    }
+
+<span class="nc" id="L40">    private PasscodeManager(){</span>
+<span class="nc" id="L41">    }</span>
+
+    // inject for testing
+    public void setMockApi(PasscodeApi mockApi ){
+<span class="nc" id="L45">        passcodeApi = mockApi;</span>
+<span class="nc" id="L46">    }</span>
+
+    public PasscodeApi getPasscodeApi(){
+<span class="nc" id="L49">        return passcodeApi;</span>
+    }
+
+    public void requestBindFingerScan( String mobileNum, BindFingerScanBody body ){
+<span class="nc" id="L53">        String serviceName = SERVICE_BIND_FINGER_SCAN;</span>
+<span class="nc" id="L54">        getSingleBindFingerScan( mobileNum, body, serviceName )</span>
+<span class="nc" id="L55">                .subscribe( new NextzySimpleSubscriber&lt;&gt;( serviceName ) );</span>
+<span class="nc" id="L56">    }</span>
+    public void requestDisableFingerScan( String mobileNum, DisableFingerScanBody body ){
+<span class="nc" id="L58">        String serviceName = SERVICE_DISABLE_FINGER_SCAN;</span>
+<span class="nc" id="L59">        getSingleDisableFingerScan( mobileNum, body, serviceName )</span>
+<span class="nc" id="L60">                .subscribe( new NextzySimpleSubscriber&lt;&gt;( serviceName ) );</span>
+<span class="nc" id="L61">    }</span>
+
+
+    /*******************/
+    /** Create Single **/
+    /*******************/
+    //&lt;editor-fold desc=&quot;Create Single folding&quot;&gt;
+
+    public Single&lt;BindFingerScanResult&gt; getSingleBindFingerScan(String mobileNum,
+                                                                BindFingerScanBody body,
+                                                                String serviceName){
+<span class="nc" id="L72">        return PasscodeService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L73">                .getRxApi( getPasscodeApi() )</span>
+<span class="nc" id="L74">                .bindFingerScan(</span>
+<span class="nc" id="L75">                        new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(),</span>
+                        mobileNum,
+                        body )
+<span class="nc" id="L78">                .compose( new SchedulersAndErrorHandling&lt;&gt;(</span>
+                        BindFingerScanResult.class,
+                        serviceName ) )
+<span class="nc" id="L81">                .flatMap( new BindFingerScanCheck() )</span>
+<span class="nc" id="L82">                .map( new SaveRealmResult&lt;&gt;( serviceName ) );</span>
+    }
+    public Single&lt;DisableFingerScanResult&gt; getSingleDisableFingerScan(String mobileNum,
+                                                                      DisableFingerScanBody body,
+                                                                      String serviceName){
+<span class="nc" id="L87">        return PasscodeService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L88">                .getRxApi( getPasscodeApi() )</span>
+<span class="nc" id="L89">                .disableFingerScan(</span>
+<span class="nc" id="L90">                        new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(),</span>
+                        mobileNum,
+                        body )
+<span class="nc" id="L93">                .compose( new SchedulersAndErrorHandling&lt;&gt;(</span>
+                        DisableFingerScanResult.class,
+                        serviceName ) )
+<span class="nc" id="L96">                .flatMap( new DisableFingerScanCheck() )</span>
+<span class="nc" id="L97">                .map( new SaveRealmResult&lt;&gt;( serviceName ) );</span>
+    }
+    //&lt;/editor-fold&gt;
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -72,13 +72,13 @@ public class MyAccountManager extends GenericNetworkController {
 
 
     public void requestCheckChangeEmail(String mobileNum, CheckChangeEmailBody body) {
-<span class="fc" id="L75">        String serviceName = SERVICE_CHECK_CHANGE_EMAIL;</span>
+<span class="nc" id="L75">        String serviceName = SERVICE_CHECK_CHANGE_EMAIL;</span>
 <span class="nc" id="L76">        checkChangeEmailSingle(mobileNum, body, serviceName)</span>
 <span class="nc" id="L77">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(serviceName));</span>
 <span class="nc" id="L78">    }</span>
 
     public void requestChangeEmail(String mobileNum, ChangeEmailBody body) {
-<span class="fc" id="L81">        String serviceName = SERVICE_CHANGE_EMAIL;</span>
+<span class="nc" id="L81">        String serviceName = SERVICE_CHANGE_EMAIL;</span>
 <span class="nc" id="L82">        changeEmailSingle(mobileNum, body, serviceName)</span>
 <span class="nc" id="L83">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(serviceName));</span>
 <span class="nc" id="L84">    }</span>
@@ -121,7 +121,7 @@ public class MyAccountManager extends GenericNetworkController {
     private Single&lt;CheckChangeEmailResult&gt; checkChangeEmailSingle(String mobileNumber,
                                                                   CheckChangeEmailBody body,
                                                                   String serviceName) {
-<span class="pc" id="L124">        return MyAccountService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L124">        return MyAccountService.newInstance(URL.getSSB())</span>
 <span class="nc" id="L125">                .getRxApi(getMyAccountApi())</span>
 <span class="nc" id="L126">                .getCheckChangeEmail(</span>
 <span class="nc" id="L127">                        new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(),</span>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DataPackageManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.promotion.helper.datapackage.network</a> &gt; <span class="el_source">DataPackageManager.java</span></div><h1>DataPackageManager.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.promotion.helper.datapackage.network;
+
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.database.model.SaveRealmResult;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.network.subscriber.NextzySimpleSubscriber;
+import com.nextzy.myais.common.network.worker.GenericNetworkController;
+import com.nextzy.myais.common.network.worker.SchedulersAndErrorHandling;
+import com.nextzy.myais.promotion.helper.datapackage.model.request.EncryptTextBody;
+import com.nextzy.myais.promotion.helper.datapackage.model.response.EncryptTextResult;
+import com.nextzy.myais.promotion.helper.datapackage.operator.EncryptTextResultCheck;
+
+import rx.Single;
+
+/**
+ * Created by kajornsak on 9/13/2016 AD.
+ */
+
+<span class="fc" id="L20">public class DataPackageManager extends GenericNetworkController {</span>
+    private static DataPackageManager instance;
+    public static final String SERVICE_NAME_ENCRYPT_TEXT = &quot;encrypt_text&quot;;
+
+
+    public static DataPackageManager getInstance() {
+<span class="nc bnc" id="L26" title="All 2 branches missed.">        if (instance == null) {</span>
+<span class="nc" id="L27">            instance = new DataPackageManager();</span>
+        }
+<span class="nc" id="L29">        return instance;</span>
+    }
+
+    DataPackageApi dataPackageApi;
+
+    public DataPackageApi getTransferApi() {
+<span class="fc" id="L35">        return dataPackageApi;</span>
+    }
+
+    public void setDataPackageApi(DataPackageApi dataPackageApi) {
+<span class="fc" id="L39">        this.dataPackageApi = dataPackageApi;</span>
+<span class="fc" id="L40">    }</span>
+
+
+    protected Single&lt;EncryptTextResult&gt; getEncryptText() {
+<span class="fc" id="L44">        EncryptTextBody encryptTextBody = new EncryptTextBody(&quot;ONLINE_TRACKING&quot;);</span>
+
+<span class="fc" id="L46">        return DataPackageApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L47">                .getRxApi(getTransferApi())</span>
+<span class="fc" id="L48">                .getEncryptText(</span>
+<span class="fc" id="L49">                        new EventLogParam(&quot;APP_VIEW_EXTRA_PACKAGE&quot;, &quot;5001&quot;, &quot;5020&quot;).getEventLogHeader(),</span>
+<span class="fc" id="L50">                        Mobile.getInstance().getMobileNumber(),</span>
+                        encryptTextBody)
+<span class="fc" id="L52">                .compose(new SchedulersAndErrorHandling&lt;&gt;(EncryptTextResult.class, SERVICE_NAME_ENCRYPT_TEXT))</span>
+<span class="fc" id="L53">                .flatMap(new EncryptTextResultCheck())</span>
+<span class="fc" id="L54">                .map(new SaveRealmResult&lt;EncryptTextResult&gt;(SERVICE_NAME_ENCRYPT_TEXT));</span>
+    }
+
+    public void getEncryptTextImpl() {
+<span class="nc" id="L58">        getEncryptText().subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_ENCRYPT_TEXT));</span>
+<span class="nc" id="L59">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

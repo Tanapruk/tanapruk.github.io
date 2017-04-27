@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChangePackagePresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.promotion.module.changepackage</a> &gt; <span class="el_source">ChangePackagePresenter.java</span></div><h1>ChangePackagePresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.promotion.module.changepackage;
+
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.mvp.NextzyActivityPresenter;
+import com.nextzy.myais.promotion.module.changepackage.event.GoToApplyPackageEvent;
+import com.nextzy.myais.promotion.module.changepackage.event.GoToEffectiveOptionEvent;
+import com.nextzy.myais.promotion.module.changepackage.event.GoToOnSpotPaymentEvent;
+import com.nextzy.myais.promotion.module.changepackage.event.GoToPackageDetailEvent;
+
+import java.util.ArrayList;
+
+/**
+ * Created by Akexorcist on 9/29/2016 AD.
+ */
+
+public class ChangePackagePresenter extends NextzyActivityPresenter&lt;ChangePackageContractor.View&gt; implements ChangePackageContractor.Presenter {
+    private String groupCode;
+
+    public static ChangePackagePresenter createPresenter(ChangePackageContractor.View view) {
+<span class="nc" id="L21">        return new ChangePackagePresenter(view);</span>
+    }
+
+    private ChangePackagePresenter(ChangePackageContractor.View view) {
+<span class="nc" id="L25">        super(view);</span>
+<span class="nc" id="L26">    }</span>
+
+    @Override
+    public void onViewStart() {
+<span class="nc" id="L30">        super.onViewStart();</span>
+<span class="nc" id="L31">        RxBus.get().register(this);</span>
+<span class="nc" id="L32">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L36">        super.onViewStop();</span>
+<span class="nc" id="L37">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L38">    }</span>
+
+    @Override
+    public void setGroupCode(String groupCode) {
+<span class="nc" id="L42">        this.groupCode = groupCode;</span>
+<span class="nc" id="L43">    }</span>
+
+    @Override
+    public String getGroupCode() {
+<span class="nc" id="L47">        return groupCode;</span>
+    }
+
+    @Subscribe
+    public void onGoToChangePackageStep2Event(GoToPackageDetailEvent event) {
+<span class="nc" id="L52">        getView().goToPackageDetailStep(event.getGroupCode(),</span>
+<span class="nc" id="L53">                event.getTabTitle(),</span>
+<span class="nc" id="L54">                event.getTabCode(),</span>
+<span class="nc" id="L55">                event.getPackageId(),</span>
+<span class="nc" id="L56">                event.getFee(),</span>
+<span class="nc" id="L57">                event.getAccessNumber(),</span>
+<span class="nc" id="L58">                event.getTermAndCondition(),</span>
+<span class="nc" id="L59">                event.getCategoryColor());</span>
+<span class="nc" id="L60">    }</span>
+
+    @Subscribe
+    public void onGoToChangePackageStep3Event(GoToEffectiveOptionEvent event) {
+<span class="nc" id="L64">        ArrayList&lt;String&gt; specialMobileNumberList = null;</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        if (event.getSpecialNumberList() != null) {</span>
+<span class="nc" id="L66">            specialMobileNumberList = new ArrayList&lt;&gt;(event.getSpecialNumberList());</span>
+        }
+<span class="nc" id="L68">        getView().goToEffectiveOptionStep(event.getGroupCode(),</span>
+<span class="nc" id="L69">                event.getTabCode(),</span>
+<span class="nc" id="L70">                event.getPackageId(),</span>
+<span class="nc" id="L71">                event.getTermAndCondition(),</span>
+                specialMobileNumberList);
+<span class="nc" id="L73">    }</span>
+
+    @Subscribe
+    public void onGoToChangePackageStep3CorporateEvent(GoToOnSpotPaymentEvent event) {
+<span class="nc" id="L77">        ArrayList&lt;String&gt; specialMobileNumberList = null;</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (event.getSpecialNumberList() != null) {</span>
+<span class="nc" id="L79">            specialMobileNumberList = new ArrayList&lt;&gt;(event.getSpecialNumberList());</span>
+        }
+<span class="nc" id="L81">        getView().goToOnSpotPaymentStep(event.getGroupCode(),</span>
+<span class="nc" id="L82">                event.getTabCode(),</span>
+<span class="nc" id="L83">                event.getPackageId(),</span>
+<span class="nc" id="L84">                event.getFee(),</span>
+<span class="nc" id="L85">                event.getTermAndCondition(),</span>
+                specialMobileNumberList);
+<span class="nc" id="L87">    }</span>
+
+    @Subscribe
+    public void onGoToChangePackageStep4Event(GoToApplyPackageEvent event) {
+<span class="nc" id="L91">        ArrayList&lt;String&gt; specialMobileNumberList = null;</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        if (event.getSpecialNumberList() != null) {</span>
+<span class="nc" id="L93">            specialMobileNumberList = new ArrayList&lt;&gt;(event.getSpecialNumberList());</span>
+        }
+<span class="nc" id="L95">        getView().goToApplyPackageStep(event.getGroupCode(),</span>
+<span class="nc" id="L96">                event.getEffectiveOption(),</span>
+<span class="nc" id="L97">                event.getTabCode(),</span>
+<span class="nc" id="L98">                event.getPackageId(),</span>
+<span class="nc" id="L99">                event.getTermAndCondition(),</span>
+                specialMobileNumberList);
+<span class="nc" id="L101">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BundleManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.promotion.helper.roaming.util</a> &gt; <span class="el_source">BundleManager.java</span></div><h1>BundleManager.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.promotion.helper.roaming.util;
+
+import android.content.Intent;
+import android.os.Bundle;
+
+import com.nextzy.myais.promotion.helper.roaming.model.UpPackCDATA;
+import com.nextzy.myais.promotion.helper.roaming.model.UpSupportResult;
+
+
+/**
+ * Created by trusttanapruk on 9/25/15 AD.
+ */
+public class BundleManager {
+
+
+<span class="nc" id="L16">    final String CUSTOMER_TYPE = &quot;chosenCustomerType&quot;;</span>
+<span class="nc" id="L17">    final String COUNTRY_NAME = &quot;chosenCountryName&quot;;</span>
+<span class="nc" id="L18">    final String COUNTRY_NAME_EN = &quot;chosenCountryNameEn&quot;;</span>
+<span class="nc" id="L19">    final String PACKAGE_TYPE = &quot;chosenPackageType&quot;;</span>
+<span class="nc" id="L20">    final String UPPACK_CDATA = &quot;upPackCDATA&quot;;</span>
+<span class="nc" id="L21">    final String UPSUPPORT_RESULT = &quot;UpSupportResult&quot;;</span>
+
+<span class="nc" id="L23">    final String IS3G_STRING = &quot;is3GString&quot;;</span>
+<span class="nc" id="L24">    final String ISPREPAID_STRING = &quot;isPrepaidString&quot;;</span>
+<span class="nc" id="L25">    final String PACKAGE_TYPE_STRING = &quot;packageTypeString&quot;;</span>
+<span class="nc" id="L26">    final String PACKAGE_NO = &quot;packageNumber&quot;;</span>
+
+<span class="nc" id="L28">    final String START_DATE_TIME_IN_THAI = &quot;startDateTimeInThailand&quot;;</span>
+<span class="nc" id="L29">    final String END_DATE_TIME_IN_THAI = &quot;endDateTimeInThailand&quot;;</span>
+<span class="nc" id="L30">    final String DT = &quot;dt&quot;;</span>
+
+    final Bundle bundle;
+    Intent intent;
+
+<span class="nc" id="L35">    public BundleManager() {</span>
+<span class="nc" id="L36">        bundle = new Bundle();</span>
+<span class="nc" id="L37">    }</span>
+
+<span class="nc" id="L39">    public BundleManager(Intent intent) {</span>
+<span class="nc" id="L40">        bundle = new Bundle();</span>
+<span class="nc" id="L41">        this.intent = intent;</span>
+<span class="nc" id="L42">    }</span>
+
+    public void setIntent(Intent intent) {
+<span class="nc" id="L45">        this.intent = intent;</span>
+<span class="nc" id="L46">    }</span>
+
+
+    public Bundle build() {
+<span class="nc" id="L50">        return bundle;</span>
+    }
+
+
+    public BundleManager addIs3GString(String is3GString) {
+<span class="nc" id="L55">        bundle.putString(IS3G_STRING, is3GString);</span>
+<span class="nc" id="L56">        return this;</span>
+    }
+
+    public BundleManager addIsPrepaidString(String isPrepaidString) {
+<span class="nc" id="L60">        bundle.putString(ISPREPAID_STRING, isPrepaidString);</span>
+<span class="nc" id="L61">        return this;</span>
+    }
+
+    public BundleManager addPackageTypeString(String packageTypeString) {
+<span class="nc" id="L65">        bundle.putString(PACKAGE_TYPE_STRING, packageTypeString);</span>
+<span class="nc" id="L66">        return this;</span>
+    }
+
+    public BundleManager addChosenCustomerType(String chosenCustomerType) {
+<span class="nc" id="L70">        bundle.putString(CUSTOMER_TYPE, chosenCustomerType);</span>
+<span class="nc" id="L71">        return this;</span>
+    }
+
+    public BundleManager addChosenCountryNameEn(String chosenCustomerNameEn) {
+<span class="nc" id="L75">        bundle.putString(COUNTRY_NAME_EN, chosenCustomerNameEn);</span>
+
+<span class="nc" id="L77">        return this;</span>
+    }
+
+    public BundleManager addChosenCountryName(String chosenCustomerName) {
+<span class="nc" id="L81">        bundle.putString(COUNTRY_NAME, chosenCustomerName);</span>
+
+<span class="nc" id="L83">        return this;</span>
+    }
+
+    public BundleManager addChosenPackageType(String chosenPackageType) {
+<span class="nc" id="L87">        bundle.putString(PACKAGE_TYPE, chosenPackageType);</span>
+
+<span class="nc" id="L89">        return this;</span>
+    }
+
+    public BundleManager addUpPackCDATA(UpPackCDATA upPackCDATA) {
+//        bundle.putParcelable(UPPACK_CDATA, Parcels.wrap(upPackCDATA));
+<span class="nc" id="L94">        return this;</span>
+    }
+
+
+    public BundleManager addUpSupportResult(UpSupportResult upSupportResult) {
+//        bundle.putParcelable(UPSUPPORT_RESULT, Parcels.wrap(upSupportResult));
+<span class="nc" id="L100">        return this;</span>
+    }
+
+    public BundleManager addPackageNo(int packageNo) {
+<span class="nc" id="L104">        bundle.putInt(PACKAGE_NO, packageNo);</span>
+<span class="nc" id="L105">        return this;</span>
+    }
+
+    public BundleManager addStartDateTimeInThai(String startDateTimeInThailand) {
+<span class="nc" id="L109">        bundle.putString(START_DATE_TIME_IN_THAI, startDateTimeInThailand);</span>
+<span class="nc" id="L110">        return this;</span>
+    }
+
+    public BundleManager addEndDateTimeInThai(String endDateTimeInThailand) {
+<span class="nc" id="L114">        bundle.putString(END_DATE_TIME_IN_THAI, endDateTimeInThailand);</span>
+<span class="nc" id="L115">        return this;</span>
+    }
+
+    public BundleManager addDt(String dt) {
+<span class="nc" id="L119">        bundle.putString(DT, dt);</span>
+<span class="nc" id="L120">        return this;</span>
+    }
+
+
+    public String getStartDateTimeInThai() {
+<span class="nc" id="L125">        return intent.getStringExtra(START_DATE_TIME_IN_THAI);</span>
+    }
+
+    public String getEndDateTimeInThai() {
+<span class="nc" id="L129">        return intent.getStringExtra(END_DATE_TIME_IN_THAI);</span>
+    }
+
+    public String getDt() {
+<span class="nc" id="L133">        return intent.getStringExtra(DT);</span>
+    }
+
+
+    public String getIs3GString() {
+<span class="nc" id="L138">        return intent.getStringExtra(IS3G_STRING);</span>
+    }
+
+    public String getIsPrepaidString() {
+<span class="nc" id="L142">        return intent.getStringExtra(ISPREPAID_STRING);</span>
+    }
+
+    public String getPackageTypeString() {
+<span class="nc" id="L146">        return intent.getStringExtra(PACKAGE_TYPE_STRING);</span>
+    }
+
+    public String getChosenCustomerType() {
+<span class="nc" id="L150">        return intent.getStringExtra(CUSTOMER_TYPE);</span>
+    }
+
+
+    public String getChosenCountryName() {
+<span class="nc" id="L155">        return intent.getStringExtra(COUNTRY_NAME);</span>
+    }
+
+    public String getChosenCountryNameEn() {
+<span class="nc" id="L159">        return intent.getStringExtra(COUNTRY_NAME_EN);</span>
+    }
+
+    public String getChosenPackageType() {
+<span class="nc" id="L163">        return intent.getStringExtra(PACKAGE_TYPE);</span>
+    }
+
+    public int getPackageNo() {
+<span class="nc" id="L167">        return intent.getIntExtra(PACKAGE_NO, 1);</span>
+    }
+
+//    public UpPackCDATA getUpPackCDATA() {
+//        return Parcels.unwrap(intent.getParcelableExtra(UPPACK_CDATA));
+//    }
+
+//    public UpSupportResult getUpSupportResult() {
+//        return Parcels.unwrap(intent.getParcelableExtra(UPSUPPORT_RESULT));
+//    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BaseChangePackagePresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.promotion.module.changepackage.common</a> &gt; <span class="el_source">BaseChangePackagePresenter.java</span></div><h1>BaseChangePackagePresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.promotion.module.changepackage.common;
+
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.mvp.NextzyFragmentPresenter;
+import com.nextzy.myais.promotion.module.changepackage.model.BaseChangePackageItem;
+import com.nextzy.myais.promotion.module.changepackage.model.ButtonConfirmItem;
+import com.nextzy.myais.promotion.module.changepackage.model.ButtonNextItem;
+import com.nextzy.myais.promotion.module.changepackage.model.CorporateTitleItem;
+import com.nextzy.myais.promotion.module.changepackage.model.EmptyItem;
+import com.nextzy.myais.promotion.module.changepackage.model.PostpaidTitleItem;
+import com.nextzy.myais.promotion.module.changepackage.model.PrepaidTitleItem;
+import com.nextzy.myais.promotion.module.changepackage.model.StepIndicatorItem;
+import com.nextzy.myais.promotion.module.changepackage.model.TermAndConditionItem;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Created by Akexorcist on 10/12/2016 AD.
+ */
+
+public abstract class BaseChangePackagePresenter&lt;CV extends BaseChangePackageContractorView&gt; extends NextzyFragmentPresenter&lt;CV&gt; implements BaseChangePackageContractorPresenter {
+    private String groupCode;
+    private String tabCode;
+    private String billingCycle;
+    private String termAndCondition;
+
+    protected BaseChangePackagePresenter(CV view) {
+<span class="nc" id="L30">        super(view);</span>
+<span class="nc" id="L31">    }</span>
+
+    @Override
+    public void setGroupCode(String groupCode) {
+<span class="nc" id="L35">        this.groupCode = groupCode;</span>
+<span class="nc" id="L36">    }</span>
+
+    @Override
+    public String getGroupCode() {
+<span class="nc" id="L40">        return groupCode;</span>
+    }
+
+    @Override
+    public void setBillingCycle(String billingCycle) {
+<span class="nc" id="L45">        this.billingCycle = billingCycle;</span>
+<span class="nc" id="L46">    }</span>
+
+    @Override
+    public String getBillingCycle() {
+<span class="nc" id="L50">        return billingCycle;</span>
+    }
+
+    @Override
+    public void setTabCode(String tabCode) {
+<span class="nc" id="L55">        this.tabCode = tabCode;</span>
+<span class="nc" id="L56">    }</span>
+
+    @Override
+    public String getTabCode() {
+<span class="nc" id="L60">        return tabCode;</span>
+    }
+
+    @Override
+    public void setTermAndCondition(String termAndCondition) {
+<span class="nc" id="L65">        this.termAndCondition = termAndCondition;</span>
+<span class="nc" id="L66">    }</span>
+
+    @Override
+    public String getTermAndCondition() {
+<span class="nc" id="L70">        return termAndCondition;</span>
+    }
+
+    @Override
+    public void onTermAndConditionClick() {
+<span class="nc" id="L75">        getView().openTermAndConditionDialog(getTermAndCondition());</span>
+<span class="nc" id="L76">    }</span>
+
+    protected List&lt;BaseChangePackageItem&gt; createTitleItem() {
+<span class="nc" id="L79">        List&lt;BaseChangePackageItem&gt; changePackageItemList = new ArrayList&lt;&gt;();</span>
+        // Don't rearrange this code. Corporate title are different from common mobile type.
+        // Corporate postpaid or corporate repaid are same condition.
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        if (Mobile.getInstance().isCorporate()) {</span>
+<span class="nc" id="L83">            changePackageItemList.add(createCorporateTitleItem());</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        } else if (Mobile.getInstance().isPostpaid()) {</span>
+<span class="nc" id="L85">            changePackageItemList.add(createPostpaidTitleItem(getBillingCycle()));</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        } else if (Mobile.getInstance().isPrepaid()) {</span>
+<span class="nc" id="L87">            changePackageItemList.add(createPrepaidTitleItem());</span>
+        }
+<span class="nc" id="L89">        return changePackageItemList;</span>
+    }
+
+    protected PostpaidTitleItem createPostpaidTitleItem(String billingCycle) {
+<span class="nc" id="L93">        PostpaidTitleItem postpaidTitleItem = new PostpaidTitleItem();</span>
+<span class="nc" id="L94">        postpaidTitleItem.setMobileNumber(Mobile.getInstance().getMobileNumber());</span>
+<span class="nc" id="L95">        postpaidTitleItem.setDueDate(billingCycle);</span>
+<span class="nc" id="L96">        return postpaidTitleItem;</span>
+    }
+
+    protected PrepaidTitleItem createPrepaidTitleItem() {
+<span class="nc" id="L100">        PrepaidTitleItem prepaidTitleItem = new PrepaidTitleItem();</span>
+<span class="nc" id="L101">        prepaidTitleItem.setMobileNumber(Mobile.getInstance().getMobileNumber());</span>
+<span class="nc" id="L102">        return prepaidTitleItem;</span>
+    }
+
+    protected CorporateTitleItem createCorporateTitleItem() {
+<span class="nc" id="L106">        return createCorporateTitleItem(false, false);</span>
+    }
+
+    protected CorporateTitleItem createCorporateTitleItem(boolean isOtherNumberButtonVisible, boolean isOtherNumberNameVisible) {
+<span class="nc" id="L110">        CorporateTitleItem corporateTitleItem = new CorporateTitleItem();</span>
+<span class="nc" id="L111">        corporateTitleItem.setMobileNumber(Mobile.getInstance().getMobileNumber());</span>
+<span class="nc" id="L112">        corporateTitleItem.setOtherNumberButtonVisible(isOtherNumberButtonVisible);</span>
+<span class="nc" id="L113">        corporateTitleItem.setOtherNumberNameVisible(isOtherNumberNameVisible);</span>
+<span class="nc" id="L114">        return corporateTitleItem;</span>
+    }
+
+    protected List&lt;BaseChangePackageItem&gt; createStepIndicatorItem(List&lt;Integer&gt; stepDescriptionList, int stepIndex) {
+<span class="nc" id="L118">        StepIndicatorItem stepIndicatorItem = new StepIndicatorItem();</span>
+<span class="nc" id="L119">        stepIndicatorItem.setStepDescriptionList(stepDescriptionList);</span>
+<span class="nc" id="L120">        stepIndicatorItem.setCurrentStep(stepIndex);</span>
+<span class="nc" id="L121">        return Collections.singletonList(stepIndicatorItem);</span>
+    }
+
+    protected EmptyItem createEmptyItem() {
+<span class="nc" id="L125">        return new EmptyItem();</span>
+    }
+
+    protected TermAndConditionItem createTermAndConditionItem(String termAndCondition) {
+<span class="nc" id="L129">        TermAndConditionItem item = new TermAndConditionItem();</span>
+<span class="nc" id="L130">        item.setTermAndCondition(termAndCondition);</span>
+<span class="nc" id="L131">        return item;</span>
+    }
+
+    protected ButtonNextItem createButtonNextItem() {
+<span class="nc" id="L135">        ButtonNextItem buttonNextItem = new ButtonNextItem();</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        if (Mobile.getInstance().isCorporate()) {</span>
+<span class="nc" id="L137">            buttonNextItem.setNegativeButtonCancel(true);</span>
+        }
+<span class="nc" id="L139">        return buttonNextItem;</span>
+    }
+
+    protected ButtonConfirmItem createButtonConfirmationItem() {
+<span class="nc" id="L143">        return new ButtonConfirmItem();</span>
+    }
+
+    protected String getServiceGroupCode() {
+<span class="nc bnc" id="L147" title="All 2 branches missed.">        return Mobile.getInstance().isPrepaid() ? &quot;pre_&quot; + getGroupCode() : getGroupCode();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

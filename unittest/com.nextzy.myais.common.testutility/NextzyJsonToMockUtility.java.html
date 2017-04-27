@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NextzyJsonToMockUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.common.testutility</a> &gt; <span class="el_source">NextzyJsonToMockUtility.java</span></div><h1>NextzyJsonToMockUtility.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.common.testutility;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+<span class="nc" id="L10">public class NextzyJsonToMockUtility {</span>
+    private static NextzyJsonToMockUtility util;
+
+    public static NextzyJsonToMockUtility getInstance() {
+<span class="nc bnc" id="L14" title="All 2 branches missed.">        if (util == null) {</span>
+<span class="nc" id="L15">            util = new NextzyJsonToMockUtility();</span>
+        }
+<span class="nc" id="L17">        return util;</span>
+    }
+
+    public &lt;T&gt; T getJsonToMock(String fileName, Class&lt;T&gt; className) {
+<span class="nc" id="L21">        String json = getJsonFromResources(fileName);</span>
+<span class="nc" id="L22">        Gson gson = new GsonBuilder().create();</span>
+<span class="nc" id="L23">        return gson.fromJson(json, className);</span>
+    }
+
+    public String getJsonFromResources(String fileName) {
+<span class="nc" id="L27">        BufferedReader reader = null;</span>
+<span class="nc" id="L28">        String mLineResult = &quot;&quot;;</span>
+        try {
+<span class="nc" id="L30">            reader = new BufferedReader(</span>
+<span class="nc" id="L31">                    new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(fileName), &quot;UTF-8&quot;));</span>
+
+            // do reading, usually loop until end of file reading
+<span class="nc" id="L34">            String mLine = null;</span>
+<span class="nc bnc" id="L35" title="All 2 branches missed.">            while ((mLine = reader.readLine()) != null) {</span>
+<span class="nc" id="L36">                mLineResult += mLine;</span>
+            }
+<span class="nc" id="L38">        } catch (IOException e) {</span>
+        } finally {
+<span class="nc bnc" id="L40" title="All 6 branches missed.">            if (reader != null) {</span>
+                try {
+<span class="nc" id="L42">                    reader.close();</span>
+<span class="nc" id="L43">                } catch (IOException e) {</span>
+<span class="nc" id="L44">                }</span>
+            }
+        }
+<span class="nc" id="L47">        return mLineResult;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

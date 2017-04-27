@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BillDetailAdapterPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.payment.module.payment.fragment.payallbill</a> &gt; <span class="el_source">BillDetailAdapterPresenter.java</span></div><h1>BillDetailAdapterPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.payment.module.payment.fragment.payallbill;
+
+import com.nextzy.myais.common.mvp.NextzyPresenter;
+import com.nextzy.myais.payment.R;
+import com.nextzy.myais.payment.helper.payment.PayAllBillBlob;
+import com.nextzy.myais.payment.helper.payment.PayAllBillHelper;
+import com.nextzy.myais.payment.helper.payment.model.BaData;
+import com.nextzy.myais.payment.helper.payment.model.PayAllBillInvoiceData;
+
+/**
+ * Created by TheKhaeng on 10/3/2016.
+ */
+
+public class BillDetailAdapterPresenter extends NextzyPresenter&lt;BillDetailAdapterContractor.View&gt; implements
+        BillDetailAdapterContractor.Presenter {
+
+    private BaData mBa;
+    private PayAllBillAdapterContractor.BaDelegate mBaDelegate;
+
+    // View type
+<span class="nc" id="L21">    private final int VIEW_ITEM = 0;</span>
+<span class="nc" id="L22">    private final int VIEW_TOTAL = 1;</span>
+<span class="nc" id="L23">    private final int VIEW_ADDITION = 2;</span>
+<span class="nc" id="L24">    private final int VIEW_REQUIRE = 3;</span>
+
+    public static BillDetailAdapterPresenter createPresenter(BillDetailAdapterContractor.View view ){
+<span class="nc" id="L27">        return new BillDetailAdapterPresenter( view );</span>
+    }
+
+    private BillDetailAdapterPresenter(BillDetailAdapterContractor.View view ){
+<span class="nc" id="L31">        super( view );</span>
+<span class="nc" id="L32">    }</span>
+
+    @Override
+    public void onViewCreate(){
+<span class="nc" id="L36">    }</span>
+
+    @Override
+    public void onViewDestroy(){
+
+<span class="nc" id="L41">    }</span>
+
+    @Override
+    public void onViewStart(){
+
+<span class="nc" id="L46">    }</span>
+
+    @Override
+    public void onViewStop(){
+
+<span class="nc" id="L51">    }</span>
+
+    @Override
+    public void prepareData(BaData ba, PayAllBillAdapterContractor.BaDelegate baDelegate) {
+<span class="nc" id="L55">        this.mBa = ba;</span>
+<span class="nc" id="L56">        this.mBaDelegate = baDelegate;</span>
+<span class="nc" id="L57">    }</span>
+
+    @Override
+    public int getItemViewType(int position) {
+        // additional fee and require type logic NEEDED HERE!
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (position &lt; mBa.getInvoiceList().size()) {</span>
+<span class="nc" id="L63">            return VIEW_ITEM;</span>
+        } else {
+<span class="nc bnc" id="L65" title="All 4 branches missed.">            if (position == mBa.getInvoiceList().size() &amp;&amp; PayAllBillHelper.isSuspendCreditCardLimit(mBa)) {</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">                return PayAllBillHelper.hasOpenSignal(mBa) ? VIEW_ADDITION : VIEW_REQUIRE;</span>
+            } else {
+<span class="nc" id="L68">                return VIEW_TOTAL;</span>
+            }
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        return mBa.getInvoiceList() == null ? 0 : mBa.getInvoiceList().size() +</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">                (PayAllBillHelper.isSuspendCreditCardLimit(mBa)? 1 : 0) +</span>
+                1; // Type VIEW_TOTAL
+    }
+
+    @Override
+    public BaData getBaData() {
+<span class="nc" id="L82">        return mBa;</span>
+    }
+
+    @Override
+    public PayAllBillAdapterContractor.BaDelegate getBaDelegate() {
+<span class="nc" id="L87">        return mBaDelegate;</span>
+    }
+
+    @Override
+    public PayAllBillInvoiceData getInvoiceAtPosition(int pos) {
+<span class="nc" id="L92">        return mBa.getInvoiceList().get(pos);</span>
+    }
+
+    @Override
+    public double getTotalOutstanding() {
+<span class="nc" id="L97">        return PayAllBillHelper.roundTwoDecimal(PayAllBillHelper.getTotalOutstandingFromBa(mBa));</span>
+    }
+
+    @Override
+    public double getLastBaAmount() {
+<span class="nc" id="L102">        PayAllBillBlob.Ba baBlob = PayAllBillBlob.INSTANCE.findBaByBaNumber(mBa.getBaNumber());</span>
+<span class="nc" id="L103">        return PayAllBillHelper.roundTwoDecimal(baBlob.getBaAmount());</span>
+    }
+
+    @Override
+    public boolean canEditAmount() {
+<span class="nc bnc" id="L108" title="All 2 branches missed.">        return !PayAllBillHelper.isSuspendCreditCardLimit(mBa);</span>
+    }
+
+    @Override
+    public int getAdditionalPaymentStringResource() {
+<span class="nc bnc" id="L113" title="All 4 branches missed.">        if (mBa.getInvoiceList() == null || mBa.getInvoiceList().isEmpty()) {</span>
+<span class="nc" id="L114">            return R.string.my_ais_pay_all_bill_additional_no_debt;</span>
+        } else {
+<span class="nc" id="L116">            return R.string.my_ais_pay_all_bill_additional;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

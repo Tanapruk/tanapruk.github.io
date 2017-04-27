@@ -8,7 +8,9 @@ import com.nextzy.myais.common.mvp.base.BaseMvpContractorPresenter;
 import com.nextzy.myais.common.mvp.base.BaseMvpPresenter;
 import com.nextzy.myais.common.utility.NextzyUtility;
 
+import static com.ais.mimo.eservice.helper.register.network.RegisterManager.SERVICE_VERIFY_IDENTITY_FOR_CHANGE_MASTER;
 import static com.ais.mimo.eservice.helper.register.network.RegisterManager.SERVICE_VERIFY_IDENTITY_MASTER;
+import static com.ais.mimo.eservice.module.register.step2.RegisterStep2Fragment.KEY_REGISTER_IS_FORCE_CHANGE_MASTER;
 
 /**
  * Created by TheKhaeng on 10/19/2016.
@@ -16,8 +18,8 @@ import static com.ais.mimo.eservice.helper.register.network.RegisterManager.SERV
 
 public abstract class RegisterBasePresenter&lt;CV extends RegisterBaseMvpContractorView&gt; extends BaseMvpPresenter&lt;CV&gt; implements BaseMvpContractorPresenter {
     protected RegisterBasePresenter(CV view) {
-<span class="fc" id="L19">        super(view);</span>
-<span class="fc" id="L20">    }</span>
+<span class="fc" id="L21">        super(view);</span>
+<span class="fc" id="L22">    }</span>
 
 
     public abstract void registerRx();
@@ -25,52 +27,54 @@ public abstract class RegisterBasePresenter&lt;CV extends RegisterBaseMvpContrac
     public abstract void unregisterRx();
 
 
-    public boolean isActivePostpaidNumber() {
-<span class="pc bpc" id="L29" title="1 of 2 branches missed.">        if (isLogin()) {</span>
-<span class="nc" id="L30">            return Mobile.getInstance().isPostpaid();</span>
-        }
-<span class="fc" id="L32">        return MobileUtility.getInstance().isNTypeIsPostpaid(getMasterNumberNTypeFromDatabase());</span>
+    public boolean masterIsPostpaid() {
+<span class="fc" id="L31">        return MobileUtility.getInstance().isNTypeIsPostpaid(getMasterNumberNTypeFromDatabase());</span>
     }
 
-    public boolean isActivePrepaidNumber() {
-<span class="fc bfc" id="L36" title="All 2 branches covered.">        if (isLogin()) {</span>
-<span class="fc" id="L37">            return Mobile.getInstance().isPrepaid();</span>
-        }
-<span class="fc" id="L39">        return MobileUtility.getInstance().isNTypeIsPrepaid(getMasterNumberNTypeFromDatabase());</span>
+    public boolean masterIsPrepaid() {
+<span class="fc" id="L35">        return MobileUtility.getInstance().isNTypeIsPrepaid(getMasterNumberNTypeFromDatabase());</span>
     }
 
-    public boolean isActiveFibreNumber() {
-<span class="pc bpc" id="L43" title="1 of 2 branches missed.">        if (isLogin()) {</span>
-<span class="nc" id="L44">            return Mobile.getInstance().isFibre();</span>
-        }
-<span class="fc" id="L46">        return MobileUtility.getInstance().isNTypeIsFbb(getMasterNumberNTypeFromDatabase());</span>
+    public boolean masterIsFibre() {
+<span class="fc" id="L39">        return MobileUtility.getInstance().isNTypeIsFbb(getMasterNumberNTypeFromDatabase());</span>
     }
 
     private String getMasterNumberNTypeFromDatabase() {
-        RegisterVerifyIdentityResult identity
-<span class="fc" id="L51">                = NextzyDatabase.getInstance().findByName(SERVICE_VERIFY_IDENTITY_MASTER, RegisterVerifyIdentityResult.class);</span>
-<span class="pc bpc" id="L52" title="1 of 4 branches missed.">        if (identity != null &amp;&amp; identity.getData() != null) {</span>
-<span class="fc" id="L53">            return identity.getData().getNtype();</span>
+        RegisterVerifyIdentityResult identity;
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        if (isForceChangeMaster()) {</span>
+<span class="fc" id="L45">            identity = NextzyDatabase.getInstance().findByName(SERVICE_VERIFY_IDENTITY_FOR_CHANGE_MASTER, RegisterVerifyIdentityResult.class);</span>
+        } else {
+<span class="fc" id="L47">            identity = NextzyDatabase.getInstance().findByName(SERVICE_VERIFY_IDENTITY_MASTER, RegisterVerifyIdentityResult.class);</span>
         }
-<span class="fc" id="L55">        return null;</span>
+<span class="pc bpc" id="L49" title="1 of 4 branches missed.">        if (identity != null &amp;&amp; identity.getData() != null) {</span>
+<span class="fc" id="L50">            return identity.getData().getNtype();</span>
+        }
+<span class="fc" id="L52">        return null;</span>
+    }
+
+
+    public Boolean isForceChangeMaster() {
+<span class="fc" id="L57">        Boolean b = NextzyDatabase.getInstance().findByName(KEY_REGISTER_IS_FORCE_CHANGE_MASTER, Boolean.class);</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if (b == null) return false;</span>
+<span class="fc" id="L59">        return b;</span>
     }
 
     public boolean isLogin() {
-<span class="fc bfc" id="L59" title="All 2 branches covered.">        return Mobile.getInstance().isLoggedIn()</span>
-<span class="pc bpc" id="L60" title="1 of 2 branches missed.">                &amp;&amp; Mobile.getInstance() != null;</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        return Mobile.getInstance().isLoggedIn()</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">                &amp;&amp; Mobile.getInstance() != null;</span>
     }
 
     private boolean isSuccessResultDesc(String str) {
-<span class="fc" id="L64">        return NextzyUtility.getInstance().isStringEqual(&quot;Success&quot;, str);</span>
+<span class="fc" id="L68">        return NextzyUtility.getInstance().isStringEqual(&quot;Success&quot;, str);</span>
     }
 
     protected void showResponseExceptionDismiss(String msg) {
-<span class="fc bfc" id="L68" title="All 2 branches covered.">        if (isSuccessResultDesc(msg)) {</span>
-<span class="fc" id="L69">            getView().showResponseException();</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        if (isSuccessResultDesc(msg)) {</span>
+<span class="fc" id="L73">            getView().showResponseException();</span>
         } else {
-<span class="fc" id="L71">            getView().showResponseException(msg);</span>
+<span class="fc" id="L75">            getView().showResponseException(msg);</span>
         }
-<span class="fc" id="L73">    }</span>
+<span class="fc" id="L77">    }</span>
 
 }
 

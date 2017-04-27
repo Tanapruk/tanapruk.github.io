@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SummaryPackagePresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.home.module.summaryinfo.summarypackage</a> &gt; <span class="el_source">SummaryPackagePresenter.java</span></div><h1>SummaryPackagePresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.home.module.summaryinfo.summarypackage;
+
+import android.util.Log;
+
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.event.GotoCqsEvent;
+import com.nextzy.myais.common.event.GotoCurrentPackageEvent;
+import com.nextzy.myais.common.mvp.NextzyPresenter;
+import com.nextzy.myais.common.utility.NextzyNumberUtility;
+import com.nextzy.myais.home.helper.summarypackage.exception.UsageStatisticException;
+import com.nextzy.myais.home.helper.summarypackage.model.UsageStatisticData;
+import com.nextzy.myais.home.helper.summarypackage.model.UsageStatisticResult;
+import com.nextzy.myais.home.helper.summarypackage.network.SummaryPackageManager;
+import com.nextzy.myais.home.module.summaryinfo.event.DetachSummaryPackageEvent;
+import com.nextzy.myais.home.utility.UnitConverter;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import rx.Observable;
+
+/**
+ * Created by Akexorcist on 9/13/2016 AD.
+ */
+
+public class SummaryPackagePresenter extends NextzyPresenter&lt;SummaryPackageContractor.View&gt; implements SummaryPackageContractor.Presenter {
+
+    public static SummaryPackagePresenter createPresenter(SummaryPackageContractor.View view) {
+<span class="nc" id="L31">        return new SummaryPackagePresenter(view);</span>
+    }
+
+    public SummaryPackagePresenter(SummaryPackageContractor.View view) {
+<span class="fc" id="L35">        super(view);</span>
+<span class="fc" id="L36">    }</span>
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L40">        RxBus.get().register(this);</span>
+<span class="nc" id="L41">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L45">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L46">    }</span>
+
+    @Override
+    public void onViewStart() {
+
+<span class="nc" id="L51">    }</span>
+
+    @Override
+    public void onViewStop() {
+
+<span class="nc" id="L56">    }</span>
+
+    @Override
+    public void getUsageStatistic() {
+<span class="fc" id="L60">        getView().showLoading();</span>
+<span class="fc" id="L61">        getUsageStatisticWithDelay();</span>
+<span class="fc" id="L62">    }</span>
+
+    @Subscribe
+    public void onUsageStatisticResult(UsageStatisticResult result) {
+<span class="fc" id="L66">        setUsageStatisticResult(result);</span>
+<span class="fc" id="L67">    }</span>
+
+    @Subscribe
+    public void onUsageStatisticException(UsageStatisticException result) {
+<span class="fc" id="L71">        sendDetachISummaryPackageEvent();</span>
+<span class="fc" id="L72">    }</span>
+
+    @Override
+    public void setUsageStatisticResult(UsageStatisticResult result) {
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        if (result == null) {</span>
+<span class="fc" id="L77">            sendDetachISummaryPackageEvent();</span>
+<span class="fc" id="L78">            return;</span>
+        }
+<span class="fc" id="L80">        List&lt;UsageStatisticData.UsageDetail&gt; usageDetailList = result.getData().getAvailableUsageDetail(</span>
+                UsageStatisticData.Type.INTERNET_VOLUME_BASE,
+                UsageStatisticData.Type.INTERNET_TIME_BASE,
+                UsageStatisticData.Type.LOCAL_CALL
+        );
+<span class="pc bpc" id="L85" title="1 of 4 branches missed.">        if (usageDetailList == null || usageDetailList.size() == 0) {</span>
+<span class="fc" id="L86">            sendDetachISummaryPackageEvent();</span>
+<span class="fc" id="L87">            return;</span>
+        }
+<span class="fc" id="L89">        setUsageDetailPayPerUse(result.getData().getAvailableUsageDetail(UsageStatisticData.Type.INTERNET_PAY_PER_USE));</span>
+<span class="fc" id="L90">        setUsageDetailVoice(usageDetailList);</span>
+<span class="fc" id="L91">        setUnlimitedDescriptionVisibility(usageDetailList);</span>
+<span class="fc" id="L92">        setUsageStatisticBox(usageDetailList);</span>
+<span class="fc" id="L93">        getView().hideLoading();</span>
+<span class="fc" id="L94">    }</span>
+
+    @Override
+    public boolean isUsageDetailItemCountCorrect(List&lt;UsageStatisticData.UsageDetail&gt; usageDetailList, int expectItemCount) {
+<span class="fc bfc" id="L98" title="All 4 branches covered.">        return usageDetailList != null &amp;&amp; usageDetailList.size() == expectItemCount;</span>
+    }
+
+    @Override
+    public float getUsageDetailProgress(UsageStatisticData.UsageDetail usageDetail) {
+<span class="fc bfc" id="L103" title="All 2 branches covered.">        if (Mobile.getInstance().isPostpaid()) {</span>
+<span class="fc" id="L104">            return usageDetail.getUsed();</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        } else if (Mobile.getInstance().isPrepaid()) {</span>
+<span class="fc" id="L106">            return usageDetail.getRemaining();</span>
+        }
+<span class="fc" id="L108">        return 0;</span>
+    }
+
+    @Override
+    public int getUsageDetailMax(UsageStatisticData.UsageDetail usageDetail) {
+<span class="fc" id="L113">        return (int) usageDetail.getMax();</span>
+    }
+
+    @Override
+    public String getUsageDetailAmount(UsageStatisticData.UsageDetail usageDetail) {
+<span class="fc bfc" id="L118" title="All 2 branches covered.">        if (UsageStatisticData.Type.LOCAL_CALL.equals(usageDetail.getType()) ||</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">                UsageStatisticData.Type.INTERNET_TIME_BASE.equals(usageDetail.getType())) {</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">            if (Mobile.getInstance().isPostpaid()) {</span>
+<span class="fc" id="L121">                return UnitConverter.getInstance().convertTimeValueToMinute(usageDetail.getUsed(), usageDetail.getUnit());</span>
+<span class="pc bpc" id="L122" title="3 of 4 branches missed.">            } else if (Mobile.getInstance().isPrepaid() || Mobile.getInstance().isFibre()) {</span>
+<span class="fc" id="L123">                return UnitConverter.getInstance().convertTimeValueToMinute(usageDetail.getRemaining(), usageDetail.getUnit());</span>
+            }
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        } else if (UsageStatisticData.Type.INTERNET_VOLUME_BASE.equals(usageDetail.getType())) {</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">            if (Mobile.getInstance().isPostpaid()) {</span>
+<span class="fc" id="L127">                return UnitConverter.getInstance().convertDataValue(usageDetail.getUsed(), usageDetail.getUnit());</span>
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">            } else if (Mobile.getInstance().isPrepaid()) {</span>
+<span class="fc" id="L129">                return UnitConverter.getInstance().convertDataValue(usageDetail.getRemaining(), usageDetail.getUnit());</span>
+            }
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        } else if (UsageStatisticData.Type.INTERNET_PAY_PER_USE.equals(usageDetail.getType())) {</span>
+<span class="fc" id="L132">            return NextzyNumberUtility.getInstance().formatNumber(usageDetail.getUsed());</span>
+        }
+<span class="fc" id="L134">        return &quot;-&quot;;</span>
+    }
+
+    @Override
+    public String getUsageDetailUnit(UsageStatisticData.UsageDetail usageDetail) {
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        if (UsageStatisticData.Type.LOCAL_CALL.equals(usageDetail.getType()) ||</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">                UsageStatisticData.Type.INTERNET_TIME_BASE.equals(usageDetail.getType())) {</span>
+<span class="fc" id="L141">            return UnitConverter.getInstance().getMinuteUnit(getView().getCurrentLanguage());</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">        } else if (UsageStatisticData.Type.INTERNET_VOLUME_BASE.equals(usageDetail.getType())) {</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">            if (Mobile.getInstance().isPostpaid()) {</span>
+<span class="fc" id="L144">                return UnitConverter.getInstance().getConvertedDataUnit(usageDetail.getUsed(), usageDetail.getUnit());</span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">            } else if (Mobile.getInstance().isPrepaid()) {</span>
+<span class="fc" id="L146">                return UnitConverter.getInstance().getConvertedDataUnit(usageDetail.getRemaining(), usageDetail.getUnit());</span>
+            }
+        }
+<span class="fc" id="L149">        return usageDetail.getUnit();</span>
+    }
+
+    @Override
+    public String getUsageDetailTitle(UsageStatisticData.UsageDetail usageDetail) {
+<span class="fc bfc" id="L154" title="All 2 branches covered.">        if (UsageStatisticData.Type.INTERNET_VOLUME_BASE.equals(usageDetail.getType()) ||</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">                UsageStatisticData.Type.INTERNET_TIME_BASE.equals(usageDetail.getType())) {</span>
+<span class="fc" id="L156">            return getView().getUsageDetailInternetTitle();</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">        } else if (UsageStatisticData.Type.LOCAL_CALL.equals(usageDetail.getType())) {</span>
+<span class="fc" id="L158">            return getView().getUsageDetailVoiceTitle();</span>
+        }
+<span class="fc" id="L160">        return &quot;-&quot;;</span>
+    }
+
+    @Override
+    public String getUsageDetailTotal(UsageStatisticData.UsageDetail usageDetail) {
+<span class="fc bfc" id="L165" title="All 2 branches covered.">        if (UsageStatisticData.Type.LOCAL_CALL.equals(usageDetail.getType()) ||</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">                UsageStatisticData.Type.INTERNET_TIME_BASE.equals(usageDetail.getType())) {</span>
+<span class="fc" id="L167">            return UnitConverter.getInstance().convertTimeValueToMinuteWithUnit(usageDetail.getMax(), usageDetail.getUnit(), getView().getCurrentLanguage());</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">        } else if (UsageStatisticData.Type.INTERNET_VOLUME_BASE.equals(usageDetail.getType())) {</span>
+<span class="fc" id="L169">            return UnitConverter.getInstance().convertDataValueWithUnit(usageDetail.getMax(), usageDetail.getUnit());</span>
+        }
+<span class="fc" id="L171">        return usageDetail.getMax() + &quot;&quot;;</span>
+    }
+
+    @Override
+    public boolean isUsageDetailUnlimited(UsageStatisticData.UsageDetail usageDetail) {
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        if (UsageStatisticData.Type.INTERNET_VOLUME_BASE.equals(usageDetail.getType())) {</span>
+<span class="fc" id="L177">            return usageDetail.isUnlimited();</span>
+        }
+<span class="fc" id="L179">        return false;</span>
+    }
+
+    @Override
+    public boolean isUsageDetailOverMaxUsed(UsageStatisticData.UsageDetail usageDetail) {
+<span class="fc" id="L184">        return usageDetail.isOverMaxUsed();</span>
+    }
+
+    @Override
+    public boolean isInternetVolumeBase(UsageStatisticData.UsageDetail usageDetail) {
+<span class="fc" id="L189">        return UsageStatisticData.Type.INTERNET_VOLUME_BASE.equals(usageDetail.getType());</span>
+    }
+
+    @Override
+    public void onGoToCurrentPackageEvent() {
+<span class="fc bfc" id="L194" title="All 2 branches covered.">        if (Mobile.getInstance().isPostpaid()) {</span>
+<span class="fc" id="L195">            RxBus.get().post(new GotoCqsEvent());</span>
+        } else {
+<span class="fc" id="L197">            RxBus.get().post(new GotoCurrentPackageEvent());</span>
+        }
+<span class="fc" id="L199">    }</span>
+
+    public void getUsageStatisticWithDelay() {
+<span class="nc" id="L202">        Observable.empty()</span>
+<span class="nc" id="L203">                .delay(400, TimeUnit.MILLISECONDS)</span>
+<span class="nc" id="L204">                .doOnCompleted(() -&gt; SummaryPackageManager.getInstance().getUsageStatistic())</span>
+<span class="nc" id="L205">                .subscribe();</span>
+<span class="nc" id="L206">    }</span>
+
+    public void sendDetachISummaryPackageEvent() {
+<span class="fc" id="L209">        RxBus.get().post(new DetachSummaryPackageEvent());</span>
+<span class="fc" id="L210">    }</span>
+
+    public void setUsageDetailVoice(List&lt;UsageStatisticData.UsageDetail&gt; usageDetailList) {
+<span class="fc bfc" id="L213" title="All 2 branches covered.">        if (isVoiceUsageDetailContain(usageDetailList)) {</span>
+<span class="fc" id="L214">            UsageStatisticData.UsageDetail voiceUsageDetail = getVoiceUsageDetailFromList(usageDetailList);</span>
+<span class="pc bpc" id="L215" title="2 of 4 branches missed.">            if (voiceUsageDetail != null &amp;&amp; !isContainMaxUsageDetail(voiceUsageDetail)) {</span>
+<span class="fc" id="L216">                usageDetailList.remove(voiceUsageDetail);</span>
+<span class="fc" id="L217">                setVoiceBox(voiceUsageDetail);</span>
+<span class="fc" id="L218">                return;</span>
+            }
+        }
+<span class="fc" id="L221">        getView().hideVoiceExceedPackage();</span>
+<span class="fc" id="L222">    }</span>
+
+    public void setUsageDetailPayPerUse(UsageStatisticData.UsageDetail internetPayPerUseUsageDetail) {
+<span class="fc bfc" id="L225" title="All 2 branches covered.">        if (internetPayPerUseUsageDetail != null) {</span>
+<span class="fc" id="L226">            setInternetPayPerUseBox(internetPayPerUseUsageDetail);</span>
+<span class="fc" id="L227">            return;</span>
+        }
+<span class="fc" id="L229">        getView().hideInternetExceedPackage();</span>
+<span class="fc" id="L230">    }</span>
+
+    public void setVoiceBox(UsageStatisticData.UsageDetail voiceUsageDetail) {
+<span class="fc" id="L233">        String amount = String.format(&quot;%s %s&quot;, getUsageDetailAmount(voiceUsageDetail), getUsageDetailUnit(voiceUsageDetail));</span>
+<span class="fc" id="L234">        getView().showVoiceExceedPackage(amount);</span>
+<span class="fc" id="L235">    }</span>
+
+    public void setInternetPayPerUseBox(UsageStatisticData.UsageDetail internetPayPerUseUsageDetail) {
+<span class="fc" id="L238">        String amount = String.format(&quot;%s ฿&quot;, getUsageDetailAmount(internetPayPerUseUsageDetail));</span>
+<span class="fc" id="L239">        getView().showInternetExceedPackage(amount);</span>
+<span class="fc" id="L240">    }</span>
+
+    public UsageStatisticData.UsageDetail getVoiceUsageDetailFromList(List&lt;UsageStatisticData.UsageDetail&gt; usageDetailList) {
+<span class="fc bfc" id="L243" title="All 2 branches covered.">        if (usageDetailList != null) {</span>
+<span class="fc bfc" id="L244" title="All 2 branches covered.">            for (UsageStatisticData.UsageDetail usageDetail : usageDetailList) {</span>
+<span class="fc bfc" id="L245" title="All 2 branches covered.">                if (UsageStatisticData.Type.LOCAL_CALL.equals(usageDetail.getType())) {</span>
+<span class="fc" id="L246">                    return usageDetail;</span>
+                }
+<span class="fc" id="L248">            }</span>
+        }
+<span class="fc" id="L250">        return null;</span>
+    }
+
+    public boolean isVoiceUsageDetailContain(List&lt;UsageStatisticData.UsageDetail&gt; usageDetailList) {
+<span class="fc bfc" id="L254" title="All 2 branches covered.">        if (usageDetailList != null) {</span>
+<span class="fc bfc" id="L255" title="All 2 branches covered.">            for (UsageStatisticData.UsageDetail usageDetail : usageDetailList) {</span>
+<span class="fc bfc" id="L256" title="All 2 branches covered.">                if (UsageStatisticData.Type.LOCAL_CALL.equals(usageDetail.getType())) {</span>
+<span class="fc" id="L257">                    return true;</span>
+                }
+<span class="fc" id="L259">            }</span>
+        }
+<span class="fc" id="L261">        return false;</span>
+    }
+
+    public boolean isContainMaxUsageDetail(UsageStatisticData.UsageDetail usageDetail) {
+<span class="pc bpc" id="L265" title="1 of 2 branches missed.">        if (usageDetail != null) {</span>
+<span class="pc bpc" id="L266" title="1 of 2 branches missed.">            return usageDetail.getMax() &gt; 0;</span>
+        }
+<span class="nc" id="L268">        return false;</span>
+    }
+
+    public void setUsageStatisticBox(List&lt;UsageStatisticData.UsageDetail&gt; usageDetailList) {
+<span class="fc bfc" id="L272" title="All 2 branches covered.">        if (usageDetailList.size() == 1) {</span>
+<span class="fc" id="L273">            getView().showUsageStatisticOneBox(usageDetailList);</span>
+<span class="fc bfc" id="L274" title="All 2 branches covered.">        } else if (usageDetailList.size() == 2) {</span>
+<span class="fc" id="L275">            getView().showUsageStatisticTwoBox(usageDetailList);</span>
+<span class="fc bfc" id="L276" title="All 2 branches covered.">        } else if (usageDetailList.size() == 3) {</span>
+<span class="fc" id="L277">            getView().showUsageStatisticThreeBox(usageDetailList);</span>
+        } else {
+<span class="fc" id="L279">            getView().hideUsageStatistic();</span>
+        }
+<span class="fc" id="L281">    }</span>
+
+    public void setUnlimitedDescriptionVisibility(List&lt;UsageStatisticData.UsageDetail&gt; usageDetailList) {
+<span class="fc bfc" id="L284" title="All 2 branches covered.">        if (usageDetailList != null) {</span>
+<span class="fc bfc" id="L285" title="All 2 branches covered.">            for (UsageStatisticData.UsageDetail usageDetail : usageDetailList) {</span>
+<span class="pc bpc" id="L286" title="1 of 4 branches missed.">                if (isUsageDetailOverMaxUsed(usageDetail) &amp;&amp; isUsageDetailUnlimited(usageDetail)) {</span>
+<span class="fc" id="L287">                    getView().showUsageStatisticUnlimitedDescription(true);</span>
+<span class="fc" id="L288">                    return;</span>
+                }
+<span class="pc bpc" id="L290" title="1 of 2 branches missed.">                if (isUsageDetailUnlimited(usageDetail)) {</span>
+<span class="fc" id="L291">                    getView().showUsageStatisticUnlimitedDescription(false);</span>
+<span class="fc" id="L292">                    return;</span>
+                }
+<span class="nc" id="L294">            }</span>
+        }
+<span class="fc" id="L296">        getView().hideUsageStatisticUnlimitedDescription();</span>
+<span class="fc" id="L297">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

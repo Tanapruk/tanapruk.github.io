@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChangePackageUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.promotion.module.changepackage</a> &gt; <span class="el_source">ChangePackageUtility.java</span></div><h1>ChangePackageUtility.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.promotion.module.changepackage;
+
+import com.nextzy.myais.common.utility.NextzyUtility;
+import com.nextzy.myais.promotion.R;
+import com.nextzy.myais.promotion.helper.changepackage.response.BillingCycleResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.PackageData;
+import com.nextzy.myais.promotion.helper.changepackage.response.PackageGroupData;
+import com.nextzy.myais.promotion.helper.changepackage.response.PackageGroupResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.PackageResult;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * Created by Akexorcist on 10/5/2016 AD.
+ */
+
+<span class="nc" id="L23">public class ChangePackageUtility {</span>
+    private static ChangePackageUtility utility;
+
+    public static ChangePackageUtility getInstance() {
+<span class="nc bnc" id="L27" title="All 2 branches missed.">        if (utility == null) {</span>
+<span class="nc" id="L28">            utility = new ChangePackageUtility();</span>
+        }
+<span class="nc" id="L30">        return utility;</span>
+    }
+
+    public int getPackageIconResourceByTitle(String title) {
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        if (title != null) {</span>
+<span class="nc bnc" id="L35" title="All 2 branches missed.">            if (title.contains(&quot;Xtra Pack&quot;) ||</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">                    title.contains(&quot;คุยและเล่นเน็ต&quot;)||</span>
+<span class="nc bnc" id="L37" title="All 2 branches missed.">                    title.equals(&quot;แพ็กเกจโทรและเน็ต&quot;)||</span>
+<span class="nc bnc" id="L38" title="All 2 branches missed.">                    title.equals(&quot;Talk &amp; Net Plan&quot;)||</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">                    title.equals(&quot;แพ็กเกจเสริมโทรและเน็ต&quot;)||</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">                    title.equals(&quot;Talk &amp; Net On-Top Package&quot;)) {</span>
+<span class="nc" id="L41">                return R.drawable.promotion_change_package_ic_category_voice_and_internet;</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">            } else if (title.contains(&quot;Xtra Net&quot;) ||</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">                    title.contains(&quot;เล่นเน็ต&quot;) ||</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">                    title.contains(&quot;Internet Package&quot;) ||</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">                    title.contains(&quot;โปรโมชั่นอินเทอร์เน็ต&quot;) ||</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">                    title.equals(&quot;Internet Plan&quot;) ||</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">                    title.equals(&quot;แพ็กเกจอินเทอร์เน็ต&quot;)||</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">                    title.equals(&quot;Internet On-Top Package&quot;)||</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">                    title.equals(&quot;แพ็กเกจเสริมอินเทอร์เน็ต&quot;)) {</span>
+<span class="nc" id="L50">                return R.drawable.promotion_change_package_ic_category_internet;</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">            } else if (title.contains(&quot;Xtra Talk&quot;) ||</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">                    title.contains(&quot;Call plan&quot;) ||</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">                    title.contains(&quot;Social Pack&quot;) ||</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">                    title.contains(&quot;เน้นคุย&quot;) ||</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">                    title.contains(&quot;On Top 11&quot;) ||</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">                    title.equalsIgnoreCase(&quot;โปรโมชั่นการโทร&quot;)||</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">                    title.equals(&quot;Talk Plan&quot;)||</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">                    title.equals(&quot;แพ็กเกจสำหรับโทร&quot;)||</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">                    title.equals(&quot;Talk On-Top Package&quot;)||</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">                    title.equals(&quot;แพ็กเกจเสริมสำหรับโทร&quot;)) {</span>
+<span class="nc" id="L61">                return R.drawable.promotion_change_package_ic_category_voice;</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">            } else if (title.contains(&quot;Mao Mao&quot;) ||</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">                    title.contains(&quot;เหมา เหมา&quot;)) {</span>
+<span class="nc" id="L64">                return R.drawable.promotion_change_package_ic_category_voice_and_internet;</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">            } else if (title.contains(&quot;SMS/MMS&quot;)) {</span>
+<span class="nc" id="L66">                return R.drawable.promotion_change_package_ic_category_voice;</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">            } else if (title.contains(&quot;Voice &amp; Internet Promotion&quot;) ||</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">                    title.contains(&quot;Talk + Net Packages&quot;) ||</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">                    title.contains(&quot;Talk &amp; Net Packages&quot;) ||</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">                    title.equalsIgnoreCase(&quot;โปรโมชั่นการโทรและอินเทอร์เน็ต&quot;) ||</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">                    title.equalsIgnoreCase(&quot;แพ็กเกจเสริมโทรและอินเทอร์เน็ต&quot;)) {</span>
+<span class="nc" id="L72">                return R.drawable.promotion_change_package_ic_category_voice_and_internet;</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">            } else if (title.contains(&quot;iSWOP&quot;) ||</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">                    title.contains(&quot;SWOP&quot;)) {</span>
+<span class="nc" id="L75">                return R.drawable.promotion_change_package_ic_category_iswop;</span>
+            }
+        }
+<span class="nc" id="L78">        return R.drawable.promotion_change_package_ic_category_voice;</span>
+    }
+
+    public String getBillingCycleText(BillingCycleResult billingCycleResult) {
+<span class="nc bnc" id="L82" title="All 4 branches missed.">        if (billingCycleResult != null &amp;&amp; billingCycleResult.getData() != null) {</span>
+<span class="nc" id="L83">            return billingCycleResult.getData().getBillCycleText();</span>
+        }
+<span class="nc" id="L85">        return &quot;-&quot;;</span>
+    }
+
+    public String getPackageGroupDescription(PackageGroupData packageGroupData) {
+<span class="nc bnc" id="L89" title="All 4 branches missed.">        if (packageGroupData != null &amp;&amp; packageGroupData.getDescription() != null) {</span>
+<span class="nc" id="L90">            return packageGroupData.getDescription();</span>
+        }
+<span class="nc" id="L92">        return &quot;-&quot;;</span>
+    }
+
+    public PackageGroupData getCategoryByTabCode(String tabCode, PackageGroupResult packageGroupResult) {
+<span class="nc bnc" id="L96" title="All 4 branches missed.">        if (packageGroupResult != null &amp;&amp; packageGroupResult.getDataList() != null) {</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">            for (PackageGroupData packageGroupData : packageGroupResult.getDataList()) {</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">                if (packageGroupData != null) {</span>
+<span class="nc" id="L99">                    List&lt;PackageGroupData.ChildGroup&gt; childGroupList = packageGroupData.getChildGroupList();</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">                    if (childGroupList != null) {</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">                        for (PackageGroupData.ChildGroup childGroup : childGroupList) {</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">                            if (tabCode.equals(childGroup.getTabCode())) {</span>
+<span class="nc" id="L103">                                return createPackageGroupDataFromChildGroup(childGroup);</span>
+                            }
+<span class="nc" id="L105">                        }</span>
+                    }
+<span class="nc bnc" id="L107" title="All 2 branches missed.">                    if (tabCode.equals(packageGroupData.getTabCode())) {</span>
+<span class="nc" id="L108">                        return packageGroupData;</span>
+                    }
+                }
+<span class="nc" id="L111">            }</span>
+        }
+<span class="nc" id="L113">        return null;</span>
+    }
+
+    private PackageGroupData createPackageGroupDataFromChildGroup(PackageGroupData.ChildGroup childGroup) {
+<span class="nc" id="L117">        PackageGroupData childPackageGroupData = new PackageGroupData();</span>
+<span class="nc" id="L118">        childPackageGroupData.setTitle(childGroup.getTitle());</span>
+<span class="nc" id="L119">        childPackageGroupData.setName(childGroup.getName());</span>
+<span class="nc" id="L120">        childPackageGroupData.setActionCode(childGroup.getActionCode());</span>
+<span class="nc" id="L121">        childPackageGroupData.setDescription(childGroup.getDescription());</span>
+<span class="nc" id="L122">        childPackageGroupData.setTabCode(childGroup.getTabCode());</span>
+<span class="nc" id="L123">        childPackageGroupData.setEffectiveOptionList(childGroup.getEffectiveOptionList());</span>
+<span class="nc" id="L124">        return childPackageGroupData;</span>
+    }
+
+    public PackageData.PackageDetail getPackageDetailById(String packageId, PackageResult packageResult) {
+<span class="nc bnc" id="L128" title="All 4 branches missed.">        if (packageResult != null &amp;&amp; packageResult.getData() != null) {</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">            if (packageResult.getData().getPackageDetailList() != null) {</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">                for (PackageData.PackageDetail packageDetail : packageResult.getData().getPackageDetailList()) {</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">                    if (packageId.equals(packageDetail.getId())) {</span>
+<span class="nc" id="L132">                        return packageDetail;</span>
+                    }
+<span class="nc" id="L134">                }</span>
+            }
+<span class="nc bnc" id="L136" title="All 2 branches missed.">            if (packageResult.getData().getGroupList() != null) {</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">                for (PackageData.Group packageGroup : packageResult.getData().getGroupList()) {</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">                    if (packageGroup.getPackageDetailList() != null) {</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">                        for (PackageData.PackageDetail packageDetail : packageGroup.getPackageDetailList()) {</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">                            if (packageId.equals(packageDetail.getId())) {</span>
+<span class="nc" id="L141">                                return packageDetail;</span>
+                            }
+<span class="nc" id="L143">                        }</span>
+                    }
+<span class="nc" id="L145">                }</span>
+            }
+        }
+<span class="nc" id="L148">        return null;</span>
+    }
+
+    private Calendar convertStringDateToCalendar(String strDate) {
+<span class="nc" id="L152">        Calendar cal = null;</span>
+        try {
+<span class="nc" id="L154">            DateFormat formatter = new SimpleDateFormat(&quot;d/MM/yyyy&quot;, Locale.US);</span>
+<span class="nc" id="L155">            Date date = formatter.parse(strDate);</span>
+<span class="nc" id="L156">            cal = Calendar.getInstance();</span>
+<span class="nc" id="L157">            cal.setTime(date);</span>
+<span class="nc" id="L158">        } catch (ParseException e) {</span>
+<span class="nc" id="L159">            e.printStackTrace();</span>
+<span class="nc" id="L160">        }</span>
+<span class="nc" id="L161">        return cal;</span>
+    }
+
+    private String getBillingCycleFinishDate(String billingCycleStartDate, String language) {
+<span class="nc" id="L165">        Calendar calendar = convertStringDateToCalendar(billingCycleStartDate);</span>
+<span class="nc" id="L166">        calendar.add(Calendar.MONTH, 1);</span>
+<span class="nc" id="L167">        String finishDate = new SimpleDateFormat(&quot;dd/MM/yyyy&quot;, Locale.getDefault()).format(calendar.getTime());</span>
+<span class="nc" id="L168">        return NextzyUtility.getInstance().convertYearAD2BE(finishDate, &quot;/&quot;, language);</span>
+    }
+
+    public String getNextDayDate(String language) {
+<span class="nc" id="L172">        Calendar calendar = Calendar.getInstance();</span>
+<span class="nc" id="L173">        calendar.add(Calendar.DAY_OF_MONTH, 1);</span>
+<span class="nc" id="L174">        String nextDate = new SimpleDateFormat(&quot;dd/MM/yyyy&quot;, Locale.getDefault()).format(calendar.getTime());</span>
+<span class="nc" id="L175">        return NextzyUtility.getInstance().convertYearAD2BE(nextDate, &quot;/&quot;, language);</span>
+    }
+
+    public String getNextBillDate(BillingCycleResult billingCycleResult, String language) {
+<span class="nc bnc" id="L179" title="All 4 branches missed.">        if (billingCycleResult != null &amp;&amp; billingCycleResult.getData() != null) {</span>
+<span class="nc" id="L180">            return getBillingCycleFinishDate(billingCycleResult.getData().getStartDate(), language);</span>
+        }
+<span class="nc" id="L182">        return &quot;-&quot;;</span>
+    }
+
+    public PackageGroupData getCategoryByTabCode2(String tabCode, PackageGroupResult packageGroupResult) {
+<span class="nc bnc" id="L186" title="All 4 branches missed.">        if (packageGroupResult != null &amp;&amp; packageGroupResult.getDataList() != null) {</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">            for (PackageGroupData data : packageGroupResult.getDataList()) {</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">                if (data.getTabCode().equals(tabCode)) {</span>
+<span class="nc" id="L189">                    return data;</span>
+                }
+<span class="nc" id="L191">            }</span>
+        }
+<span class="nc" id="L193">        return null;</span>
+    }
+
+    public PackageGroupData getChildGroupFromActionCode(String categoryTabCode, PackageGroupResult packageGroupResult) {
+<span class="nc bnc" id="L197" title="All 2 branches missed.">        if (packageGroupResult != null) {</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">            for (PackageGroupData packageGroupData : packageGroupResult.getDataList()) {</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">                if (packageGroupData.getTabCode().equals(categoryTabCode)) {</span>
+<span class="nc" id="L200">                    return packageGroupData;</span>
+                }
+<span class="nc" id="L202">            }</span>
+        }
+<span class="nc" id="L204">        return null;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

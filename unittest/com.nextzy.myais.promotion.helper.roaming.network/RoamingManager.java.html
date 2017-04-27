@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RoamingManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.promotion.helper.roaming.network</a> &gt; <span class="el_source">RoamingManager.java</span></div><h1>RoamingManager.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.promotion.helper.roaming.network;
+
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.database.model.SaveRealmResult;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.network.subscriber.NextzySimpleSubscriber;
+import com.nextzy.myais.promotion.helper.roaming.RoamingURL;
+import com.nextzy.myais.promotion.helper.roaming.model.ApplyRoamingPackageData;
+import com.nextzy.myais.promotion.helper.roaming.model.ChkPackResult;
+import com.nextzy.myais.promotion.helper.roaming.model.RoamingResult;
+import com.nextzy.myais.promotion.helper.roaming.model.UpPackCDATA;
+import com.nextzy.myais.promotion.helper.roaming.model.UpPackResult;
+import com.nextzy.myais.promotion.helper.roaming.model.UpSupportResult;
+import com.nextzy.myais.promotion.helper.roaming.model.UpTariffResult;
+import com.nextzy.myais.promotion.helper.roaming.util.RoamingUtil;
+
+import java.util.Map;
+
+import rx.Single;
+import rx.functions.Func1;
+
+/**
+ * Created by trusttanapruk on 10/8/2016.
+ */
+
+<span class="fc" id="L26">public class RoamingManager {</span>
+
+    private static RoamingManager instance;
+
+    public static RoamingManager getInstance() {
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        if (instance == null) {</span>
+<span class="nc" id="L32">            instance = new RoamingManager();</span>
+        }
+<span class="nc" id="L34">        return instance;</span>
+    }
+
+    public static final String SERVICE_NAME_UPDATE_TARIFF = &quot;update_tariff&quot;;
+    public static final String SERVICE_NAME_CHK_PACKAGE = &quot;check_package&quot;;
+    public static final String SERVICE_NAME_UPDATE_PACKAGE = &quot;update_package&quot;;
+    public static final String SERVICE_NAME_UPDATE_SUPPORT = &quot;update_support&quot;;
+    public static final String SERVICE_NAME_BUY_PACKAGE = &quot;buy_package&quot;;
+
+    private RoamingApi api;
+
+    public RoamingApi getApi() {
+<span class="fc" id="L46">        return api;</span>
+    }
+
+    public void setApi(RoamingApi api) {
+<span class="fc" id="L50">        this.api = api;</span>
+<span class="fc" id="L51">    }</span>
+
+    public static final String LAST_UPDATE = &quot;20150130150515&quot;;
+
+
+    protected Single&lt;UpTariffResult&gt; updateTariffSingle(String countryName, String isPrepaidParam) {
+<span class="nc" id="L57">        final Map&lt;String, String&gt; requestParams = new RoamingRequestBuilder()</span>
+<span class="nc" id="L58">                .cmdUpTariff()</span>
+<span class="nc" id="L59">                .country(countryName)</span>
+<span class="nc" id="L60">                .is3G(&quot;1&quot;)</span>
+<span class="nc" id="L61">                .isPrepaid(isPrepaidParam)</span>
+<span class="nc" id="L62">                .lastUpdate(LAST_UPDATE)</span>
+<span class="nc" id="L63">                .build();</span>
+
+<span class="nc" id="L65">        return RoamingApiService.newInstance(RoamingURL.ROAMING_BASE_URL)</span>
+<span class="nc" id="L66">                .getRxXmlApi(getApi())</span>
+<span class="nc" id="L67">                .getUpTariffResponse(</span>
+<span class="nc" id="L68">                        new EventLogParam(&quot;APP_VIEW_ROAMING_SERVICE_RATE&quot;, &quot;5001&quot;, &quot;5098&quot;).getEventLogHeader(),</span>
+                        requestParams)
+<span class="nc" id="L70">                .compose(new RoamingSchedulersAndErrorHandling&lt;UpTariffResult&gt;(UpTariffResult.class, SERVICE_NAME_UPDATE_TARIFF))</span>
+<span class="nc" id="L71">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_UPDATE_TARIFF));</span>
+    }
+
+
+    protected Single&lt;ChkPackResult&gt; chkPackResultSingle() {
+<span class="fc" id="L76">        final Map&lt;String, String&gt; requestParams = new RoamingRequestBuilder().cmdChkPack().msisdn(Mobile.getInstance().getMobileNumber()).type(&quot;D&quot;).build();</span>
+
+<span class="fc" id="L78">        return RoamingApiService.newInstance(RoamingURL.ROAMING_BASE_URL)</span>
+<span class="fc" id="L79">                .getRxXmlApi(getApi())</span>
+<span class="fc" id="L80">                .getChkPackResponse(</span>
+<span class="fc" id="L81">                        new EventLogParam(&quot;APP_VIEW_ROAMING_CURRENT_PACKAGE&quot;, &quot;5001&quot;, &quot;5099&quot;).getEventLogHeader(),</span>
+                        requestParams)
+<span class="fc" id="L83">                .compose(new RoamingSchedulersAndErrorHandling&lt;ChkPackResult&gt;(ChkPackResult.class, SERVICE_NAME_CHK_PACKAGE))</span>
+<span class="fc" id="L84">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_CHK_PACKAGE));</span>
+    }
+
+    protected Single&lt;UpPackResult&gt; updatePackageResultSingle(String countryParam, String typeParam, String isPrepaidParam) {
+<span class="nc" id="L88">        final Map&lt;String, String&gt; requestParams = new RoamingRequestBuilder()</span>
+<span class="nc" id="L89">                .cmdUpPack()</span>
+<span class="nc" id="L90">                .country(countryParam)</span>
+<span class="nc" id="L91">                .type(typeParam)</span>
+<span class="nc" id="L92">                .is3G(&quot;1&quot;)</span>
+<span class="nc" id="L93">                .isPrepaid(isPrepaidParam)</span>
+<span class="nc" id="L94">                .lastUpdate(LAST_UPDATE)</span>
+<span class="nc" id="L95">                .build();</span>
+
+<span class="nc" id="L97">        return RoamingApiService.newInstance(RoamingURL.ROAMING_BASE_URL)</span>
+<span class="nc" id="L98">                .getRxXmlApi(getApi())</span>
+<span class="nc" id="L99">                .getUpPackResponse(</span>
+<span class="nc" id="L100">                        new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(),</span>
+                        requestParams)
+<span class="nc" id="L102">                .compose(new RoamingSchedulersAndErrorHandling&lt;UpPackResult&gt;(UpPackResult.class, SERVICE_NAME_UPDATE_PACKAGE))</span>
+<span class="nc" id="L103">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_UPDATE_PACKAGE));</span>
+    }
+
+    protected Single&lt;RoamingResult&gt; buyPackageSingle(UpPackCDATA upPackCDATA, String dt) {
+<span class="nc" id="L107">        RoamingRequestBuilder requestParams =</span>
+<span class="nc" id="L108">                new RoamingRequestBuilder().cmdBuyPack().msisdn(Mobile.getInstance().getMobileNumber())</span>
+<span class="nc" id="L109">                        .packName(upPackCDATA.getPackageEn())</span>
+<span class="nc" id="L110">                        .fcode(RoamingUtil.fcodeCheck(upPackCDATA.getfCode()))</span>
+<span class="nc" id="L111">                        .fcode2(RoamingUtil.fcodeCheck(upPackCDATA.getfSubCode()))</span>
+<span class="nc" id="L112">                        .country(upPackCDATA.getCountryEn())</span>
+<span class="nc" id="L113">                        .lastUpdate(upPackCDATA.getLastUpdate());</span>
+
+<span class="nc bnc" id="L115" title="All 2 branches missed.">        if (!dt.trim().equalsIgnoreCase(&quot;&quot;)) {</span>
+<span class="nc" id="L116">            requestParams.dt(dt);</span>
+        }
+
+<span class="nc bnc" id="L119" title="All 2 branches missed.">        if (upPackCDATA.getIsPrepaid().equals(&quot;1&quot;)) {</span>
+            //prepaid
+<span class="nc" id="L121">            requestParams</span>
+<span class="nc" id="L122">                    .accNum(upPackCDATA.getAccessNum())</span>
+<span class="nc" id="L123">                    .vname(upPackCDATA.getVoucherName())</span>
+<span class="nc" id="L124">                    .packCode(upPackCDATA.getPackCode());</span>
+        } else {
+            //postpaid
+<span class="nc" id="L127">            requestParams.packCode(upPackCDATA.getPackId());</span>
+        }
+
+<span class="nc" id="L130">        final Map&lt;String, String&gt; requestParamLast = requestParams.build();</span>
+
+<span class="nc" id="L132">        return RoamingApiService.newInstance(RoamingURL.ROAMING_BASE_URL)</span>
+<span class="nc" id="L133">                .getRxXmlApi(getApi())</span>
+<span class="nc" id="L134">                .getBuyPackResponse(</span>
+<span class="nc" id="L135">                        new EventLogParam(&quot;APP_CONFIRM_APPLY_ROAMING_PACKAGE&quot;, &quot;5001&quot;, &quot;5097&quot;).getEventLogHeader(),</span>
+                        requestParamLast)
+<span class="nc" id="L137">                .compose(new RoamingSchedulersAndErrorHandling&lt;RoamingResult&gt;(RoamingResult.class, SERVICE_NAME_BUY_PACKAGE));</span>
+    }
+
+    protected Single&lt;UpSupportResult&gt; updateSupportResultSingle() {
+<span class="nc" id="L141">        final Map&lt;String, String&gt; requestParams = new RoamingRequestBuilder()</span>
+<span class="nc" id="L142">                .cmdUpSupport()</span>
+<span class="nc" id="L143">                .lastUpdate(LAST_UPDATE)</span>
+<span class="nc" id="L144">                .is3G(&quot;1&quot;)</span>
+<span class="nc" id="L145">                .msisdn(Mobile.getInstance().getMobileNumber())</span>
+<span class="nc" id="L146">                .build();</span>
+
+<span class="nc" id="L148">        return RoamingApiService.newInstance(RoamingURL.ROAMING_BASE_URL)</span>
+<span class="nc" id="L149">                .getRxXmlApi(getApi())</span>
+<span class="nc" id="L150">                .getUpSupportResponse(</span>
+<span class="nc" id="L151">                        new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(),</span>
+                        requestParams)
+<span class="nc" id="L153">                .compose(new RoamingSchedulersAndErrorHandling&lt;UpSupportResult&gt;(UpSupportResult.class, SERVICE_NAME_UPDATE_SUPPORT))</span>
+<span class="nc" id="L154">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_UPDATE_SUPPORT));</span>
+    }
+
+    public void updatePackageAndUpdateSupport(String countryParam, String typeParam, String isPrepaidParam) {
+        //cannot directly zip so I have to do it like this
+<span class="nc" id="L159">        updatePackageResultSingle(countryParam, typeParam, isPrepaidParam)</span>
+<span class="nc" id="L160">                .flatMap(new Func1&lt;UpPackResult, Single&lt;ApplyRoamingPackageData&gt;&gt;() {</span>
+                    @Override
+                    public Single&lt;ApplyRoamingPackageData&gt; call(UpPackResult upPackResult) {
+                        return Single.zip(Single.just(upPackResult), updateSupportResultSingle(), ApplyRoamingPackageData::new);
+                    }
+                }).
+<span class="nc" id="L166">                subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_UPDATE_PACKAGE, SERVICE_NAME_UPDATE_SUPPORT));</span>
+<span class="nc" id="L167">    }</span>
+
+    public void updateTariff(String countryName, String isPrepaidParam) {
+<span class="nc" id="L170">        updateTariffSingle(countryName, isPrepaidParam).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_UPDATE_TARIFF));</span>
+<span class="nc" id="L171">    }</span>
+
+    public void checkPackage() {
+<span class="nc" id="L174">        chkPackResultSingle().subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_CHK_PACKAGE));</span>
+<span class="nc" id="L175">    }</span>
+
+    public void buyPackage(UpPackCDATA upPackCDATA, String dt) {
+<span class="nc" id="L178">        buyPackageSingle(upPackCDATA, dt).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_BUY_PACKAGE));</span>
+<span class="nc" id="L179">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

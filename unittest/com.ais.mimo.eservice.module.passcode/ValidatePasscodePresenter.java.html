@@ -12,7 +12,7 @@ import com.nextzy.myais.common.passcode.network.request.DisableFingerScanBody;
 public class ValidatePasscodePresenter extends NextzyActivityPresenter&lt;ValidatePasscodeContractor.View&gt; implements ValidatePasscodeContractor.Presenter {
 
     private final PasscodeManager passcodeManager;
-    private boolean isConcernDisableException;
+//    private boolean isConcernDisableException;
 
     public static ValidatePasscodePresenter createPresenter(ValidatePasscodeContractor.View view) {
 <span class="nc" id="L18">        return new ValidatePasscodePresenter(view);</span>
@@ -26,37 +26,39 @@ public class ValidatePasscodePresenter extends NextzyActivityPresenter&lt;Valida
 
     @Override
     public void onViewCreate() {
-<span class="nc" id="L29">    }</span>
+        // Do nothing.
+<span class="nc" id="L30">    }</span>
 
     @Override
     public void onViewDestroy() {
-<span class="nc" id="L33">    }</span>
+        // Do nothing.
+<span class="nc" id="L35">    }</span>
 
     @Override
     public void onViewStart() {
-<span class="nc" id="L37">        super.onViewStart();</span>
-<span class="nc" id="L38">        RxBus.get().register(this);</span>
-<span class="nc" id="L39">    }</span>
+<span class="nc" id="L39">        super.onViewStart();</span>
+<span class="nc" id="L40">        RxBus.get().register(this);</span>
+<span class="nc" id="L41">    }</span>
 
     @Override
     public void onViewStop() {
-<span class="nc" id="L43">        super.onViewStop();</span>
-<span class="nc" id="L44">        RxBus.get().unregister(this);</span>
-<span class="nc" id="L45">    }</span>
+<span class="nc" id="L45">        super.onViewStop();</span>
+<span class="nc" id="L46">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L47">    }</span>
 
     @Override
     public void requestDisableFingerScanAndGoToLoginFragment(String masterNumber, String privateId, String token, boolean isConcernDisableException) {
-<span class="nc" id="L49">        this.isConcernDisableException = isConcernDisableException;</span>
+//        this.isConcernDisableException = isConcernDisableException;
 //        getView().showLoadingDialog();
-<span class="nc" id="L51">        DisableFingerScanBody body = new DisableFingerScanBody(</span>
+<span class="nc" id="L53">        DisableFingerScanBody body = new DisableFingerScanBody(</span>
                 masterNumber,
                 token,
                 privateId,
                 null
         );
-<span class="nc" id="L57">        passcodeManager.requestDisableFingerScan(masterNumber, body);</span>
-<span class="nc" id="L58">        disableFingerScan();</span>
-<span class="nc" id="L59">    }</span>
+<span class="nc" id="L59">        passcodeManager.requestDisableFingerScan(masterNumber, body);</span>
+<span class="nc" id="L60">        disableFingerScan();</span>
+<span class="nc" id="L61">    }</span>
 
 //    @Subscribe
 //    public void onReceiveDisableFingerScanResult(DisableFingerScanResult result) {
@@ -73,9 +75,9 @@ public class ValidatePasscodePresenter extends NextzyActivityPresenter&lt;Valida
 //    }
 
     private void disableFingerScan() {
-<span class="nc" id="L76">        getView().dismissAllDialogs();</span>
-<span class="nc" id="L77">        getView().removePasscodeAndMasterNumberAndPrivateIdAndToken();</span>
-<span class="nc" id="L78">        getView().goToLoginActivity();</span>
-<span class="nc" id="L79">    }</span>
+<span class="nc" id="L78">        getView().dismissAllDialogs();</span>
+<span class="nc" id="L79">        getView().removePasscodeAndMasterNumberAndPrivateIdAndToken();</span>
+<span class="nc" id="L80">        getView().goToLoginActivity();</span>
+<span class="nc" id="L81">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

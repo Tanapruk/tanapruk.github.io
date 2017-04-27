@@ -34,14 +34,13 @@ public class MainSettingPresenter extends NextzyPresenter&lt;MainSettingContract
 
     @Override
     public void onViewStart(){
-
+        // Do nothing.
 <span class="nc" id="L38">    }</span>
 
     @Override
     public void onViewStop(){
-
+        // Do nothing.
 <span class="nc" id="L43">    }</span>
-
 
     /*******************/
     /** For view call **/
@@ -49,27 +48,27 @@ public class MainSettingPresenter extends NextzyPresenter&lt;MainSettingContract
     //&lt;editor-fold desc=&quot;For view folding&quot;&gt;
     @Override
     public void pushSubscriber(boolean isChecked) {
-<span class="nc" id="L52">        getView().showLoadingDialog();</span>
-<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (isChecked) {</span>
-<span class="nc" id="L54">            NotificationManager.getInstance().pushNotificationSubscribers();</span>
+<span class="nc" id="L51">        getView().showLoadingDialog();</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">        if (isChecked) {</span>
+<span class="nc" id="L53">            NotificationManager.getInstance().pushNotificationSubscribers();</span>
         } else {
-<span class="nc" id="L56">            NotificationManager.getInstance().pushNotificationUnsubscribers();</span>
+<span class="nc" id="L55">            NotificationManager.getInstance().pushNotificationUnsubscribers();</span>
         }
-<span class="nc" id="L58">    }</span>
+<span class="nc" id="L57">    }</span>
     @Override
     public void setLanguage(String language){
-<span class="nc" id="L61">        RxBus.get().post(new SetLanguageEvent(language));</span>
-<span class="nc" id="L62">    }</span>
+<span class="nc" id="L60">        RxBus.get().post(new SetLanguageEvent(language));</span>
+<span class="nc" id="L61">    }</span>
 
     @Override
     public void openPasscodeSettingFragment(){
-<span class="nc" id="L66">        RxBus.get().post(new GoToPasscodeSettingFragmentEvent());</span>
-<span class="nc" id="L67">    }</span>
+<span class="nc" id="L65">        RxBus.get().post(new GoToPasscodeSettingFragmentEvent());</span>
+<span class="nc" id="L66">    }</span>
 
     @Override
     public void openFirstNewPasscodeActivity() {
-<span class="nc" id="L71">        RxBus.get().post(new GoToFirstNewPasscodeFragmentEvent());</span>
-<span class="nc" id="L72">    }</span>
+<span class="nc" id="L70">        RxBus.get().post(new GoToFirstNewPasscodeFragmentEvent());</span>
+<span class="nc" id="L71">    }</span>
     //&lt;/editor-fold&gt;
 
 }

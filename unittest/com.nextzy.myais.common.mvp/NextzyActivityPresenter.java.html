@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NextzyActivityPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.common.mvp</a> &gt; <span class="el_source">NextzyActivityPresenter.java</span></div><h1>NextzyActivityPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.common.mvp;
+
+import com.nextzy.myais.common.delegate.ErrorReceiver;
+
+import java.util.List;
+
+/**
+ * Created by trusttanapruk on 9/15/2016.
+ */
+public abstract class NextzyActivityPresenter&lt;CV extends NextzyActivityContractorView&gt; extends NextzyPresenter&lt;CV&gt; implements NextzyActivityContractorPresenter {
+
+    protected NextzyActivityPresenter(CV view) {
+<span class="nc" id="L13">        super(view);</span>
+<span class="nc" id="L14">    }</span>
+
+<span class="nc" id="L16">    private ErrorReceiver mErrorReceiver = new ErrorReceiver(this, enableErrorReceiver());</span>
+
+    protected boolean enableErrorReceiver() {
+<span class="nc" id="L19">        return true;</span>
+    }
+
+
+    @Override
+    public void onSessionExpired(Throwable throwable, List&lt;String&gt; serviceNameList) {
+<span class="nc" id="L25">        getView().showSessionExpireDialog();</span>
+<span class="nc" id="L26">    }</span>
+
+    @Override
+    public void onServiceUnavailable(Throwable throwable, List&lt;String&gt; serviceNameList) {
+<span class="nc" id="L30">        getView().showServiceUnavailableDialog(false);</span>
+<span class="nc" id="L31">    }</span>
+
+    @Override
+    public void onNoInternetConnection(Throwable throwable, List&lt;String&gt; serviceNameList) {
+<span class="nc" id="L35">        getView().showNoInternetConnection();</span>
+<span class="nc" id="L36">    }</span>
+
+    @Override
+    public void onUnHandledAisError(Throwable throwable, List&lt;String&gt; serviceNameList) {
+<span class="nc" id="L40">        getView().showUnhandledAisError(throwable.getMessage());</span>
+<span class="nc" id="L41">    }</span>
+
+    @Override
+    public void onBadRequestException(Throwable throwable, List&lt;String&gt; serviceNameList) {
+<span class="nc" id="L45">        getView().showServiceUnavailableDialog(false);</span>
+<span class="nc" id="L46">    }</span>
+
+    /**
+     * when throwable is specific to the service inside that activity e.g., MSISDNException
+     * It will be here.
+     *
+     * @param throwable
+     */
+    @Override
+    public void onNonGlobalException(Throwable throwable, List&lt;String&gt; serviceNameList) {
+
+<span class="nc" id="L57">    }</span>
+
+    @Override
+    public void onViewStart() {
+<span class="nc" id="L61">        mErrorReceiver.start();</span>
+<span class="nc" id="L62">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L66">        mErrorReceiver.stop();</span>
+<span class="nc" id="L67">    }</span>
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L71">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L75">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

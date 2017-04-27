@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NextzyAndroidUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.common.utility</a> &gt; <span class="el_source">NextzyAndroidUtility.java</span></div><h1>NextzyAndroidUtility.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.common.utility;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.graphics.Point;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.os.Build;
+import android.os.Bundle;
+import android.provider.Settings;
+import android.text.Html;
+import android.util.DisplayMetrics;
+import android.view.Display;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+
+import com.nextzy.myais.common.mvp.webview.MyAisWebViewActivity;
+
+import java.lang.reflect.Method;
+
+/**
+ * Created by Akexorcist on 8/9/16 AD.
+ */
+<span class="nc" id="L31">public class NextzyAndroidUtility {</span>
+    public static final float RATIO_16_9 = 1.77f;
+    public static final float RATIO_5_3 = 1.66f;
+    public static final float RATIO_16_10 = 1.6f;
+    public static final float RATIO_3_2 = 1.5f;
+    public static final float RATIO_4_3 = 1.33f;
+
+    private static NextzyAndroidUtility utility;
+
+    public static NextzyAndroidUtility getInstance() {
+<span class="nc bnc" id="L41" title="All 2 branches missed.">        if (utility == null) {</span>
+<span class="nc" id="L42">            utility = new NextzyAndroidUtility();</span>
+        }
+<span class="nc" id="L44">        return utility;</span>
+    }
+
+    @SuppressLint(&quot;HardwareIds&quot;)
+    public String getDeviceId(Context context) {
+<span class="nc" id="L49">        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);</span>
+<span class="nc" id="L50">        WifiInfo wInfo = wifiManager.getConnectionInfo();</span>
+<span class="nc" id="L51">        String macAddress = wInfo.getMacAddress();</span>
+<span class="nc" id="L52">        return Settings.Secure.getString(</span>
+<span class="nc" id="L53">                context.getContentResolver(), Settings.Secure.ANDROID_ID) + &quot;:&quot; + Build.SERIAL + &quot;:&quot; + macAddress;</span>
+    }
+
+    public String getDeviceModel() {
+<span class="nc" id="L57">        return android.os.Build.MODEL;</span>
+    }
+
+
+    @SuppressWarnings(&quot;deprecation&quot;)
+    public String removeHtmlTag(String text) {
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        if (android.os.Build.VERSION.SDK_INT &gt;= android.os.Build.VERSION_CODES.N) {</span>
+<span class="nc" id="L64">            return Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY).toString().replaceAll(&quot;\n&quot;, &quot;&quot;);</span>
+        } else {
+<span class="nc" id="L66">            return Html.fromHtml(text).toString().replaceAll(&quot;\n&quot;, &quot;&quot;);</span>
+        }
+    }
+
+    public int getResourceIdDynamic(Context context, String name, String type) {
+<span class="nc" id="L71">        return context.getResources().getIdentifier(name, type, context.getPackageName());</span>
+    }
+
+    public float getPixelFromDp(Context context, float dp) {
+<span class="nc" id="L75">        DisplayMetrics metrics = context.getResources().getDisplayMetrics();</span>
+<span class="nc" id="L76">        return dp * (metrics.densityDpi / 160f);</span>
+    }
+
+    public float getDpFromPixel(Context context, float px) {
+<span class="nc" id="L80">        DisplayMetrics metrics = context.getResources().getDisplayMetrics();</span>
+<span class="nc" id="L81">        return px / (metrics.densityDpi / 160f);</span>
+    }
+
+    public int getDrawableResourceByFilename(Context context, String filename) {
+<span class="nc" id="L85">        return context.getResources().getIdentifier(filename, &quot;drawable&quot;, context.getPackageName());</span>
+    }
+
+    public int getMipmapResourceByFilename(Context context, String filename) {
+<span class="nc" id="L89">        return context.getResources().getIdentifier(filename, &quot;mipmap&quot;, context.getPackageName());</span>
+    }
+
+    public void hideKeyboard(Activity activity) {
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        if (activity != null) {</span>
+<span class="nc" id="L94">            View view = activity.getCurrentFocus();</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">            if (view != null) {</span>
+<span class="nc" id="L96">                InputMethodManager inputManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);</span>
+<span class="nc" id="L97">                inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);</span>
+            }
+        }
+<span class="nc" id="L100">    }</span>
+
+    /**
+     * You should supply title and use {@link #openWebUrl(Activity, String, String)}
+     *
+     * @param activity
+     * @param url
+     */
+    @Deprecated
+    public void openWebUrl(Activity activity, String url) {
+<span class="nc" id="L110">        openWebUrl(activity, url, null);</span>
+<span class="nc" id="L111">    }</span>
+
+    public void openWebUrl(Activity activity, String url, String title) {
+<span class="nc bnc" id="L114" title="All 4 branches missed.">        if (url != null &amp;&amp; !url.isEmpty()) {</span>
+<span class="nc" id="L115">            Bundle bundle = new Bundle();</span>
+<span class="nc" id="L116">            bundle.putString(MyAisWebViewActivity.KEY_URL, url);</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">            if (title != null) {</span>
+<span class="nc" id="L118">                bundle.putString(MyAisWebViewActivity.KEY_TITLE, title);</span>
+            }
+<span class="nc" id="L120">            Intent intent = new Intent(activity, MyAisWebViewActivity.class);</span>
+<span class="nc" id="L121">            intent.setAction(Intent.ACTION_VIEW);</span>
+<span class="nc" id="L122">            intent.putExtras(bundle);</span>
+<span class="nc" id="L123">            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);</span>
+<span class="nc" id="L124">            activity.startActivity(intent, bundle);</span>
+        }
+<span class="nc" id="L126">    }</span>
+
+    public void openWebUrlForResult(Activity activity, String url, String title) {
+<span class="nc bnc" id="L129" title="All 4 branches missed.">        if (url != null &amp;&amp; !url.isEmpty()) {</span>
+<span class="nc" id="L130">            Bundle bundle = new Bundle();</span>
+<span class="nc" id="L131">            bundle.putString(MyAisWebViewActivity.KEY_URL, url);</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">            if (title != null) {</span>
+<span class="nc" id="L133">                bundle.putString(MyAisWebViewActivity.KEY_TITLE, title);</span>
+            }
+<span class="nc" id="L135">            Intent intent = new Intent(activity, MyAisWebViewActivity.class);</span>
+<span class="nc" id="L136">            intent.setAction(Intent.ACTION_VIEW);</span>
+<span class="nc" id="L137">            intent.putExtras(bundle);</span>
+<span class="nc" id="L138">            activity.startActivityForResult(intent, MyAisWebViewActivity.REQUEST_CODE, bundle);</span>
+        }
+<span class="nc" id="L140">    }</span>
+
+    public String getAppName(Context context) {
+<span class="nc" id="L143">        return context.getString(context.getApplicationInfo().labelRes);</span>
+    }
+
+    public String getAppVersion(Context context) {
+<span class="nc" id="L147">        String version = &quot;0.0&quot;;</span>
+        try {
+<span class="nc" id="L149">            PackageInfo infos = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);</span>
+<span class="nc" id="L150">            version = infos.versionName;</span>
+<span class="nc" id="L151">        } catch (PackageManager.NameNotFoundException e) {</span>
+<span class="nc" id="L152">            e.printStackTrace();</span>
+<span class="nc" id="L153">        }</span>
+<span class="nc" id="L154">        return version;</span>
+    }
+
+    public boolean isWiFiConnection(Context context) {
+<span class="nc" id="L158">        NetworkInfo networkInfo = getNetworkInfo(context);</span>
+<span class="nc bnc" id="L159" title="All 4 branches missed.">        return networkInfo != null &amp;&amp; networkInfo.getType() == ConnectivityManager.TYPE_WIFI;</span>
+    }
+
+    public boolean isMobileConnection(Context context) {
+<span class="nc" id="L163">        NetworkInfo networkInfo = getNetworkInfo(context);</span>
+<span class="nc bnc" id="L164" title="All 4 branches missed.">        return networkInfo != null &amp;&amp; networkInfo.getType() == ConnectivityManager.TYPE_MOBILE;</span>
+    }
+
+    public boolean isEthernetConnection(Context context) {
+<span class="nc" id="L168">        NetworkInfo networkInfo = getNetworkInfo(context);</span>
+<span class="nc bnc" id="L169" title="All 4 branches missed.">        return networkInfo != null &amp;&amp; networkInfo.getType() == ConnectivityManager.TYPE_ETHERNET;</span>
+    }
+
+    public boolean isBluetoothConnection(Context context) {
+<span class="nc" id="L173">        NetworkInfo networkInfo = getNetworkInfo(context);</span>
+<span class="nc bnc" id="L174" title="All 4 branches missed.">        return networkInfo != null &amp;&amp; networkInfo.getType() == ConnectivityManager.TYPE_BLUETOOTH;</span>
+    }
+
+    public boolean isVpnConnection(Context context) {
+<span class="nc bnc" id="L178" title="All 2 branches missed.">        if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.LOLLIPOP) {</span>
+<span class="nc" id="L179">            NetworkInfo networkInfo = getNetworkInfo(context);</span>
+<span class="nc bnc" id="L180" title="All 4 branches missed.">            return networkInfo != null &amp;&amp; networkInfo.getType() == ConnectivityManager.TYPE_VPN;</span>
+        } else {
+<span class="nc" id="L182">            return false;</span>
+        }
+    }
+
+    public boolean isWimaxConnection(Context context) {
+<span class="nc" id="L187">        NetworkInfo networkInfo = getNetworkInfo(context);</span>
+<span class="nc bnc" id="L188" title="All 4 branches missed.">        return networkInfo != null &amp;&amp; networkInfo.getType() == ConnectivityManager.TYPE_WIMAX;</span>
+    }
+
+    public boolean isInternetUnavailable(Context context) {
+<span class="nc" id="L192">        NetworkInfo networkInfo = getNetworkInfo(context);</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">        return networkInfo == null;</span>
+    }
+
+    public boolean isInternetAvailable(Context context) {
+<span class="nc" id="L197">        NetworkInfo networkInfo = getNetworkInfo(context);</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">        return networkInfo != null;</span>
+    }
+
+    private NetworkInfo getNetworkInfo(Context context) {
+<span class="nc" id="L202">        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);</span>
+<span class="nc" id="L203">        return cm.getActiveNetworkInfo();</span>
+    }
+
+    public boolean isAppInstalled(Context context, String packageName) {
+        try {
+<span class="nc" id="L208">            context.getPackageManager().getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);</span>
+<span class="nc" id="L209">            return true;</span>
+<span class="nc" id="L210">        } catch (PackageManager.NameNotFoundException ignored) {</span>
+        }
+<span class="nc" id="L212">        return false;</span>
+    }
+
+    public void openAppInPlayStore(Context context, String packageName) {
+        try {
+<span class="nc" id="L217">            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(&quot;market://details?id=&quot; + packageName)));</span>
+<span class="nc" id="L218">        } catch (android.content.ActivityNotFoundException anfe) {</span>
+<span class="nc" id="L219">            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(&quot;https://play.google.com/store/apps/details?id=&quot; + packageName)));</span>
+<span class="nc" id="L220">        }</span>
+<span class="nc" id="L221">    }</span>
+
+    public Point getDeviceScreenSize(Activity activity) {
+<span class="nc" id="L224">        int resolutionX = 0, resolutionY = 0;</span>
+<span class="nc" id="L225">        Display display = activity.getWindowManager().getDefaultDisplay();</span>
+<span class="nc" id="L226">        DisplayMetrics dm = new DisplayMetrics();</span>
+<span class="nc" id="L227">        activity.getWindowManager().getDefaultDisplay().getMetrics(dm);</span>
+
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        if (android.os.Build.VERSION.SDK_INT &lt; android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {</span>
+            try {
+<span class="nc" id="L231">                Method mGetRawH = Display.class.getMethod(&quot;getRawHeight&quot;);</span>
+<span class="nc" id="L232">                Method mGetRawW = Display.class.getMethod(&quot;getRawWidth&quot;);</span>
+<span class="nc" id="L233">                resolutionX = (Integer) mGetRawW.invoke(display);</span>
+<span class="nc" id="L234">                resolutionY = (Integer) mGetRawH.invoke(display);</span>
+<span class="nc" id="L235">            } catch (Exception e) {</span>
+<span class="nc" id="L236">                resolutionX = display.getWidth();</span>
+<span class="nc" id="L237">                resolutionY = display.getHeight();</span>
+<span class="nc" id="L238">            }</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">        } else if (android.os.Build.VERSION.SDK_INT &gt;= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {</span>
+<span class="nc" id="L240">            DisplayMetrics outMetrics = new DisplayMetrics();</span>
+<span class="nc" id="L241">            display.getRealMetrics(outMetrics);</span>
+
+<span class="nc" id="L243">            resolutionX = outMetrics.widthPixels;</span>
+<span class="nc" id="L244">            resolutionY = outMetrics.heightPixels;</span>
+        }
+
+<span class="nc" id="L247">        Point point = new Point();</span>
+<span class="nc" id="L248">        point.x = resolutionX;</span>
+<span class="nc" id="L249">        point.y = resolutionY;</span>
+<span class="nc" id="L250">        return point;</span>
+    }
+
+    public float calculateRatio(Point point) {
+<span class="nc" id="L254">        float ratio = 0f;</span>
+<span class="nc bnc" id="L255" title="All 2 branches missed.">        if (point.x &gt; point.y) {</span>
+<span class="nc" id="L256">            ratio = (float) point.x / point.y;</span>
+        } else {
+<span class="nc" id="L258">            ratio = (float) point.y / point.x;</span>
+        }
+<span class="nc" id="L260">        return ((int) (ratio * 100)) / 100f;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

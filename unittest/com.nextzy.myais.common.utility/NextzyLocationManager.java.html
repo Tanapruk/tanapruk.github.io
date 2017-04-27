@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NextzyLocationManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.common.utility</a> &gt; <span class="el_source">NextzyLocationManager.java</span></div><h1>NextzyLocationManager.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.common.utility;
+
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.location.Address;
+import android.location.Location;
+import android.provider.Settings;
+import android.support.v7.app.NotificationCompat;
+import android.text.TextUtils;
+
+import com.nextzy.myais.common.R;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import io.nlopez.smartlocation.SmartLocation;
+import io.nlopez.smartlocation.location.config.LocationAccuracy;
+import io.nlopez.smartlocation.location.config.LocationParams;
+
+/**
+ * Created by Akexorcist on 7/27/15 AD.
+ * &lt;p&gt;
+ * &lt;p&gt;
+ * Example
+ * NextzyPermission.requestPermission(getApplicationContext(), permissionResult -&gt; {
+ * if (permissionResult.areAllPermissionsGranted()) {
+ * accessLocation();
+ * } else {
+ * Observable.empty()
+ * .delay(500, TimeUnit.MILLISECONDS)
+ * .doOnCompleted(this::showLocationDenied)
+ * .subscribe();
+ * }
+ * }, Manifest.permission.ACCESS_FINE_LOCATION);
+ * &lt;p&gt;
+ * &lt;p&gt;
+ * public void showLocationDenied() {
+ * AisDialog.getInstance().showSimpleDialog(getSupportFragmentManager(),
+ * null,
+ * getString(com.nextzy.myais.common.R.string.my_ais_library_qr_camera_permission_denied),
+ * getString(com.nextzy.myais.common.R.string.ok),
+ * null);
+ * }
+ * &lt;p&gt;
+ * public void accessLocation() {
+ * &lt;p&gt;
+ * AISLocationService.getInstance().requestBalancePowerLocationUpdate(new AISLocationService.LocationListener() {
+ *
+ * @Override public void onLocationChanged(Location location) {
+ * ///เขียน code ที่ต้องการใช้ Location ที่นี่
+ * }
+ * @Override public void onLocationUnavailable() {
+ * ///
+ * }
+ * });
+ * }
+ */
+@SuppressWarnings(&quot;unused&quot;)
+<span class="nc" id="L61">public class NextzyLocationManager {</span>
+    private static final int LOCATION_NOTIFICATION_ID = 2000;
+    private static final int LOCATION_REQUEST_CODE = 2001;
+
+    private static NextzyLocationManager service;
+
+    public static NextzyLocationManager getInstance() {
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        if (service == null) {</span>
+<span class="nc" id="L69">            service = new NextzyLocationManager();</span>
+        }
+<span class="nc" id="L71">        return service;</span>
+    }
+
+    public boolean isLocationServicesEnabled(Context context) {
+<span class="nc" id="L75">        return SmartLocation.with(context).location().state().locationServicesEnabled();</span>
+    }
+
+    public boolean isGpsAvailable(Context context) {
+<span class="nc" id="L79">        return SmartLocation.with(context).location().state().isGpsAvailable();</span>
+    }
+
+    public boolean isNetworkAvailable(Context context) {
+<span class="nc" id="L83">        return SmartLocation.with(context).location().state().isNetworkAvailable();</span>
+    }
+
+    public boolean isAnyProviderAvailable(Context context) {
+<span class="nc" id="L87">        return SmartLocation.with(context).location().state().isAnyProviderAvailable();</span>
+    }
+
+    public void requestHighPowerLocationUpdate(Context context, LocationListener listener) {
+<span class="nc" id="L91">        requestLocationUpdate(context, LocationAccuracy.HIGH, 2000, 0, listener);</span>
+<span class="nc" id="L92">    }</span>
+
+    public void requestBalancePowerLocationUpdate(Context context, LocationListener listener) {
+<span class="nc" id="L95">        requestLocationUpdate(context, LocationAccuracy.MEDIUM, 5000, 100, listener);</span>
+<span class="nc" id="L96">    }</span>
+
+    public void requestLowPowerLocationUpdate(Context context, LocationListener listener) {
+<span class="nc" id="L99">        requestLocationUpdate(context, LocationAccuracy.LOW, 10000, 500, listener);</span>
+<span class="nc" id="L100">    }</span>
+
+    private void requestLocationUpdate(Context context, LocationAccuracy locationAccuracy, long interval, float distance, final LocationListener listener) {
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        if (isLocationServicesEnabled(context)) {</span>
+<span class="nc" id="L104">            LocationParams locationParams = new LocationParams.Builder()</span>
+<span class="nc" id="L105">                    .setAccuracy(locationAccuracy)</span>
+<span class="nc" id="L106">                    .setInterval(interval)</span>
+<span class="nc" id="L107">                    .setDistance(distance)</span>
+<span class="nc" id="L108">                    .build();</span>
+<span class="nc" id="L109">            SmartLocation.with(context)</span>
+<span class="nc" id="L110">                    .location()</span>
+<span class="nc" id="L111">                    .continuous()</span>
+<span class="nc" id="L112">                    .config(locationParams)</span>
+<span class="nc" id="L113">                    .start(location -&gt; {</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">                        if (listener != null)</span>
+<span class="nc" id="L115">                            listener.onLocationChanged(location);</span>
+<span class="nc" id="L116">                    });</span>
+<span class="nc" id="L117">        } else {</span>
+<span class="nc" id="L118">            createLocationNotification(context);</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">            if (listener != null)</span>
+<span class="nc" id="L120">                listener.onLocationUnavailable();</span>
+        }
+<span class="nc" id="L122">    }</span>
+
+    public void removeLocationUpdate(Context context) {
+<span class="nc" id="L125">        SmartLocation.with(context).location().stop();</span>
+<span class="nc" id="L126">    }</span>
+
+    private void removeGeocodeUpdate(Context context) {
+<span class="nc" id="L129">        SmartLocation.with(context).geocoding().stop();</span>
+<span class="nc" id="L130">    }</span>
+
+    public void openLocationSettings(Context context) {
+<span class="nc" id="L133">        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);</span>
+<span class="nc" id="L134">        context.startActivity(intent);</span>
+<span class="nc" id="L135">    }</span>
+
+    private void createLocationNotification(Context context) {
+<span class="nc" id="L138">        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);</span>
+<span class="nc" id="L139">        PendingIntent pendingIntent = PendingIntent.getActivity(context, LOCATION_REQUEST_CODE, intent, PendingIntent.FLAG_CANCEL_CURRENT);</span>
+
+<span class="nc" id="L141">        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context);</span>
+<span class="nc" id="L142">        mBuilder.setSmallIcon(R.drawable.my_ais_library_location_ic_notification)</span>
+<span class="nc" id="L143">                .setContentTitle(NextzyAndroidUtility.getInstance().getAppName(context))</span>
+<span class="nc" id="L144">                .setContentText(context.getString(R.string.my_ais_library_location_notification_content))</span>
+<span class="nc" id="L145">                .setContentIntent(pendingIntent)</span>
+<span class="nc" id="L146">                .setAutoCancel(true);</span>
+
+<span class="nc" id="L148">        NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);</span>
+<span class="nc" id="L149">        mNotifyMgr.notify(LOCATION_NOTIFICATION_ID, mBuilder.build());</span>
+<span class="nc" id="L150">    }</span>
+
+    public Location getLastLocation(Context context) {
+<span class="nc" id="L153">        Location location = SmartLocation.with(context).location().getLastLocation();</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        if (location == null) {</span>
+<span class="nc" id="L155">            location = new Location(&quot;default&quot;);</span>
+<span class="nc" id="L156">            location.setLatitude(13.756331);</span>
+<span class="nc" id="L157">            location.setLongitude(100.501765);</span>
+        }
+<span class="nc" id="L159">        return location;</span>
+    }
+
+    public void getCurrentCountry(Context context, final CountryCallback callback) {
+<span class="nc bnc" id="L163" title="All 2 branches missed.">        if (isLocationServicesEnabled(context)) {</span>
+<span class="nc" id="L164">            SmartLocation.with(context)</span>
+<span class="nc" id="L165">                    .location()</span>
+<span class="nc" id="L166">                    .oneFix()</span>
+<span class="nc" id="L167">                    .config(getLocationParamHighAccuracy())</span>
+<span class="nc" id="L168">                    .start(location -&gt; {</span>
+<span class="nc" id="L169">                        removeLocationUpdate(context);</span>
+<span class="nc" id="L170">                        getGeocode(context, location, callback);</span>
+<span class="nc" id="L171">                    });</span>
+        } else {
+<span class="nc" id="L173">            createLocationNotification(context);</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">            if (callback != null) {</span>
+<span class="nc" id="L175">                callback.onLocationUnavailable();</span>
+            }
+        }
+<span class="nc" id="L178">    }</span>
+
+
+    private LocationParams getLocationParamHighAccuracy() {
+<span class="nc" id="L182">        return new LocationParams.Builder()</span>
+<span class="nc" id="L183">                .setAccuracy(LocationAccuracy.HIGH)</span>
+<span class="nc" id="L184">                .build();</span>
+    }
+
+    private void getGeocode(Context context, Location location, final CountryCallback callback) {
+        //UK
+//        location.setLatitude(55.378051);
+//        location.setLongitude(-3.435973);
+
+        //south korea
+//        location.setLatitude(35.907757);
+//        location.setLongitude(127.766922);
+
+        //USA
+//        location.setLatitude(37.090240);
+//        location.setLongitude(-95.712891);
+<span class="nc" id="L199">        SmartLocation.with(context)</span>
+<span class="nc" id="L200">                .geocoding()</span>
+<span class="nc" id="L201">                .reverse(location, (location1, addresses) -&gt; {</span>
+<span class="nc" id="L202">                    removeGeocodeUpdate(context);</span>
+<span class="nc bnc" id="L203" title="All 4 branches missed.">                    if (addresses == null || addresses.size() == 0) {</span>
+<span class="nc" id="L204">                        return;</span>
+                    }
+<span class="nc" id="L206">                    Address address = addresses.get(0);</span>
+
+<span class="nc" id="L208">                    ArrayList&lt;String&gt; addressList = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L210" title="All 2 branches missed.">                    for (int i = 0; i &lt;= address.getMaxAddressLineIndex(); i++) {</span>
+<span class="nc" id="L211">                        addressList.add(address.getAddressLine(i));</span>
+                    }
+<span class="nc" id="L213">                    String longAddress = TextUtils.join(System.getProperty(&quot;line.separator&quot;), addressList);</span>
+<span class="nc" id="L214">                    List&lt;String&gt; countryNameList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L215">                    countryNameList.add(address.getCountryName());</span>
+<span class="nc" id="L216">                    countryNameList.add(address.getAddressLine(address.getMaxAddressLineIndex()));</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">                    if (callback != null) {</span>
+<span class="nc" id="L218">                        callback.onSendCountryNameList(countryNameList);</span>
+<span class="nc" id="L219">                        callback.onSendAddress(longAddress);</span>
+                    }
+<span class="nc" id="L221">                });</span>
+<span class="nc" id="L222">    }</span>
+
+
+    public interface LocationListener {
+        void onLocationChanged(Location location);
+
+        void onLocationUnavailable();
+    }
+
+    public interface CountryCallback {
+        void onSendCountryNameList(List&lt;String&gt; countryList);
+
+        void onSendAddress(String address);
+
+        void onLocationUnavailable();
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChangePackageManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.promotion.helper.changepackage.network</a> &gt; <span class="el_source">ChangePackageManager.java</span></div><h1>ChangePackageManager.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.promotion.helper.changepackage.network;
+
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.database.model.SaveRealmResult;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.network.subscriber.NextzySimpleSubscriber;
+import com.nextzy.myais.common.network.worker.ContinueWithNullOnCrash;
+import com.nextzy.myais.common.network.worker.GenericNetworkController;
+import com.nextzy.myais.common.network.worker.SchedulersAndErrorHandling;
+import com.nextzy.myais.promotion.helper.changepackage.operator.ChangePackageBlob;
+import com.nextzy.myais.promotion.helper.changepackage.operator.GetPackageGroupCheck;
+import com.nextzy.myais.promotion.helper.changepackage.request.ApplyPackageBody;
+import com.nextzy.myais.promotion.helper.changepackage.request.ApplyPaymentBody;
+import com.nextzy.myais.promotion.helper.changepackage.request.CheckPackageBody;
+import com.nextzy.myais.promotion.helper.changepackage.response.ApplyPackageResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.ApplyPaymentRemarkResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.ApplyPaymentResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.BillingCycleResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.CheckPackageResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.CreditCardDropdownResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.InitialCorporateResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.InitialPostpaidResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.InitialPrepaidResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.PackageGroupResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.PackageListResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.PackageRemarkResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.PackageResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.PaymentOptionResult;
+import com.nextzy.myais.promotion.module.changepackage.constant.ChangePackageKey;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import rx.Single;
+
+/**
+ * Created by kajornsak on 9/13/2016 AD.
+ */
+
+<span class="nc" id="L41">public class ChangePackageManager extends GenericNetworkController {</span>
+    private static ChangePackageManager instance;
+    public static final String SERVICE_NAME_GET_BILLING_CYCLE = &quot;get_billing_cycle&quot;;
+    public static final String SERVICE_NAME_GET_PACKAGE_GROUP_LIST = &quot;get_package_group_list&quot;;
+    public static final String SERVICE_NAME_GET_PACKAGE_LIST = &quot;get_package_list&quot;;
+    public static final String SERVICE_NAME_GET_PACKAGE_REMARKS = &quot;get_package_remarks&quot;;
+    public static final String SERVICE_NAME_APPLY_PACKAGE = &quot;apply_package&quot;;
+    public static final String SERVICE_NAME_GET_POSTPAID_PACKAGE_GROUP = &quot;get_postpaid_package_group&quot;;
+    public static final String SERVICE_NAME_GET_PREPAID_PACKAGE_GROUP = &quot;get_prepaid_package_group&quot;;
+    public static final String SERVICE_NAME_GET_CORPORATE_PACKAGE_GROUP = &quot;get_corporate_package_group&quot;;
+    public static final String SERVICE_NAME_GET_ALL_PACKAGE_BY_CATEGORY = &quot;get_all_package_by_category&quot;;
+    public static final String SERVICE_NAME_CHECK_PACKAGE = &quot;check_package&quot;;
+    public static final String SERVICE_NAME_GET_CREDIT_CARD_DROPDOWN = &quot;get_credit_card_dropdown&quot;;
+    public static final String SERVICE_NAME_APPLY_PAYMENT = &quot;apply_payment&quot;;
+    public static final String SERVICE_NAME_PAYMENT_REMARK = &quot;payment_remark&quot;;
+    public static final String SERVICE_NAME_GET_PAYMENT_OPTION = &quot;payment_option&quot;;
+
+    public static final String REMARK_POSTPAID = &quot;PACKAGE&quot;;
+    public static final String REMARK_PREPAID = &quot;CHANGEPROMOTION&quot;;
+
+    public static ChangePackageManager getInstance() {
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (instance == null) {</span>
+<span class="nc" id="L63">            instance = new ChangePackageManager();</span>
+        }
+<span class="nc" id="L65">        return instance;</span>
+    }
+
+    ChangePackageApi changePackageApi;
+
+    public ChangePackageApi getPackageApi() {
+<span class="nc" id="L71">        return changePackageApi;</span>
+    }
+
+    public void setChangePackageApi(ChangePackageApi changePackageApi) {
+<span class="nc" id="L75">        this.changePackageApi = changePackageApi;</span>
+<span class="nc" id="L76">    }</span>
+
+    private Single&lt;BillingCycleResult&gt; getBillingCycleSingle() {
+<span class="nc" id="L79">        return ChangePackageApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L80">                .getRxApi(getPackageApi())</span>
+<span class="nc" id="L81">                .getBillingCycle(</span>
+<span class="nc" id="L82">                        new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(),</span>
+<span class="nc" id="L83">                        Mobile.getInstance().getMobileNumber())</span>
+<span class="nc" id="L84">                .compose(new SchedulersAndErrorHandling&lt;&gt;(BillingCycleResult.class, SERVICE_NAME_GET_BILLING_CYCLE))</span>
+<span class="nc" id="L85">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_BILLING_CYCLE));</span>
+    }
+
+    private Single&lt;PackageGroupResult&gt; getPackageGroupListSingle(String groupCode) {
+<span class="nc" id="L89">        return ChangePackageApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L90">                .getRxApi(getPackageApi())</span>
+<span class="nc" id="L91">                .getPackageGroupList(</span>
+<span class="nc" id="L92">                        new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(),</span>
+<span class="nc" id="L93">                        Mobile.getInstance().getMobileNumber(),</span>
+                        groupCode)
+<span class="nc" id="L95">                .compose(new SchedulersAndErrorHandling&lt;&gt;(PackageGroupResult.class, SERVICE_NAME_GET_PACKAGE_GROUP_LIST))</span>
+<span class="nc" id="L96">                .flatMap(new GetPackageGroupCheck())</span>
+<span class="nc" id="L97">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_PACKAGE_GROUP_LIST));</span>
+    }
+
+    private Single&lt;PackageResult&gt; getPackageListSingle(String eventLogString, String groupCode, String tabCode) {
+<span class="nc" id="L101">        return ChangePackageApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L102">                .getRxApi(getPackageApi())</span>
+<span class="nc" id="L103">                .getPackageList(</span>
+                        eventLogString,
+<span class="nc" id="L105">                        Mobile.getInstance().getMobileNumber(), groupCode, tabCode)</span>
+<span class="nc" id="L106">                .compose(new SchedulersAndErrorHandling&lt;&gt;(PackageResult.class, SERVICE_NAME_GET_PACKAGE_LIST + &quot;_&quot; + tabCode))</span>
+<span class="nc" id="L107">                .compose(new ContinueWithNullOnCrash&lt;&gt;(PackageResult.class))</span>
+<span class="nc" id="L108">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_PACKAGE_LIST + &quot;_&quot; + tabCode));</span>
+    }
+
+    public void getPaymentOption(String eventLogString, boolean isPayToAnother) {
+<span class="nc" id="L112">        getPaymentOptionSingle(eventLogString, isPayToAnother).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_GET_PAYMENT_OPTION));</span>
+<span class="nc" id="L113">    }</span>
+
+    public Single&lt;PaymentOptionResult&gt; getPaymentOptionSingle(String eventLogString, boolean isPayToAnother) {
+<span class="nc" id="L116">        return Single.zip(getCreditCardDropdownSingle(eventLogString),</span>
+<span class="nc" id="L117">                getPaymentRemark(isPayToAnother),</span>
+                PaymentOptionResult::new);
+    }
+
+    public void getCreditCardDropdown(String eventLogString) {
+<span class="nc" id="L122">        getCreditCardDropdownSingle(eventLogString).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_GET_CREDIT_CARD_DROPDOWN));</span>
+<span class="nc" id="L123">    }</span>
+
+    private Single&lt;CreditCardDropdownResult&gt; getCreditCardDropdownSingle(String eventLogString) {
+<span class="nc" id="L126">        return ChangePackageApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L127">                .getRxApi(getPackageApi())</span>
+<span class="nc" id="L128">                .getCreditCardDropdown(</span>
+                        eventLogString,
+<span class="nc" id="L130">                        Mobile.getInstance().getMobileNumber()</span>
+                )
+<span class="nc" id="L132">                .compose(new SchedulersAndErrorHandling&lt;&gt;(CreditCardDropdownResult.class, SERVICE_NAME_GET_CREDIT_CARD_DROPDOWN))</span>
+<span class="nc" id="L133">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_CREDIT_CARD_DROPDOWN));</span>
+    }
+
+    public void checkPackage(String groupCode, CheckPackageBody body) {
+<span class="nc" id="L137">        checkPackageSingle(groupCode, body).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_CHECK_PACKAGE));</span>
+<span class="nc" id="L138">    }</span>
+
+    private Single&lt;CheckPackageResult&gt; checkPackageSingle(String groupCode, CheckPackageBody body) {
+<span class="nc" id="L141">        return ChangePackageApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L142">                .getRxApi(getPackageApi())</span>
+<span class="nc" id="L143">                .checkPackage(</span>
+<span class="nc" id="L144">                        Mobile.getInstance().getMobileNumber(),</span>
+                        groupCode,
+                        body
+                )
+<span class="nc" id="L148">                .compose(new SchedulersAndErrorHandling&lt;&gt;(CheckPackageResult.class, SERVICE_NAME_CHECK_PACKAGE))</span>
+<span class="nc" id="L149">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_CHECK_PACKAGE));</span>
+    }
+
+    public void applyPayment(String eventLogParam, ApplyPaymentBody body) {
+<span class="nc" id="L153">        applyPaymentSingle(eventLogParam, body).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_APPLY_PAYMENT));</span>
+<span class="nc" id="L154">    }</span>
+
+    private Single&lt;ApplyPaymentResult&gt; applyPaymentSingle(String eventLogParam, ApplyPaymentBody body) {
+<span class="nc" id="L157">        return ChangePackageApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L158">                .getRxApi(getPackageApi())</span>
+<span class="nc" id="L159">                .applyPayment(</span>
+                        eventLogParam,
+<span class="nc" id="L161">                        Mobile.getInstance().getMobileNumber(),</span>
+                        body
+<span class="nc" id="L163">                ).compose(new SchedulersAndErrorHandling&lt;&gt;(ApplyPaymentResult.class, SERVICE_NAME_APPLY_PAYMENT))</span>
+<span class="nc" id="L164">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_APPLY_PAYMENT));</span>
+    }
+
+    private Single&lt;PackageRemarkResult&gt; getCorporatePackageRemarksSingle() {
+<span class="nc bnc" id="L168" title="All 2 branches missed.">        String packageKey = Mobile.getInstance().isPostpaid() ? REMARK_POSTPAID : REMARK_PREPAID;</span>
+<span class="nc" id="L169">        return getPackageRemarksSingle(packageKey);</span>
+    }
+
+    private Single&lt;PackageRemarkResult&gt; getPrepaidPackageRemarksSingle() {
+<span class="nc" id="L173">        return getPackageRemarksSingle(REMARK_PREPAID);</span>
+    }
+
+    private Single&lt;PackageRemarkResult&gt; getPostpaidPackageRemarksSingle() {
+<span class="nc" id="L177">        return getPackageRemarksSingle(REMARK_POSTPAID);</span>
+    }
+
+    private Single&lt;PackageRemarkResult&gt; getPackageRemarksSingle(String packageKey) {
+<span class="nc" id="L181">        return ChangePackageApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L182">                .getRxApi(getPackageApi())</span>
+<span class="nc" id="L183">                .getPackageRemarks(</span>
+<span class="nc" id="L184">                        new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(),</span>
+<span class="nc" id="L185">                        Mobile.getInstance().getMobileNumber(),</span>
+                        packageKey)
+<span class="nc" id="L187">                .compose(new SchedulersAndErrorHandling&lt;&gt;(PackageRemarkResult.class, SERVICE_NAME_GET_PACKAGE_REMARKS))</span>
+<span class="nc" id="L188">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_PACKAGE_REMARKS));</span>
+    }
+
+    public void applyPackage(String groupCode, ApplyPackageBody param) {
+<span class="nc" id="L192">        applyPackageSingle(getEventLogApplyChangePackage(groupCode), groupCode, param).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_APPLY_PACKAGE));</span>
+<span class="nc" id="L193">    }</span>
+
+    private Single&lt;ApplyPackageResult&gt; applyPackageSingle(String eventLogString, String groupCode, ApplyPackageBody param) {
+<span class="nc" id="L196">        return ChangePackageApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L197">                .getRxApi(getPackageApi())</span>
+<span class="nc" id="L198">                .applyPackage(</span>
+                        eventLogString,
+<span class="nc" id="L200">                        Mobile.getInstance().getMobileNumber(),</span>
+                        groupCode,
+                        param)
+<span class="nc" id="L203">                .compose(new SchedulersAndErrorHandling&lt;&gt;(ApplyPackageResult.class, SERVICE_NAME_APPLY_PACKAGE))</span>
+<span class="nc" id="L204">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_APPLY_PACKAGE));</span>
+    }
+
+    private Single&lt;ApplyPaymentRemarkResult&gt; getPaymentRemark(boolean isPayToAnother) {
+        String eventLog;
+<span class="nc bnc" id="L209" title="All 2 branches missed.">        if (isPayToAnother) {</span>
+<span class="nc" id="L210">            eventLog = new EventLogParam(&quot;APP_VIEW_PAYBILL_ANOTHER&quot;, &quot;5003&quot;, &quot;5041&quot;).getEventLogHeader();</span>
+        } else {
+<span class="nc" id="L212">            eventLog = new EventLogParam(&quot;APP_VIEW_PAYBILL&quot;, &quot;5003&quot;, &quot;5034&quot;).getEventLogHeader();</span>
+        }
+<span class="nc" id="L214">        return ChangePackageApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L215">                .getRxApi(getPackageApi())</span>
+<span class="nc" id="L216">                .paymentRemark(eventLog, Mobile.getInstance().getMobileNumber())</span>
+<span class="nc" id="L217">                .compose(new SchedulersAndErrorHandling&lt;&gt;(ApplyPaymentRemarkResult.class, SERVICE_NAME_PAYMENT_REMARK))</span>
+<span class="nc" id="L218">                .compose(new ContinueWithNullOnCrash&lt;&gt;(ApplyPaymentRemarkResult.class))</span>
+<span class="nc" id="L219">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_PAYMENT_REMARK));</span>
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Chain Method
+    ///////////////////////////////////////////////////////////////////////////
+
+    public void getPostpaidPackageGroup(String groupCode) {
+<span class="nc" id="L227">        getPostpaidPackageGroupSingle(groupCode).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_GET_POSTPAID_PACKAGE_GROUP));</span>
+<span class="nc" id="L228">    }</span>
+
+    public void getPrepaidPackageGroup(String groupCode) {
+<span class="nc" id="L231">        getPrepaidPackageGroupSingle(groupCode).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_GET_PREPAID_PACKAGE_GROUP));</span>
+<span class="nc" id="L232">    }</span>
+
+    public void getCorporatePackageGroup(String groupCode) {
+<span class="nc" id="L235">        getCorporatePackageGroupSingle(groupCode).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_GET_CORPORATE_PACKAGE_GROUP));</span>
+<span class="nc" id="L236">    }</span>
+
+    private Single&lt;InitialPostpaidResult&gt; getPostpaidPackageGroupSingle(String groupCode) {
+<span class="nc" id="L239">        return Single.zip(</span>
+<span class="nc" id="L240">                getBillingCycleSingle(),</span>
+<span class="nc" id="L241">                getPackageGroupListSingle(groupCode),</span>
+<span class="nc" id="L242">                getPostpaidPackageRemarksSingle(),</span>
+                InitialPostpaidResult::new);
+    }
+
+    private Single&lt;InitialPrepaidResult&gt; getPrepaidPackageGroupSingle(String groupCode) {
+<span class="nc" id="L247">        return Single.zip(</span>
+<span class="nc" id="L248">                getPackageGroupListSingle(groupCode),</span>
+<span class="nc" id="L249">                getPrepaidPackageRemarksSingle(),</span>
+                InitialPrepaidResult::new);
+    }
+
+    private Single&lt;InitialCorporateResult&gt; getCorporatePackageGroupSingle(String groupCode) {
+<span class="nc" id="L254">        return Single.zip(</span>
+<span class="nc" id="L255">                getPackageGroupListSingle(groupCode),</span>
+<span class="nc" id="L256">                getCorporatePackageRemarksSingle(),</span>
+                InitialCorporateResult::new);
+    }
+
+    public void getAllPackageByCategory(String groupCode, List&lt;String&gt; tabCodeList, String categoryTabCode, String actionCode) {
+<span class="nc" id="L261">        getAllPackageByCategorySingle(getEventLogChangePackage(actionCode, groupCode), groupCode, tabCodeList, categoryTabCode, actionCode).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_GET_ALL_PACKAGE_BY_CATEGORY));</span>
+<span class="nc" id="L262">    }</span>
+
+    private Single&lt;PackageListResult&gt; getAllPackageByCategorySingle(String eventLogString, String groupCode, List&lt;String&gt; tabCodeList, String categoryTabCode, String actionCode) {
+<span class="nc" id="L265">        List&lt;Single&lt;PackageResult&gt;&gt; singleList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L266" title="All 2 branches missed.">        for (String tabCode : tabCodeList) {</span>
+<span class="nc" id="L267">            singleList.add(getPackageListSingle(eventLogString, groupCode, tabCode));</span>
+<span class="nc" id="L268">        }</span>
+<span class="nc" id="L269">        return Single.zip(</span>
+                singleList, args -&gt; {
+<span class="nc" id="L271">                    List&lt;PackageResult&gt; packageResultList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">                    for (Object arg : args) {</span>
+<span class="nc" id="L273">                        packageResultList.add((PackageResult) arg);</span>
+                    }
+<span class="nc" id="L275">                    return new PackageListResult(categoryTabCode, actionCode, packageResultList);</span>
+                });
+    }
+
+    private String getEventLogChangePackage(String actionCode, String groupCode) {
+<span class="nc" id="L280">        ChangePackageBlob.getInstance().setActionCode(actionCode);</span>
+
+<span class="nc bnc" id="L282" title="All 2 branches missed.">        if (groupCode.contains(ChangePackageKey.TYPE_ON_TOP)) {</span>
+<span class="nc" id="L283">            return new EventLogParam(String.format(&quot;APP_VIEW_APPLY_PACKAGE_%s&quot;, actionCode), &quot;10034&quot;, &quot;5014&quot;).getEventLogHeader();</span>
+<span class="nc bnc" id="L284" title="All 2 branches missed.">        } else if (groupCode.contains(ChangePackageKey.TYPE_MAIN)) {</span>
+<span class="nc" id="L285">            return new EventLogParam(String.format(&quot;APP_VIEW_CHANGE_PACKAGE_%s&quot;, actionCode), &quot;10035&quot;, &quot;5011&quot;).getEventLogHeader();</span>
+<span class="nc bnc" id="L286" title="All 2 branches missed.">        } else if (groupCode.contains(ChangePackageKey.TYPE_ON_SPOT)) {</span>
+            // TODO Event log for on spot
+<span class="nc" id="L288">            return &quot;&quot;;</span>
+        } else {
+<span class="nc" id="L290">            throw new NullPointerException(String.format(&quot;No eventlog for this groupcode: %s&quot;, groupCode));</span>
+        }
+    }
+
+
+    private String getEventLogApplyChangePackage(String groupCode) {
+<span class="nc" id="L296">        final String actionCode = ChangePackageBlob.getInstance().getActionCode();</span>
+
+<span class="nc bnc" id="L298" title="All 2 branches missed.">        if (groupCode.contains(ChangePackageKey.TYPE_ON_TOP)) {</span>
+<span class="nc" id="L299">            return new EventLogParam(String.format(&quot;APP_CONFIRM_APPLY_PACKAGE_%s&quot;, actionCode), &quot;10034&quot;, &quot;5016&quot;).getEventLogHeader();</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">        } else if (groupCode.contains(ChangePackageKey.TYPE_MAIN)) {</span>
+<span class="nc" id="L301">            return new EventLogParam(String.format(&quot;APP_CONFIRM_CHANGE_PACKAGE_%s&quot;, actionCode), &quot;10035&quot;, &quot;5013&quot;).getEventLogHeader();</span>
+<span class="nc bnc" id="L302" title="All 2 branches missed.">        } else if (groupCode.contains(ChangePackageKey.TYPE_ON_SPOT)) {</span>
+            // TODO Event log for on spot
+<span class="nc" id="L304">            return &quot;&quot;;</span>
+        } else {
+<span class="nc" id="L306">            throw new NullPointerException(String.format(&quot;No eventlog for this groupcode: %s&quot;, groupCode));</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

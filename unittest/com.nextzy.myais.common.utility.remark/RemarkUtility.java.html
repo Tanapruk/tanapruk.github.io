@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RemarkUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.common.utility.remark</a> &gt; <span class="el_source">RemarkUtility.java</span></div><h1>RemarkUtility.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.common.utility.remark;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by trusttanapruk on 9/28/2016.
+ */
+
+<span class="nc" id="L10">public class RemarkUtility {</span>
+    public static RemarkUtility instance;
+
+    public static RemarkUtility getInstance() {
+<span class="nc bnc" id="L14" title="All 2 branches missed.">        if (instance == null) {</span>
+<span class="nc" id="L15">            instance = new RemarkUtility();</span>
+        }
+<span class="nc" id="L17">        return instance;</span>
+    }
+
+    public &lt;RemarkBlockData extends RemarkBlock&gt; String sum(List&lt;RemarkBlockData&gt; rawRemarkBlockList) {
+<span class="nc" id="L21">        return sum(null, rawRemarkBlockList);</span>
+    }
+
+    public &lt;RemarkBlockData extends RemarkBlock&gt; String sum(String[] keys, List&lt;RemarkBlockData&gt; rawRemarkBlockList) {
+<span class="nc bnc" id="L25" title="All 2 branches missed.">        if (keys == null) {</span>
+<span class="nc" id="L26">            return addAllRemarks(rawRemarkBlockList);</span>
+        }
+
+<span class="nc" id="L29">        return addAllRemarks(getDataListByKey(keys, rawRemarkBlockList));</span>
+    }
+
+    private &lt;RemarkBlockData extends RemarkBlock&gt; String addAllRemarks(List&lt;RemarkBlockData&gt; filterRemarkBlockList) {
+<span class="nc" id="L33">        String remark = &quot;&quot;;</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        for (RemarkBlock data : filterRemarkBlockList) {</span>
+<span class="nc" id="L35">            remark += addBrTag(data.getRemarkHeader());</span>
+<span class="nc" id="L36">            remark += addBrTag(data.getRemarkDisplay1());</span>
+<span class="nc" id="L37">            remark += addBrTag(data.getRemarkDisplay2());</span>
+<span class="nc" id="L38">            remark += addBrTag(data.getRemarkDisplay3());</span>
+<span class="nc" id="L39">        }</span>
+<span class="nc" id="L40">        return remark;</span>
+    }
+
+    private String addBrTag(String remarkDisplay) {
+<span class="nc bnc" id="L44" title="All 4 branches missed.">        if (remarkDisplay == null || remarkDisplay.isEmpty()) {</span>
+<span class="nc" id="L45">            return &quot;&quot;;</span>
+        }
+
+<span class="nc" id="L48">        return remarkDisplay + &quot;&lt;br /&gt;&quot;;</span>
+    }
+
+    private &lt;RemarkBlockData extends RemarkBlock&gt; List&lt;RemarkBlockData&gt; getDataListByKey(String[] keys, List&lt;RemarkBlockData&gt; rawRemarkBlockList) {
+<span class="nc bnc" id="L52" title="All 2 branches missed.">        if (rawRemarkBlockList == null) {</span>
+<span class="nc" id="L53">            return null;</span>
+        }
+<span class="nc" id="L55">        List&lt;RemarkBlockData&gt; filteredDataList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        for (String key : keys) {</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">            for (RemarkBlockData data : rawRemarkBlockList) {</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">                if (data != null &amp;&amp;</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">                        data.getKey().equalsIgnoreCase(key) &amp;&amp;</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">                        !isRemarkDataContainByKey(filteredDataList, data)) {</span>
+<span class="nc" id="L61">                    filteredDataList.add(data);</span>
+                }
+<span class="nc" id="L63">            }</span>
+        }
+<span class="nc" id="L65">        return filteredDataList;</span>
+    }
+
+    private &lt;RemarkBlockData extends RemarkBlock&gt; boolean isRemarkDataContainByKey(List&lt;RemarkBlockData&gt; dataList, RemarkBlockData remarkData) {
+<span class="nc bnc" id="L69" title="All 4 branches missed.">        if (dataList == null || remarkData == null) {</span>
+<span class="nc" id="L70">            return false;</span>
+        }
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        for (RemarkBlockData data : dataList) {</span>
+<span class="nc bnc" id="L73" title="All 4 branches missed.">            if (data == null || !data.getKey().equalsIgnoreCase(remarkData.getKey())) {</span>
+<span class="nc" id="L74">                continue;</span>
+            }
+<span class="nc" id="L76">            return true;</span>
+        }
+<span class="nc" id="L78">        return false;</span>
+    }
+}
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CloudPlusManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.home.helper.cloudplus.network</a> &gt; <span class="el_source">CloudPlusManager.java</span></div><h1>CloudPlusManager.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.home.helper.cloudplus.network;
+
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.database.model.SaveRealmResult;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.network.subscriber.NextzySimpleSubscriber;
+import com.nextzy.myais.common.network.worker.GenericNetworkController;
+import com.nextzy.myais.common.network.worker.SchedulersAndErrorHandling;
+import com.nextzy.myais.home.helper.cloudplus.model.CloudPlusResult;
+
+import rx.Single;
+
+/**
+ * Created by trusttanapruk on 8/25/2016.
+ */
+<span class="fc" id="L16">public class CloudPlusManager extends GenericNetworkController {</span>
+    public static final String SERVICE_NAME_GET_CLOUD_PLUS = &quot;get_cloud_plus&quot;;
+
+    private static CloudPlusManager instance;
+
+    public static CloudPlusManager getInstance() {
+<span class="pc bpc" id="L22" title="1 of 2 branches missed.">        if (instance == null) {</span>
+<span class="fc" id="L23">            instance = new CloudPlusManager();</span>
+        }
+<span class="fc" id="L25">        return instance;</span>
+    }
+
+    public static void setMockInstance(CloudPlusManager mockInstance) {
+<span class="fc" id="L29">        instance = mockInstance;</span>
+<span class="fc" id="L30">    }</span>
+
+    private CloudPlusApi cloudPlusApi;
+
+    public CloudPlusApi getCloudPlusApi() {
+<span class="nc" id="L35">        return cloudPlusApi;</span>
+    }
+
+    public void setCloudPlusApi(CloudPlusApi cloudPlusApi) {
+<span class="fc" id="L39">        this.cloudPlusApi = cloudPlusApi;</span>
+<span class="fc" id="L40">    }</span>
+
+    protected Single&lt;CloudPlusResult&gt; getCloudPlusSingle() {
+<span class="fc" id="L43">        return CloudPlusApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L44">                .getRxApi(cloudPlusApi)</span>
+<span class="fc" id="L45">                .getCloudPlus(new EventLogParam(&quot;APP_VIEW_HOME&quot;, &quot;5000&quot;, &quot;5000&quot;).getEventLogHeader())</span>
+<span class="fc" id="L46">                .compose(new SchedulersAndErrorHandling&lt;&gt;(CloudPlusResult.class, SERVICE_NAME_GET_CLOUD_PLUS))</span>
+<span class="fc" id="L47">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_CLOUD_PLUS));</span>
+    }
+
+    public void getCloudPlus() {
+<span class="nc" id="L51">        getCloudPlusSingle().subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_GET_CLOUD_PLUS));</span>
+<span class="nc" id="L52">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

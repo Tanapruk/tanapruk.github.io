@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TopUpConfirmationPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.payment.module.topup.fragment</a> &gt; <span class="el_source">TopUpConfirmationPresenter.java</span></div><h1>TopUpConfirmationPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.payment.module.topup.fragment;
+
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.mvp.NextzyPresenter;
+import com.nextzy.myais.payment.R;
+import com.nextzy.myais.payment.helper.payment.model.PayAndTopUpParam;
+import com.nextzy.myais.payment.helper.payment.model.PaymentActionIPayResult;
+import com.nextzy.myais.payment.helper.payment.network.PaymentManager;
+import com.nextzy.myais.payment.helper.topup.model.PaymentActionCashCardParam;
+import com.nextzy.myais.payment.helper.topup.model.PaymentActionCashCardResult;
+import com.nextzy.myais.payment.helper.topup.model.PaymentActionTopUpParam;
+import com.nextzy.myais.payment.helper.topup.model.PaymentActionTopUpResult;
+import com.nextzy.myais.payment.helper.topup.model.TopUpBlob;
+import com.nextzy.myais.payment.helper.topup.model.TopUpChannel;
+import com.nextzy.myais.payment.helper.topup.network.TopupManager;
+
+import static com.nextzy.myais.common.network.model.Checker.dataNotNull;
+import static com.nextzy.myais.common.network.model.Checker.descriptionNotNull;
+
+public class TopUpConfirmationPresenter extends NextzyPresenter&lt;TopUpConfirmationContractor.View&gt; implements TopUpConfirmationContractor.Presenter {
+    public TopUpConfirmationPresenter(TopUpConfirmationContractor.View view) {
+<span class="fc" id="L25">        super(view);</span>
+<span class="fc" id="L26">    }</span>
+
+    public static TopUpConfirmationPresenter createPresenter(TopUpConfirmationContractor.View view) {
+<span class="nc" id="L29">        return new TopUpConfirmationPresenter(view);</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L34">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L38">    }</span>
+
+    @Override
+    public void onViewStart() {
+<span class="nc" id="L42">        RxBus.get().register(this);</span>
+<span class="nc" id="L43">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L47">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L48">    }</span>
+
+    @Override
+    public void callService() {
+<span class="fc" id="L52">        getView().showLoadingDialog();</span>
+<span class="pc bpc" id="L53" title="1 of 5 branches missed.">        switch (TopUpBlob.INSTANCE.getTopUpChannel()) {</span>
+            case CREDIT:
+            case DEBIT:
+<span class="fc" id="L56">                callPayAndTopUpCreditDebitCard();</span>
+<span class="fc" id="L57">                break;</span>
+            case AISTOPUP:
+<span class="fc" id="L59">                callActionTopUp();</span>
+<span class="fc" id="L60">                break;</span>
+            case CASH_CARD:
+<span class="fc" id="L62">                callActionCash();</span>
+<span class="fc" id="L63">                break;</span>
+            case MPAY:
+<span class="fc" id="L65">                callPayAndTopupMPay();</span>
+                break;
+        }
+<span class="fc" id="L68">    }</span>
+
+
+    private String getEventLogCreditDebit() {
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        if (Mobile.getInstance().isPostpaid()) {</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">            if (TopUpBlob.INSTANCE.getTopUpChannel() == TopUpChannel.CREDIT) {</span>
+<span class="nc" id="L74">                return new EventLogParam(&quot;APP_CONFIRM_POSTPAID_TOPUP_CREDIT&quot;, &quot;5003&quot;, &quot;5053&quot;).getEventLogHeader();</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">            } else if (TopUpBlob.INSTANCE.getTopUpChannel() == TopUpChannel.DEBIT) {</span>
+<span class="nc" id="L76">                return new EventLogParam(&quot;APP_CONFIRM_POSTPAID_TOPUP_DEBIT&quot;, &quot;5003&quot;, &quot;5054&quot;).getEventLogHeader();</span>
+            }
+        } else {
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">            if (TopUpBlob.INSTANCE.getTopUpChannel() == TopUpChannel.CREDIT) {</span>
+<span class="nc" id="L80">                return new EventLogParam(&quot;APP_CONFIRM_TOPUP_CREDIT&quot;, &quot;5003&quot;, &quot;5062&quot;).getEventLogHeader();</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">            } else if (TopUpBlob.INSTANCE.getTopUpChannel() == TopUpChannel.DEBIT) {</span>
+<span class="fc" id="L82">                return new EventLogParam(&quot;APP_CONFIRM_TOPUP_DEBIT&quot;, &quot;5003&quot;, &quot;5061&quot;).getEventLogHeader();</span>
+            }
+        }
+<span class="nc" id="L85">        throw new NullPointerException(&quot;No event log for this type&quot;);</span>
+    }
+
+    void callActionCash() {
+<span class="fc" id="L89">        PaymentActionCashCardParam param = new PaymentActionCashCardParam();</span>
+<span class="fc" id="L90">        param.setPayTo(TopUpBlob.INSTANCE.getPayTo());</span>
+<span class="fc" id="L91">        param.setCashCardNo(TopUpBlob.INSTANCE.getPin());</span>
+<span class="fc" id="L92">        TopupManager.getInstance().paymentActionCashCard(param);</span>
+<span class="fc" id="L93">    }</span>
+
+    void callActionTopUp() {
+<span class="fc" id="L96">        PaymentActionTopUpParam param = new PaymentActionTopUpParam();</span>
+<span class="fc" id="L97">        param.setAmount(TopUpBlob.INSTANCE.getAmountNoComma());</span>
+<span class="fc" id="L98">        param.setIdCard(TopUpBlob.INSTANCE.getIdCard());</span>
+<span class="fc" id="L99">        param.setPayTo(TopUpBlob.INSTANCE.getPayTo());</span>
+<span class="fc" id="L100">        TopupManager.getInstance().paymentActionTopUp(param);</span>
+<span class="fc" id="L101">    }</span>
+
+    private void callPayAndTopUp(String eventLog) {
+<span class="fc" id="L104">        PayAndTopUpParam payAndTopUpParam = new PayAndTopUpParam();</span>
+<span class="fc" id="L105">        payAndTopUpParam.setTotalAmount(TopUpBlob.INSTANCE.getAmountDouble());</span>
+<span class="fc" id="L106">        payAndTopUpParam.setMasterMobile(Mobile.getInstance().getMobileNumber());</span>
+<span class="fc" id="L107">        payAndTopUpParam.setCardType(TopUpBlob.INSTANCE.getCardTypeParam());</span>
+<span class="fc" id="L108">        payAndTopUpParam.setMode(PayAndTopUpParam.MODE_TOP_UP_ONE_2_CALL);</span>
+<span class="fc" id="L109">        payAndTopUpParam.setPayeeMobile(TopUpBlob.INSTANCE.getPayTo());</span>
+<span class="fc" id="L110">        PaymentManager.getInstance().payAndTopUp(eventLog, payAndTopUpParam);</span>
+<span class="fc" id="L111">    }</span>
+
+    void callPayAndTopUpCreditDebitCard() {
+<span class="fc" id="L114">        callPayAndTopUp(getEventLogCreditDebit());</span>
+<span class="fc" id="L115">    }</span>
+
+    void callPayAndTopupMPay() {
+<span class="fc" id="L118">        callPayAndTopUp(getEventLogMPay());</span>
+<span class="fc" id="L119">    }</span>
+
+    private String getEventLogMPay() {
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">        if (Mobile.getInstance().isPostpaid()) {</span>
+<span class="fc" id="L123">            return new EventLogParam(&quot;APP_CONFIRM_POSTPAID_TOPUP_MPAY&quot;, &quot;5003&quot;, &quot;5055&quot;).getEventLogHeader();</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">        } else if (Mobile.getInstance().isPrepaid()) {</span>
+<span class="nc" id="L125">            return new EventLogParam(&quot;APP_CONFIRM_TOPUP_MPAY&quot;, &quot;5003&quot;, &quot;5121&quot;).getEventLogHeader();</span>
+        } else {
+<span class="nc" id="L127">            throw new NullPointerException(&quot;No event log for this type&quot;);</span>
+        }
+
+    }
+
+    void showResultAndFinish(String description) {
+<span class="fc" id="L133">        getView().setCurrentStatementUpdate();</span>
+<span class="fc" id="L134">        getView().showAlertDialogFinishOnClick(description);</span>
+<span class="fc" id="L135">    }</span>
+
+    @Subscribe
+    public void onActionTopUpResult(PaymentActionTopUpResult result) {
+<span class="fc" id="L139">        showResultAndFinish(result.getResultDescription());</span>
+<span class="fc" id="L140">    }</span>
+
+    @Subscribe
+    public void onActionCashResult(PaymentActionCashCardResult result) {
+<span class="fc" id="L144">        showResultAndFinish(result.getResultDescription());</span>
+<span class="fc" id="L145">    }</span>
+
+    @Subscribe
+    public void onPaymentIPayResult(PaymentActionIPayResult result) {
+<span class="fc bfc" id="L149" title="All 2 branches covered.">        if (dataNotNull(result)) {</span>
+<span class="fc" id="L150">            getView().setCurrentStatementUpdate();</span>
+<span class="fc" id="L151">            getView().gotoPaymentPage(result.getData().getPaymentPage());</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">        } else if (descriptionNotNull(result)) {</span>
+<span class="fc" id="L153">            getView().showAlertDialogFinishOnClick(result.getResultDescription());</span>
+        } else {
+<span class="fc" id="L155">            getView().showAlertDialogFinishOnClick(R.string.my_ais_server_unavailable);</span>
+        }
+<span class="fc" id="L157">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

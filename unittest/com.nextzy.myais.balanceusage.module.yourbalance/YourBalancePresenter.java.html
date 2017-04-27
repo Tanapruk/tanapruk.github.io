@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>YourBalancePresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.balanceusage.module.yourbalance</a> &gt; <span class="el_source">YourBalancePresenter.java</span></div><h1>YourBalancePresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.balanceusage.module.yourbalance;
+
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.mvp.NextzyActivityPresenter;
+import com.nextzy.myais.common.utility.NextzyNumberUtility;
+import com.nextzy.myais.payment.helper.payment.model.InvoiceData;
+import com.nextzy.myais.payment.helper.payment.model.InvoiceResult;
+import com.nextzy.myais.payment.helper.payment.network.PaymentManager;
+import com.nextzy.myais.payment.module.payment.delegate.InvoiceDelegate;
+
+import java.lang.Override;
+import java.math.BigDecimal;
+import java.util.List;
+
+public class YourBalancePresenter extends NextzyActivityPresenter&lt;YourBalanceContractor.View&gt; implements YourBalanceContractor.Presenter, InvoiceDelegate.Organizer {
+
+    InvoiceDelegate invoiceDelegate;
+    private List&lt;InvoiceData&gt; invoiceDataList;
+
+    public YourBalancePresenter(YourBalanceContractor.View view) {
+<span class="fc" id="L23">        super(view);</span>
+<span class="fc" id="L24">    }</span>
+
+    public static YourBalancePresenter createPresenter(YourBalanceContractor.View view) {
+<span class="nc" id="L27">        return new YourBalancePresenter(view);</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L32">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L36">    }</span>
+
+    @Override
+    public void onViewStart() {
+<span class="nc" id="L40">        super.onViewStart();</span>
+<span class="nc" id="L41">        RxBus.get().register(this);</span>
+<span class="nc" id="L42">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L46">        super.onViewStop();</span>
+<span class="nc" id="L47">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L48">    }</span>
+
+    @Override
+    public void callService() {
+<span class="nc" id="L52">        PaymentManager.getInstance().getInvoice(new EventLogParam(&quot;APP_VIEW_YOUR_BALANCE&quot;, &quot;5002&quot;, &quot;5027&quot;).getEventLogHeader());</span>
+<span class="nc" id="L53">    }</span>
+
+    @Subscribe
+    @Override
+    public void onInvoiceSuccess(InvoiceResult invoiceResult) {
+<span class="fc" id="L58">        setInvoiceResult(invoiceResult);</span>
+<span class="fc" id="L59">    }</span>
+
+    private void setInvoiceResult(InvoiceResult invoiceResult) {
+<span class="fc" id="L62">        invoiceDataList = invoiceResult.getDataList();</span>
+<span class="fc" id="L63">        invoiceDelegate = new InvoiceDelegate(invoiceDataList, this);</span>
+<span class="fc" id="L64">    }</span>
+
+    @Override
+    public void onEachInvoiceData(String billingCycle, String paymentDueDate, String outStandingBalance) {
+<span class="fc" id="L68">        getView().addInvoiceItem(billingCycle, paymentDueDate, outStandingBalance);</span>
+<span class="fc" id="L69">    }</span>
+
+    @Override
+    public void onBetweenInvoiceData() {
+<span class="fc" id="L73">        getView().addDivider();</span>
+<span class="fc" id="L74">    }</span>
+
+    @Override
+    public void onBeforeFirstInvoiceDataList() {
+
+<span class="fc" id="L79">    }</span>
+
+    @Override
+    public void onAfterLastInvoiceDataList(BigDecimal totalBillingAmount) {
+<span class="fc" id="L83">        getView().addTotalBalance(NextzyNumberUtility.getInstance().formatNumber(totalBillingAmount.toString()));</span>
+<span class="fc" id="L84">    }</span>
+
+    @Override
+    public void onNoInvoiceDataList() {
+<span class="fc" id="L88">        getView().addNoOutStandingBalance();</span>
+<span class="fc" id="L89">    }</span>
+
+    @Override
+    public void onFinish() {
+<span class="fc" id="L93">        getView().dismissLoading();</span>
+<span class="fc" id="L94">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

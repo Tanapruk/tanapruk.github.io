@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RoamingPackageConfirmationPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.promotion.module.roaming.fragment</a> &gt; <span class="el_source">RoamingPackageConfirmationPresenter.java</span></div><h1>RoamingPackageConfirmationPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.promotion.module.roaming.fragment;
+
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.mvp.NextzyPresenter;
+import com.nextzy.myais.common.utility.NextzyLanguage;
+import com.nextzy.myais.promotion.R;
+import com.nextzy.myais.promotion.helper.roaming.event.GotoRoamingPackageListEvent;
+import com.nextzy.myais.promotion.helper.roaming.event.GotoRoamingPackageRequest;
+import com.nextzy.myais.promotion.helper.roaming.model.RoamingResult;
+import com.nextzy.myais.promotion.helper.roaming.model.UpPackCDATA;
+import com.nextzy.myais.promotion.helper.roaming.network.RoamingManager;
+import com.nextzy.myais.promotion.helper.roaming.util.TextFormatter;
+
+public class RoamingPackageConfirmationPresenter extends NextzyPresenter&lt;RoamingPackageConfirmationContractor.View&gt; implements RoamingPackageConfirmationContractor.Presenter {
+    private String mStartDateTime;
+    private String mEndDateTime;
+    private String mDt;
+    private UpPackCDATA mUpPackCDATA;
+
+    public RoamingPackageConfirmationPresenter(RoamingPackageConfirmationContractor.View view) {
+<span class="nc" id="L23">        super(view);</span>
+<span class="nc" id="L24">    }</span>
+
+    public static RoamingPackageConfirmationPresenter createPresenter(RoamingPackageConfirmationContractor.View view) {
+<span class="nc" id="L27">        return new RoamingPackageConfirmationPresenter(view);</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L32">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L36">    }</span>
+
+    @Override
+    public void onViewStart() {
+<span class="nc" id="L40">        RxBus.get().register(this);</span>
+<span class="nc" id="L41">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L45">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L46">    }</span>
+
+    @Override
+    public void initializeConfirmData(String startDateTime, String endDateTime, String dt, UpPackCDATA upPackCDATA) {
+<span class="nc" id="L50">        mStartDateTime = startDateTime;</span>
+<span class="nc" id="L51">        mEndDateTime = endDateTime;</span>
+<span class="nc" id="L52">        mDt = dt;</span>
+<span class="nc" id="L53">        mUpPackCDATA = upPackCDATA;</span>
+
+<span class="nc" id="L55">    }</span>
+
+    @Override
+    public void setInitialView() {
+<span class="nc" id="L59">        setHeaderTitle();</span>
+
+<span class="nc" id="L61">    }</span>
+
+    @Override
+    public void gotoPackageList() {
+<span class="nc" id="L65">        RxBus.get().post(new GotoRoamingPackageListEvent());</span>
+<span class="nc" id="L66">    }</span>
+
+    @Override
+    public void validateAndCallService() {
+<span class="nc" id="L70">        validateChosenVsActualSystemMismatch();</span>
+
+<span class="nc" id="L72">    }</span>
+
+
+    private boolean isCorrectType() {
+<span class="nc bnc" id="L76" title="All 8 branches missed.">        return Mobile.getInstance().isPrepaid() &amp;&amp; mUpPackCDATA.getIsPrepaid().equals(&quot;1&quot;) || Mobile.getInstance().isPostpaid() &amp;&amp; mUpPackCDATA.getIsPrepaid().equals(&quot;0&quot;);</span>
+    }
+
+    private boolean isPrepaidButPostpaidWasChosen() {
+<span class="nc bnc" id="L80" title="All 4 branches missed.">        return Mobile.getInstance().isPrepaid() &amp;&amp; mUpPackCDATA.getIsPrepaid().equals(&quot;0&quot;);</span>
+    }
+
+    private boolean isPostpaidButPrepaidWasChosen() {
+<span class="nc bnc" id="L84" title="All 4 branches missed.">        return Mobile.getInstance().isPostpaid() &amp;&amp; mUpPackCDATA.getIsPrepaid().equals(&quot;1&quot;);</span>
+
+    }
+
+    private void validateChosenVsActualSystemMismatch() {
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        if (isCorrectType()) {</span>
+<span class="nc" id="L90">            getView().showLoadingDialog();</span>
+<span class="nc" id="L91">            RoamingManager.getInstance().buyPackage(mUpPackCDATA, mDt);</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        } else if (isPostpaidButPrepaidWasChosen()) {</span>
+<span class="nc" id="L93">            getView().showAlertDialogPostpaidButPrepaidWasChosen();</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        } else if (isPrepaidButPostpaidWasChosen()) {</span>
+<span class="nc" id="L95">            getView().showAlertDialogPrepaidButPostpaidWasChosen();</span>
+        }
+
+<span class="nc" id="L98">    }</span>
+
+    @Override
+    public void gotoPackageRequest() {
+<span class="nc" id="L102">        RxBus.get().post(new GotoRoamingPackageRequest());</span>
+<span class="nc" id="L103">    }</span>
+
+    @Override
+    public UpPackCDATA getUpPackCDATA() {
+<span class="nc" id="L107">        return mUpPackCDATA;</span>
+    }
+
+    @Override
+    public String getStartDateTime() {
+<span class="nc" id="L112">        return mStartDateTime;</span>
+    }
+
+    @Override
+    public String getEndDateTime() {
+<span class="nc" id="L117">        return mEndDateTime;</span>
+    }
+
+    @Override
+    public String getDt() {
+<span class="nc" id="L122">        return mDt;</span>
+    }
+
+    @Subscribe
+    public void onRoamingResult(RoamingResult result) {
+<span class="nc" id="L127">        getView().dismissDialog();</span>
+<span class="nc bnc" id="L128" title="All 4 branches missed.">        if (&quot;000&quot;.equalsIgnoreCase(result.getStatus()) || &quot;Ok&quot;.equalsIgnoreCase(result.getStatus())) {</span>
+<span class="nc" id="L129">            getView().setRoamingPackageDataUpdated();</span>
+<span class="nc" id="L130">            getView().showAlertDialogFinishOnClick(R.string.promotion_roaming_package_confirmation_alert_success);</span>
+        } else {
+<span class="nc bnc" id="L132" title="All 2 branches missed.">            getView().showAlertDialogDismissOnClick(NextzyLanguage.getInstance().isThai() ? result.getDetailTh() : result.getDetail());</span>
+        }
+<span class="nc" id="L134">    }</span>
+
+    private void setHeaderTitle() {
+<span class="nc bnc" id="L137" title="All 2 branches missed.">        getView().setPackageName(NextzyLanguage.getInstance().isThai() ? mUpPackCDATA.getPackageTh() : mUpPackCDATA.getPackageEn());</span>
+<span class="nc" id="L138">        getView().setPackageRate(TextFormatter.addComma(mUpPackCDATA.getRate()));</span>
+<span class="nc" id="L139">        getView().setValidity(mUpPackCDATA.getValidity());</span>
+<span class="nc" id="L140">        getView().setDateTime(mStartDateTime, mEndDateTime);</span>
+<span class="nc" id="L141">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RoamingInfoPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.home.module.summaryinfo.roaming</a> &gt; <span class="el_source">RoamingInfoPresenter.java</span></div><h1>RoamingInfoPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.home.module.summaryinfo.roaming;
+
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.event.GoToRoamingCurrentPackageEvent;
+import com.nextzy.myais.common.event.GoToRoamingPackageEvent;
+import com.nextzy.myais.common.mvp.NextzyFragmentPresenter;
+import com.nextzy.myais.common.utility.NextzyUtility;
+import com.nextzy.myais.home.helper.roaming.network.RoamingInfoManager;
+import com.nextzy.myais.home.helper.roaming.network.model.MyPackageData;
+import com.nextzy.myais.home.helper.roaming.network.model.MyPackageResult;
+import com.nextzy.myais.home.helper.summarypackage.network.SummaryPackageManager;
+import com.nextzy.myais.home.module.summaryinfo.roaming.model.RoamingRemainingInfo;
+import com.nextzy.myais.home.module.summaryinfo.roaming.utility.RoamingInfoUtility;
+import com.nextzy.myais.home.utility.UnitConverter;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import rx.Observable;
+
+/**
+ * Created by Akexorcist on 12/8/2016 AD.
+ */
+
+public class RoamingInfoPresenter extends NextzyFragmentPresenter&lt;RoamingInfoContractor.View&gt; implements RoamingInfoContractor.Presenter {
+
+    public static RoamingInfoPresenter createPresenter(RoamingInfoContractor.View view) {
+<span class="nc" id="L29">        return new RoamingInfoPresenter(view);</span>
+    }
+
+    private RoamingInfoPresenter(RoamingInfoContractor.View view) {
+<span class="nc" id="L33">        super(view);</span>
+<span class="nc" id="L34">    }</span>
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L38">        RxBus.get().register(this);</span>
+<span class="nc" id="L39">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L43">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L44">    }</span>
+
+    @Override
+    public void getMyPackageInfo() {
+<span class="nc" id="L48">        getView().showLoading();</span>
+<span class="nc" id="L49">        getMyPackageInfoWithDelay();</span>
+<span class="nc" id="L50">    }</span>
+
+    @Override
+    public void goToRoamingPackage() {
+<span class="nc" id="L54">        getView().getRoamingInfoFromDatabaseSingle().subscribe(myPackageResult -&gt; {</span>
+<span class="nc bnc" id="L55" title="All 4 branches missed.">            if (myPackageResult != null &amp;&amp; myPackageResult.hasData()) {</span>
+<span class="nc" id="L56">                MyPackageData myPackageData = myPackageResult.getData();</span>
+<span class="nc" id="L57">                RoamingRemainingInfo roamingRemainingInfo = getRoamingRemainingItem(myPackageData);</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">                if (roamingRemainingInfo != null) {</span>
+<span class="nc" id="L59">                    RxBus.get().post(new GoToRoamingCurrentPackageEvent());</span>
+                } else {
+<span class="nc" id="L61">                    RxBus.get().post(new GoToRoamingPackageEvent());</span>
+                }
+<span class="nc" id="L63">            } else {</span>
+<span class="nc" id="L64">                RxBus.get().post(new GoToRoamingPackageEvent());</span>
+            }
+<span class="nc" id="L66">        });</span>
+<span class="nc" id="L67">    }</span>
+
+    @Override
+    public void setMyPackageInfo(MyPackageResult myPackageResult) {
+<span class="nc bnc" id="L71" title="All 4 branches missed.">        if (myPackageResult != null &amp;&amp; myPackageResult.hasData()) {</span>
+<span class="nc" id="L72">            MyPackageData myPackageData = myPackageResult.getData();</span>
+<span class="nc" id="L73">            RoamingRemainingInfo roamingRemainingInfo = getRoamingRemainingItem(myPackageData);</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">            if (roamingRemainingInfo != null) {</span>
+<span class="nc" id="L75">                String packageName = NextzyUtility.getInstance().wrapBlank(roamingRemainingInfo.getPackageName(), &quot;-&quot;);</span>
+<span class="nc" id="L76">                String startDate = NextzyUtility.getInstance().wrapBlank(roamingRemainingInfo.getStartDate(), &quot;-&quot;);</span>
+<span class="nc" id="L77">                String endDate = NextzyUtility.getInstance().wrapBlank(roamingRemainingInfo.getEndDate(), &quot;-&quot;);</span>
+<span class="nc" id="L78">                getView().setBasicRoamingRemainingInfo(packageName, startDate, endDate);</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">                if (roamingRemainingInfo.isExtraInfoAvailable()) {</span>
+<span class="nc" id="L80">                    String amount = UnitConverter.getInstance().convertDataValue(Float.parseFloat(roamingRemainingInfo.getRemaining()), roamingRemainingInfo.getUnit());</span>
+<span class="nc" id="L81">                    String amountUnit = UnitConverter.getInstance().getConvertedDataUnit(Float.parseFloat(roamingRemainingInfo.getRemaining()), roamingRemainingInfo.getUnit());</span>
+<span class="nc" id="L82">                    String total = UnitConverter.getInstance().convertDataValue(Float.parseFloat(roamingRemainingInfo.getMax()), roamingRemainingInfo.getUnit());</span>
+<span class="nc" id="L83">                    String totalUnit = UnitConverter.getInstance().getConvertedDataUnit(Float.parseFloat(roamingRemainingInfo.getMax()), roamingRemainingInfo.getUnit());</span>
+<span class="nc" id="L84">                    int max = (int) Float.parseFloat(roamingRemainingInfo.getMax());</span>
+<span class="nc" id="L85">                    int progress = (int) Float.parseFloat(roamingRemainingInfo.getRemaining());</span>
+<span class="nc" id="L86">                    boolean isUnlimited = roamingRemainingInfo.isUnlimited();</span>
+<span class="nc" id="L87">                    getView().setExtraRoamingRemainingInfo(total + &quot; &quot; + totalUnit, amount, amountUnit, progress, max, isUnlimited);</span>
+<span class="nc" id="L88">                } else {</span>
+<span class="nc" id="L89">                    getView().setEmptyRoamingRemainingInfo();</span>
+                }
+<span class="nc" id="L91">            } else {</span>
+<span class="nc" id="L92">                getView().setNoRoamingPackage();</span>
+            }
+<span class="nc" id="L94">        } else {</span>
+<span class="nc" id="L95">            getView().setNoRoamingPackage();</span>
+        }
+<span class="nc" id="L97">        getView().hideLoading();</span>
+<span class="nc" id="L98">    }</span>
+
+    @Subscribe
+    public void onMyPackageResult(MyPackageResult myPackageResult) {
+<span class="nc" id="L102">        setMyPackageInfo(myPackageResult);</span>
+<span class="nc" id="L103">    }</span>
+
+    public void getMyPackageInfoWithDelay() {
+<span class="nc" id="L106">        Observable.empty()</span>
+<span class="nc" id="L107">                .delay(400, TimeUnit.MILLISECONDS)</span>
+<span class="nc" id="L108">                .doOnCompleted(() -&gt; RoamingInfoManager.getInstance().getMyPackageInfo())</span>
+<span class="nc" id="L109">                .subscribe();</span>
+<span class="nc" id="L110">    }</span>
+
+    public RoamingRemainingInfo getRoamingRemainingItem(MyPackageData myPackageData) {
+<span class="nc bnc" id="L113" title="All 2 branches missed.">        if (myPackageData != null) {</span>
+<span class="nc" id="L114">            List&lt;MyPackageData.PackageGroup&gt; myCurrentPackageGroupList = myPackageData.getMyCurrentPackageGroupList();</span>
+<span class="nc" id="L115">            return getRoamingRemainingInfoFromMyCurrentPackageGroupList(myCurrentPackageGroupList);</span>
+        }
+<span class="nc" id="L117">        return null;</span>
+    }
+
+    public RoamingRemainingInfo getRoamingRemainingInfoFromMyCurrentPackageGroupList(List&lt;MyPackageData.PackageGroup&gt; myCurrentPackageGroupList) {
+<span class="nc bnc" id="L121" title="All 2 branches missed.">        if (myCurrentPackageGroupList != null) {</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">            for (MyPackageData.PackageGroup myCurrentPackageGroup : myCurrentPackageGroupList) {</span>
+<span class="nc" id="L123">                MyPackageData.PackageGroup roamingGroup = getRoamingPackageGroup(myCurrentPackageGroup);</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">                if (roamingGroup != null) {</span>
+<span class="nc" id="L125">                    String roamingPackageName = getRoamingPackageName(roamingGroup);</span>
+<span class="nc" id="L126">                    MyPackageData.RemainingItem roamingRemainingItem = getRoamingRemainingItem(roamingGroup);</span>
+<span class="nc" id="L127">                    return createRoamingRemainingInfo(roamingPackageName, roamingRemainingItem);</span>
+                }
+<span class="nc" id="L129">            }</span>
+        }
+<span class="nc" id="L131">        return null;</span>
+    }
+
+    public RoamingRemainingInfo createRoamingRemainingInfo(String packageName, MyPackageData.RemainingItem remainingItem) {
+<span class="nc bnc" id="L135" title="All 2 branches missed.">        if (remainingItem != null) {</span>
+<span class="nc" id="L136">            RoamingRemainingInfo roamingRemainingInfo = new RoamingRemainingInfo();</span>
+<span class="nc" id="L137">            roamingRemainingInfo.setPackageName(packageName);</span>
+<span class="nc" id="L138">            roamingRemainingInfo.setStartDate(remainingItem.getStartDate());</span>
+<span class="nc" id="L139">            roamingRemainingInfo.setEndDate(remainingItem.getExpireDate());</span>
+<span class="nc" id="L140">            roamingRemainingInfo.setRemaining(remainingItem.getRemaining());</span>
+<span class="nc" id="L141">            roamingRemainingInfo.setMax(remainingItem.getMax());</span>
+<span class="nc" id="L142">            roamingRemainingInfo.setUnit(remainingItem.getUnit());</span>
+<span class="nc" id="L143">            roamingRemainingInfo.setUnlimited(remainingItem.isUnlimitedFlag());</span>
+<span class="nc" id="L144">            return roamingRemainingInfo;</span>
+        }
+<span class="nc" id="L146">        return null;</span>
+    }
+
+    public MyPackageData.PackageGroup getRoamingPackageGroup(MyPackageData.PackageGroup packageGroup) {
+<span class="nc bnc" id="L150" title="All 2 branches missed.">        if (RoamingInfoUtility.getInstance().isRoamingPackage(packageGroup.getTitle())) {</span>
+<span class="nc" id="L151">            return packageGroup;</span>
+        }
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        if (packageGroup.isChildGroupListAvailable()) {</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">            for (MyPackageData.PackageGroup childGroup : packageGroup.getChildGroupList()) {</span>
+<span class="nc" id="L155">                MyPackageData.PackageGroup roamingGroup = getRoamingPackageGroup(childGroup);</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">                if (roamingGroup != null) {</span>
+<span class="nc" id="L157">                    return roamingGroup;</span>
+                }
+<span class="nc" id="L159">            }</span>
+        }
+<span class="nc" id="L161">        return null;</span>
+    }
+
+    public String getRoamingPackageName(MyPackageData.PackageGroup packageGroup) {
+<span class="nc bnc" id="L165" title="All 2 branches missed.">        if (packageGroup.isPackageItemListAvailable()) {</span>
+<span class="nc" id="L166">            MyPackageData.PackageItem packageItem = packageGroup.getPackageItemList().get(0);</span>
+<span class="nc" id="L167">            return NextzyUtility.getInstance().wrapBlank(packageItem.getName(), &quot;-&quot;);</span>
+        }
+<span class="nc" id="L169">        return &quot;-&quot;;</span>
+    }
+
+    public MyPackageData.RemainingItem getRoamingRemainingItem(MyPackageData.PackageGroup packageGroup) {
+<span class="nc bnc" id="L173" title="All 2 branches missed.">        if (packageGroup.isPackageItemListAvailable()) {</span>
+<span class="nc" id="L174">            MyPackageData.PackageItem packageItem = packageGroup.getPackageItemList().get(0);</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">            if (packageItem.isRemainingDetailGroupListAvailable()) {</span>
+<span class="nc" id="L176">                MyPackageData.RemainingDetailGroup remainingDetailGroup = packageItem.getRemainingDetailGroupList().get(0);</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">                if (remainingDetailGroup.isRemainingItemListAvailable()) {</span>
+<span class="nc" id="L178">                    return remainingDetailGroup.getRemainingItemList().get(0);</span>
+                }
+            }
+        }
+<span class="nc" id="L182">        return null;</span>
+    }
+
+    public boolean isContainWithBasicRoamingInfo(String packageName, MyPackageData.RemainingItem remainingItem) {
+<span class="nc" id="L186">        return RoamingInfoUtility.getInstance().isContainWithBasicRoamingInfo(packageName, remainingItem.getStartDate(), remainingItem.getExpireDate());</span>
+    }
+
+    public boolean isContainWithExtraRoamingInfo(MyPackageData.RemainingItem remainingItem) {
+<span class="nc" id="L190">        return RoamingInfoUtility.getInstance().isContainWithExtraRoamingInfo(remainingItem.getRemaining(), remainingItem.getMax(), remainingItem.getUnit());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

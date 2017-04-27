@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LocalDataManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.promotion.helper.roaming.util</a> &gt; <span class="el_source">LocalDataManager.java</span></div><h1>LocalDataManager.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.promotion.helper.roaming.util;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+
+import com.nextzy.myais.common.constant.Contextor;
+import com.nextzy.myais.promotion.helper.roaming.model.UpPackCDATA;
+import com.nextzy.myais.promotion.helper.roaming.model.UpTariffCDATA;
+
+import java.util.List;
+
+/**
+ * Created by trusttanapruk on 8/21/15 AD.
+ */
+<span class="nc" id="L15">public class LocalDataManager {</span>
+    final static String sharedPrefFileName = &quot;CDATA_&quot;;
+    final static String userLastUpdate = &quot;_user_last_update&quot;;
+    public final static String NO_DATA = &quot;NODATA&quot;;
+
+    protected static LocalDataManager localDataManager;
+
+    public static LocalDataManager getInstance() {
+<span class="nc bnc" id="L23" title="All 2 branches missed.">        if (localDataManager == null) {</span>
+<span class="nc" id="L24">            localDataManager = new LocalDataManager();</span>
+        }
+<span class="nc" id="L26">        return localDataManager;</span>
+    }
+    public static SharedPreferences init(String methodName) {
+<span class="nc" id="L29">        return Contextor.getInstance().getContext().getSharedPreferences(sharedPrefFileName + methodName, Context.MODE_PRIVATE);</span>
+    }
+
+    public  void saveCDATAtoSharedPrefs(String keyName, String methodName, String CDATA, String currentTime) {
+
+<span class="nc" id="L34">        SharedPreferences sharedPreferences = init(methodName);</span>
+
+<span class="nc" id="L36">        SharedPreferences.Editor editor = sharedPreferences.edit();</span>
+<span class="nc" id="L37">        editor.putString(keyName, CDATA);</span>
+<span class="nc" id="L38">        editor.putString(keyName + userLastUpdate, currentTime);</span>
+<span class="nc" id="L39">        editor.apply();</span>
+<span class="nc" id="L40">    }</span>
+
+    public  void saveUserLastUpdateDatetoSharePrefs(String keyName, String methodName, String currentTime) {
+<span class="nc" id="L43">        SharedPreferences sharedPreferences = init(methodName);</span>
+<span class="nc" id="L44">        sharedPreferences.edit().putString(keyName + userLastUpdate, currentTime).apply();</span>
+<span class="nc" id="L45">    }</span>
+
+    public  String getCDATAfromSharedPrefs(String keyName, String methodName) {
+<span class="nc" id="L48">        SharedPreferences sharedPreferences = init(methodName);</span>
+<span class="nc" id="L49">        return sharedPreferences.getString(keyName, NO_DATA);</span>
+    }
+
+    public  String getUserLastUpdateDateLocal( String keyName, String methodName) {
+        //this is for showing only
+<span class="nc" id="L54">        return getCDATAfromSharedPrefs(keyName + userLastUpdate, methodName);</span>
+    }
+
+    public  String getLastUpdateDateLocal(String keyName, String methodName) {
+
+        String lastUpdateLocal;
+<span class="nc" id="L60">        final String superOldDate = &quot;20130730150515&quot;;</span>
+
+        //get LongString from local first
+<span class="nc" id="L63">        String localCDATAString = getCDATAfromSharedPrefs( keyName, methodName);</span>
+
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        if (localCDATAString.equals(NO_DATA)) {</span>
+            //if never saved, plug in super old date number
+<span class="nc" id="L67">            lastUpdateLocal = superOldDate;</span>
+
+        } else {
+
+<span class="nc bnc" id="L71" title="All 10 branches missed.">            switch (methodName) {</span>
+                case &quot;updateTariff&quot;:
+                    UpTariffCDATA localUpTariffCDATA;
+<span class="nc" id="L74">                    localUpTariffCDATA = CDATAConverter.createUpTariffCDATA(localCDATAString);</span>
+<span class="nc" id="L75">                    lastUpdateLocal = localUpTariffCDATA.getLastUpdate();</span>
+<span class="nc" id="L76">                    break;</span>
+                case &quot;updatePackage&quot;:
+                    UpPackCDATA localUppackCDATA;
+<span class="nc" id="L79">                    List&lt;UpPackCDATA&gt; upPackCDATAList = CDATAConverter.createUpPackCDATAList(localCDATAString);</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">                    if (upPackCDATAList.size() &gt; 0) {</span>
+<span class="nc" id="L81">                        localUppackCDATA = upPackCDATAList.get(0);</span>
+                    } else {
+                        //failproof if there is nodata at all.
+                        //unlikely use case though
+<span class="nc" id="L85">                        localUppackCDATA = new UpPackCDATA();</span>
+<span class="nc" id="L86">                        localUppackCDATA.setLastUpdate(superOldDate);</span>
+                    }
+<span class="nc" id="L88">                    lastUpdateLocal = localUppackCDATA.getLastUpdate();</span>
+<span class="nc" id="L89">                    break;</span>
+
+                default:
+                    //upSupport will fall here. Based on previous development it just used veryold date
+<span class="nc" id="L93">                    lastUpdateLocal = superOldDate;</span>
+                    break;
+            }
+        }
+<span class="nc" id="L97">        return lastUpdateLocal;</span>
+    }
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FeedContentManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.home.helper.feedcontent.network</a> &gt; <span class="el_source">FeedContentManager.java</span></div><h1>FeedContentManager.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.home.helper.feedcontent.network;
+
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.database.model.SaveRealmResult;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.network.subscriber.NextzySimpleSubscriber;
+import com.nextzy.myais.common.network.worker.GenericNetworkController;
+import com.nextzy.myais.common.network.worker.SchedulersAndErrorHandling;
+import com.nextzy.myais.home.helper.feedcontent.model.FeedContentResult;
+
+import rx.Single;
+
+/**
+ * Created by trusttanapruk on 8/25/2016.
+ */
+<span class="fc" id="L17">public class FeedContentManager extends GenericNetworkController {</span>
+    public static final String SERVICE_NAME_GET_FEED_CONTENT = &quot;get_feed_content&quot;;
+
+    private static FeedContentManager instance;
+
+    public static FeedContentManager getInstance() {
+<span class="fc bfc" id="L23" title="All 2 branches covered.">        if (instance == null) {</span>
+<span class="fc" id="L24">            instance = new FeedContentManager();</span>
+        }
+<span class="fc" id="L26">        return instance;</span>
+    }
+
+    public static void setMockInstance(FeedContentManager mockInstance) {
+<span class="fc" id="L30">        instance = mockInstance;</span>
+<span class="fc" id="L31">    }</span>
+
+    private FeedContentApi feedContentApi;
+
+    public FeedContentApi getFeedContentApi() {
+<span class="nc" id="L36">        return feedContentApi;</span>
+    }
+
+    public void setFeedContentApi(FeedContentApi feedContentApi) {
+<span class="fc" id="L40">        this.feedContentApi = feedContentApi;</span>
+<span class="fc" id="L41">    }</span>
+
+    protected Single&lt;FeedContentResult&gt; getFeedContentSingle() {
+<span class="fc" id="L44">        return FeedContentApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L45">                .getRxApi(feedContentApi)</span>
+<span class="fc" id="L46">                .getFeedContent(new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(), Mobile.getInstance().getMobileNumber())</span>
+<span class="fc" id="L47">                .compose(new SchedulersAndErrorHandling&lt;&gt;(FeedContentResult.class, SERVICE_NAME_GET_FEED_CONTENT))</span>
+<span class="fc" id="L48">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_FEED_CONTENT));</span>
+    }
+
+    public void getFeedContent() {
+<span class="nc" id="L52">        getFeedContentSingle().subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_GET_FEED_CONTENT));</span>
+<span class="nc" id="L53">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

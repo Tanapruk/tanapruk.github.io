@@ -10,7 +10,6 @@ import com.nextzy.myais.common.passcode.network.exception.BindFingerScanExceptio
 import com.nextzy.myais.common.passcode.network.request.BindFingerScanBody;
 import com.nextzy.myais.common.passcode.network.request.DisableFingerScanBody;
 import com.nextzy.myais.common.passcode.network.response.BindFingerScanResult;
-import com.nextzy.myais.common.utility.NextzyAndroidUtility;
 
 /**
  * Created by TheKhaeng on 9/20/2016.
@@ -20,102 +19,100 @@ public class PasscodeSettingPresenter extends NextzyPresenter&lt;PasscodeSetting
         implements PasscodeSettingContractor.Presenter {
 
     private final PasscodeManager manager;
-    private final NextzyAndroidUtility androidUtil;
 
-    protected PasscodeSettingPresenter(PasscodeSettingContractor.View view) {
-<span class="nc" id="L26">        super(view);</span>
-<span class="nc" id="L27">        manager = PasscodeManager.getInstance();</span>
-<span class="nc" id="L28">        androidUtil = NextzyAndroidUtility.getInstance();</span>
-<span class="nc" id="L29">    }</span>
+    private PasscodeSettingPresenter(PasscodeSettingContractor.View view) {
+<span class="nc" id="L24">        super(view);</span>
+<span class="nc" id="L25">        manager = PasscodeManager.getInstance();</span>
+<span class="nc" id="L26">    }</span>
 
     public static PasscodeSettingPresenter createPresenter(PasscodeSettingContractor.View view) {
-<span class="nc" id="L32">        return new PasscodeSettingPresenter(view);</span>
+<span class="nc" id="L29">        return new PasscodeSettingPresenter(view);</span>
     }
 
     @Override
     public void onViewCreate() {
-<span class="nc" id="L37">        RxBus.get().register(this);</span>
-<span class="nc" id="L38">    }</span>
+<span class="nc" id="L34">        RxBus.get().register(this);</span>
+<span class="nc" id="L35">    }</span>
 
     @Override
     public void onViewDestroy() {
-<span class="nc" id="L42">        RxBus.get().unregister(this);</span>
-<span class="nc" id="L43">    }</span>
+<span class="nc" id="L39">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L40">    }</span>
 
     @Override
     public void onViewStart() {
-
-<span class="nc" id="L48">    }</span>
+        // Do nothing.
+<span class="nc" id="L45">    }</span>
 
     @Override
     public void onViewStop() {
-
-<span class="nc" id="L53">    }</span>
+        // Do nothing.
+<span class="nc" id="L50">    }</span>
 
     /*******************/
     /** For view call **/
     /*******************/
     //&lt;editor-fold desc=&quot;For view folding&quot;&gt;
     public void openChangePasscodeActivity() {
-<span class="nc" id="L60">        getView().openFirstNewPasscodeActivity();</span>
-<span class="nc" id="L61">    }</span>
+<span class="nc" id="L57">        getView().openFirstNewPasscodeActivity();</span>
+<span class="nc" id="L58">    }</span>
 
     @Override
     public void openChangePasscodeActivity(String oldPasscode) {
-<span class="nc" id="L65">        RxBus.get().post(new GoToChangePasscodeFragmentEvent(oldPasscode));</span>
-<span class="nc" id="L66">    }</span>
+<span class="nc" id="L62">        RxBus.get().post(new GoToChangePasscodeFragmentEvent(oldPasscode));</span>
+<span class="nc" id="L63">    }</span>
 
     @Override
     public void enablePasscodeLock(String deviceId, String deviceModel) {
-<span class="nc" id="L70">        getView().showLoadingDialog();</span>
-<span class="nc" id="L71">        String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
-<span class="nc" id="L72">        String masterMobileNumber = Mobile.getInstance().getMasterMobileNumber();</span>
-<span class="nc" id="L73">        BindFingerScanBody body = new BindFingerScanBody(</span>
+<span class="nc" id="L67">        getView().showLoadingDialog();</span>
+<span class="nc" id="L68">        String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
+<span class="nc" id="L69">        String masterMobileNumber = Mobile.getInstance().getMainMobileNumber();</span>
+<span class="nc" id="L70">        BindFingerScanBody body = new BindFingerScanBody(</span>
                 masterMobileNumber,
                 deviceId,
                 deviceModel,
                 null
         );
-<span class="nc" id="L79">        manager.requestBindFingerScan(mobileNumber, body);</span>
-<span class="nc" id="L80">    }</span>
+<span class="nc" id="L76">        manager.requestBindFingerScan(mobileNumber, body);</span>
+<span class="nc" id="L77">    }</span>
 
     @Override
     public void disablePasscodeLock(String privateId, String token) {
 //        getView().showLoadingDialog();
-<span class="nc" id="L85">        String mobileNumber = Mobile.getInstance().getMasterMobileNumber();</span>
-<span class="nc" id="L86">        DisableFingerScanBody body = new DisableFingerScanBody(</span>
+<span class="nc" id="L82">        String mobileNumber = Mobile.getInstance().getMainMobileNumber();</span>
+<span class="nc" id="L83">        DisableFingerScanBody body = new DisableFingerScanBody(</span>
                 mobileNumber,
                 token,
                 privateId,
                 null
         );
-<span class="nc" id="L92">        manager.requestDisableFingerScan(mobileNumber, body);</span>
-<span class="nc" id="L93">        getView().removeAllPasscodeData();</span>
-<span class="nc" id="L94">        getView().updatePasscodeLockSetting();</span>
-<span class="nc" id="L95">    }</span>
+<span class="nc" id="L89">        manager.requestDisableFingerScan(mobileNumber, body);</span>
+<span class="nc" id="L90">        getView().removeAllPasscodeData();</span>
+<span class="nc" id="L91">        getView().updatePasscodeLockSetting();</span>
+<span class="nc" id="L92">    }</span>
     //&lt;/editor-fold&gt;
 
     @Subscribe
     public void onReceiveBindFingerScanResult(BindFingerScanResult result) {
-<span class="nc bnc" id="L100" title="All 2 branches missed.">        if (isNotEmptyData(result)) {</span>
-<span class="nc" id="L101">            getView().dismissDialog();</span>
-<span class="nc" id="L102">            getView().saveBindFingerScanData(result);</span>
-<span class="nc bnc" id="L103" title="All 2 branches missed.">            if (getView().isFirstEnablePasscodeLock()) {</span>
-<span class="nc" id="L104">                openChangePasscodeActivity();</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        if (isNotEmptyData(result)) {</span>
+<span class="nc" id="L98">            getView().dismissDialog();</span>
+<span class="nc" id="L99">            getView().saveBindFingerScanData(result);</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">            if (getView().isFirstEnablePasscodeLock()) {</span>
+<span class="nc" id="L101">                openChangePasscodeActivity();</span>
             } else {
-<span class="nc" id="L106">                getView().updatePasscodeLockSetting();</span>
+<span class="nc" id="L103">                getView().updatePasscodeLockSetting();</span>
             }
         } else {
-<span class="nc" id="L109">            getView().showResponseException();</span>
-<span class="nc" id="L110">            getView().updatePasscodeLockSetting();</span>
+<span class="nc" id="L106">            getView().showResponseException();</span>
+<span class="nc" id="L107">            getView().updatePasscodeLockSetting();</span>
         }
-<span class="nc" id="L112">    }</span>
+<span class="nc" id="L109">    }</span>
 
     @Subscribe
     public void onReceiveBindFingerScanException(BindFingerScanException e) {
-<span class="nc" id="L116">        getView().showResponseException(e.getMessage());</span>
-<span class="nc" id="L117">        getView().updatePasscodeLockSetting();</span>
-<span class="nc" id="L118">    }</span>
+<span class="nc" id="L113">        getView().showResponseException(e.getMessage());</span>
+<span class="nc" id="L114">        getView().updatePasscodeLockSetting();</span>
+<span class="nc" id="L115">    }</span>
 
 //    @Subscribe
 //    public void onReceiveDisableFingerScanResult(DisableFingerScanResult result) {
@@ -131,7 +128,7 @@ public class PasscodeSettingPresenter extends NextzyPresenter&lt;PasscodeSetting
 //    }
 
     private boolean isNotEmptyData(BindFingerScanResult result) {
-<span class="nc bnc" id="L134" title="All 4 branches missed.">        return result.getData().getPrivateId() != null &amp;&amp; result.getData().getToken() != null;</span>
+<span class="nc bnc" id="L131" title="All 4 branches missed.">        return result.getData().getPrivateId() != null &amp;&amp; result.getData().getToken() != null;</span>
     }
 
 }

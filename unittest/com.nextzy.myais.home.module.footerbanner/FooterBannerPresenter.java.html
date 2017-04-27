@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FooterBannerPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.home.module.footerbanner</a> &gt; <span class="el_source">FooterBannerPresenter.java</span></div><h1>FooterBannerPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.home.module.footerbanner;
+
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.mvp.NextzyFragmentPresenter;
+import com.nextzy.myais.home.helper.footerbanner.model.CampaignsResult;
+import com.nextzy.myais.home.helper.footerbanner.network.FooterBannerManager;
+import com.nextzy.myais.home.module.footerbanner.adapter.model.FooterBannerItem;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import rx.Observable;
+
+/**
+ * Created by Akexorcist on 10/24/2016 AD.
+ */
+
+public class FooterBannerPresenter extends NextzyFragmentPresenter&lt;FooterBannerContractor.View&gt; implements FooterBannerContractor.Presenter {
+
+    public static FooterBannerPresenter createPresenter(FooterBannerContractor.View view) {
+<span class="nc" id="L23">        return new FooterBannerPresenter(view);</span>
+    }
+
+    public FooterBannerPresenter(FooterBannerContractor.View view) {
+<span class="fc" id="L27">        super(view);</span>
+<span class="fc" id="L28">    }</span>
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L32">        RxBus.get().register(this);</span>
+<span class="nc" id="L33">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L37">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L38">    }</span>
+
+    @Override
+    public List&lt;FooterBannerItem&gt; getStupidMockFooterBanner() {
+<span class="fc" id="L42">        List&lt;FooterBannerItem&gt; footerBannerItemList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L43">        footerBannerItemList.add(new FooterBannerItem(&quot;แพ็กเกจเสริม อินเทอร์เน็ต&quot;, &quot;เลือกแพ็กเกจเสริมอินเทอร์เน็ตราคาพิเศษได้ที่นี่ที่เดียว&quot;, &quot;http://www.ais.co.th/2016/images/prepaid/Internet.jpg&quot;));</span>
+<span class="fc" id="L44">        footerBannerItemList.add(new FooterBannerItem(&quot;เหมา เหมา NON-STOP &quot;, &quot;89 บาท ใช้ได้ 7 วัน เล่นเน็ตได้ไม่จำกัด เพิ่มเติม&quot;, &quot;http://www.ais.co.th/2016/images/prepaid/maomao_th.jpg&quot;));</span>
+<span class="fc" id="L45">        return footerBannerItemList;</span>
+    }
+
+    @Subscribe
+    public void onCampaignsResult(CampaignsResult result) {
+<span class="nc" id="L50">        setCampaignsResult(result);</span>
+<span class="nc" id="L51">    }</span>
+
+    private void setCampaignsResult(CampaignsResult result) {
+//        List&lt;DataList&gt; mock = new ArrayList&lt;&gt;();
+//        mock.addAll(result.getDataList());
+//        DataList db = new DataList();
+//        db.setId(&quot;1-40004623364&quot;);
+//        db.setImageURL(&quot;campaign\\/4GMAX50_270x164.jpg&quot;);
+//        db.setTopic(&quot;Special for you !! &lt;br&gt;50% discount for 6 months&lt;br&gt;&quot;);
+//        db.setContentHTML(&quot;&lt;img src=\\\&quot;https:\\/\\/eservice.ais.co.th\\/resource\\/postpaid3g\\/images\\/TH\\/campaign\\/description\\/4G_max_speed%20444_470x130_EN.jpg\\\&quot;\\/&gt;&quot;);
+//        mock.add(db);
+
+<span class="nc" id="L63">        getView().setFooterBanner(result.getDataList());</span>
+//        try {
+//            result.getDataList().get(0).getId();
+//        } catch (Exception e) {
+//            Log.wtf(&quot;DEBUG&quot;, e);
+//        }
+//
+//        Log.wtf(&quot;DEBUG&quot;, &quot;test&quot;);
+<span class="nc" id="L71">    }</span>
+
+    @Override
+    public void getCampaigns() {
+<span class="nc" id="L75">        getView().showLoading();</span>
+<span class="nc" id="L76">        callGetCampaignsServiceWithDelay();</span>
+<span class="nc" id="L77">    }</span>
+
+    public void callGetCampaignsServiceWithDelay() {
+<span class="nc" id="L80">        Observable.empty()</span>
+<span class="nc" id="L81">                .delay(800, TimeUnit.MILLISECONDS)</span>
+<span class="nc" id="L82">                .doOnCompleted(() -&gt; FooterBannerManager.getInstance().getCampaigns())</span>
+<span class="nc" id="L83">                .subscribe();</span>
+<span class="nc" id="L84">    }</span>
+
+    @Override
+    public void onLongClicked() {
+<span class="nc" id="L88">        FooterBannerManager.getInstance().getCampaigns();</span>
+<span class="nc" id="L89">    }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

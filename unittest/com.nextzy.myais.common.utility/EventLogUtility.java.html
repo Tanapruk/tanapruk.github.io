@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EventLogUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.common.utility</a> &gt; <span class="el_source">EventLogUtility.java</span></div><h1>EventLogUtility.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.common.utility;
+
+import com.nextzy.myais.common.config.mobile.Mobile;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Random;
+
+/**
+ * Created by Akexorcist on 7/21/15 AD.
+ */
+<span class="nc" id="L13">public class EventLogUtility {</span>
+    private static EventLogUtility instance;
+
+    public static EventLogUtility getInstance() {
+<span class="nc bnc" id="L17" title="All 2 branches missed.">        if (instance == null) {</span>
+<span class="nc" id="L18">            instance = new EventLogUtility();</span>
+        }
+<span class="nc" id="L20">        return instance;</span>
+    }
+
+    public static void setInstance(EventLogUtility instance) {
+<span class="nc" id="L24">        EventLogUtility.instance = instance;</span>
+<span class="nc" id="L25">    }</span>
+
+    public String getEventLog(String eventName, int menuId) {
+<span class="nc" id="L28">        String eventLogId = getEventLogId();</span>
+<span class="nc" id="L29">        long eventDate = getEventDate();</span>
+<span class="nc" id="L30">        JSONObject jsonObject = new JSONObject();</span>
+        try {
+<span class="nc" id="L32">            jsonObject.put(&quot;eventLogId&quot;, eventLogId);</span>
+<span class="nc" id="L33">            jsonObject.put(&quot;eventName&quot;, eventName);</span>
+<span class="nc" id="L34">            jsonObject.put(&quot;eventDate&quot;, eventDate);</span>
+<span class="nc" id="L35">            jsonObject.put(&quot;menuId&quot;, menuId);</span>
+<span class="nc" id="L36">        } catch (JSONException e) {</span>
+<span class="nc" id="L37">            e.printStackTrace();</span>
+<span class="nc" id="L38">        }</span>
+<span class="nc" id="L39">        return jsonObject.toString();</span>
+    }
+
+    private String randomNumber6Digits() {
+<span class="nc" id="L43">        Random r = new Random();</span>
+<span class="nc" id="L44">        int randomNumber = r.nextInt(1000000);</span>
+<span class="nc" id="L45">        return (&quot;000000&quot; + randomNumber).substring((&quot;&quot; + randomNumber).length());</span>
+    }
+
+    public long getEventDate() {
+<span class="nc" id="L49">        return System.currentTimeMillis();</span>
+    }
+
+    public String getEventLogId() {
+//        if (Mobile.getAuditLogId().isEmpty()) {
+//            NLog.v(&quot;getEventLogId&quot;, &quot;You haven't setAuditLogId. Do it with Mobile.setAuditLogId(id)&quot;);
+//        }
+<span class="nc" id="L56">        return Mobile.getInstance().getAuditLogId() + &quot;-&quot; + System.currentTimeMillis() + &quot;-&quot; + randomNumber6Digits();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

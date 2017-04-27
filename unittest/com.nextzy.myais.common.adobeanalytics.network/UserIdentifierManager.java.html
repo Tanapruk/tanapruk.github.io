@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserIdentifierManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.common.adobeanalytics.network</a> &gt; <span class="el_source">UserIdentifierManager.java</span></div><h1>UserIdentifierManager.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.common.adobeanalytics.network;
+
+import com.nextzy.myais.common.adobeanalytics.network.request.UserIdentifierBody;
+import com.nextzy.myais.common.adobeanalytics.network.response.UserIdentifierResult;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.network.subscriber.NextzySimpleSubscriber;
+import com.nextzy.myais.common.network.worker.GenericNetworkController;
+import com.nextzy.myais.common.network.worker.SchedulersAndErrorHandling;
+
+import rx.Single;
+
+/**
+ * Created by RoyleKoonlert on 1/27/2017 AD.
+ */
+
+<span class="nc" id="L18">public class UserIdentifierManager extends GenericNetworkController {</span>
+
+    public static final String SERVICE_GET_USER_IDENTIFIER = &quot;get_user_identifier&quot;;
+
+    private static UserIdentifierManager instance;
+
+    public static UserIdentifierManager getInstance() {
+<span class="nc bnc" id="L25" title="All 2 branches missed.">        if (instance == null) {</span>
+<span class="nc" id="L26">            instance = new UserIdentifierManager();</span>
+        }
+<span class="nc" id="L28">        return instance;</span>
+    }
+
+    public static void setMockInstance(UserIdentifierManager userIdentifierManager) {
+<span class="nc" id="L32">        instance = userIdentifierManager;</span>
+<span class="nc" id="L33">    }</span>
+
+    private UserIdentifierApi userIdentifierApi;
+
+    public UserIdentifierApi getApi() {
+<span class="nc" id="L38">        return userIdentifierApi;</span>
+    }
+
+    public void setApi(UserIdentifierApi analyticsApi) {
+<span class="nc" id="L42">        this.userIdentifierApi = analyticsApi;</span>
+<span class="nc" id="L43">    }</span>
+
+    public void getUserIdentifier() {
+<span class="nc" id="L46">        getUserIdentifierSingle(Mobile.getInstance().getMobileNumber())</span>
+<span class="nc" id="L47">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_GET_USER_IDENTIFIER));</span>
+<span class="nc" id="L48">    }</span>
+
+    public void getUserIdentifier(String mobileNumber) {
+<span class="nc" id="L51">        getUserIdentifierSingle(mobileNumber)</span>
+<span class="nc" id="L52">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_GET_USER_IDENTIFIER));</span>
+<span class="nc" id="L53">    }</span>
+
+    private Single&lt;UserIdentifierResult&gt; getUserIdentifierSingle(String mobileNumber) {
+<span class="nc" id="L56">        return UserIdentifierService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L57">                .getRxApi(getApi())</span>
+<span class="nc" id="L58">                .getUserIdentifier(new EventLogParam(&quot;&quot;, &quot;&quot;, &quot;&quot;).getEventLogHeader(),</span>
+                        new UserIdentifierBody(mobileNumber))
+<span class="nc" id="L60">                .compose(new SchedulersAndErrorHandling&lt;&gt;(UserIdentifierResult.class,</span>
+                        SERVICE_GET_USER_IDENTIFIER));
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

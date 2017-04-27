@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaymentManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.payment.helper.payment.network</a> &gt; <span class="el_source">PaymentManager.java</span></div><h1>PaymentManager.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.payment.helper.payment.network;
+
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.database.model.SaveRealmResult;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.network.subscriber.NextzySimpleSubscriber;
+import com.nextzy.myais.common.network.worker.ContinueWithNullOnCrash;
+import com.nextzy.myais.common.network.worker.GenericNetworkController;
+import com.nextzy.myais.common.network.worker.SchedulersAndErrorHandling;
+import com.nextzy.myais.payment.helper.payment.PaymentBlob;
+import com.nextzy.myais.payment.helper.payment.model.BillOpenSignalResult;
+import com.nextzy.myais.payment.helper.payment.model.BillingData;
+import com.nextzy.myais.payment.helper.payment.model.CheckBillStatusResult;
+import com.nextzy.myais.payment.helper.payment.model.CreditCardDropdownResult;
+import com.nextzy.myais.payment.helper.payment.model.DiscountStatusResult;
+import com.nextzy.myais.payment.helper.payment.model.InvoiceResult;
+import com.nextzy.myais.payment.helper.payment.model.InvoicesAllBillResult;
+import com.nextzy.myais.payment.helper.payment.model.PayAllBillData;
+import com.nextzy.myais.payment.helper.payment.model.PayAndTopUpParam;
+import com.nextzy.myais.payment.helper.payment.model.PaymentActionIPayParam;
+import com.nextzy.myais.payment.helper.payment.model.PaymentActionIPayResult;
+import com.nextzy.myais.payment.helper.payment.model.PaymentCustProfileParam;
+import com.nextzy.myais.payment.helper.payment.model.PaymentCustProfileResult;
+import com.nextzy.myais.payment.helper.payment.model.PaymentPayAllBillPayAndTopupParam;
+import com.nextzy.myais.payment.helper.payment.model.PaymentRemarkResult;
+import com.nextzy.myais.payment.helper.payment.model.ValidateMobileBParam;
+import com.nextzy.myais.payment.helper.payment.model.ValidateMobileBResult;
+import com.nextzy.myais.payment.helper.payment.operator.MobileBCheck;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import rx.Single;
+
+<span class="fc" id="L37">public class PaymentManager extends GenericNetworkController {</span>
+    private static PaymentManager instance;
+
+    public static final String SERVICE_NAME_GET_CREDIT_CARD_DROPDOWN = &quot;get_credit_card_dropdown&quot;;
+    public static final String SERVICE_NAME_GET_INVOICE = &quot;get_invoice&quot;;
+    public static final String SERVICE_NAME_GET_BILL_OPEN_SIGNAL = &quot;get_bill_open_signal&quot;;
+    public static final String SERVICE_NAME_GET_DISCOUNT_STATUS = &quot;get_discount_status&quot;;
+    public static final String SERVICE_NAME_CHECK_BILL_STATUS = &quot;check_bill_status&quot;;
+    public static final String SERVICE_NAME_PAYMENT_REMARK = &quot;payment_remark&quot;;
+
+    public static final String SERVICE_NAME_VALIDATE_MOBILE_B = &quot;validate_mobile_b&quot;;
+    public static final String SERVICE_NAME_PAYMENT_ACTION_IPAY = &quot;payment_action_ipay&quot;;
+    public static final String SERVICE_NAME_GET_INVOICES_ALL_BILL = &quot;get_invoices_all_bill&quot;;
+    public static final String SERVICE_NAME_PAYMENT_PAY_AILL_BILL_ACTION_PAY_AND_TOPUP = &quot;payment_pay_all_bill_pay_and_topup&quot;;
+    public static final String SERVICE_NAME_PAY_AND_TOPUP = &quot;pay_and_topup&quot;;
+    public static final String SERVICE_NAME_PAY_AND_TOPUP_TO_ANOTHER = &quot;pay_and_topup_to_another&quot;;
+    public static final String SERVICE_NAME_PAYMENT_CUST_PROFILE = &quot;payment_cust_profile&quot;;
+
+    PaymentApi paymentApi;
+
+    public static PaymentManager getInstance() {
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if (instance == null) {</span>
+<span class="fc" id="L59">            instance = new PaymentManager();</span>
+        }
+<span class="fc" id="L61">        return instance;</span>
+    }
+
+    public static void setInstance(PaymentManager instance) {
+<span class="fc" id="L65">        PaymentManager.instance = instance;</span>
+<span class="fc" id="L66">    }</span>
+
+    public void setApi(PaymentApi paymentApi) {
+<span class="fc" id="L69">        this.paymentApi = paymentApi;</span>
+<span class="fc" id="L70">    }</span>
+
+    PaymentApi getPaymentApi() {
+<span class="fc" id="L73">        return paymentApi;</span>
+    }
+
+    private String getEventLog() {
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">        if (PaymentBlob.INSTANCE.hasOtherMobileNumber()) {</span>
+<span class="nc" id="L78">            return new EventLogParam(&quot;APP_VIEW_PAYBILL_ANOTHER&quot;, &quot;5003&quot;, &quot;5041&quot;).getEventLogHeader();</span>
+        } else {
+<span class="fc" id="L80">            return new EventLogParam(&quot;APP_VIEW_PAYBILL&quot;, &quot;5003&quot;, &quot;5034&quot;).getEventLogHeader();</span>
+        }
+    }
+
+    private String getPayALlBillEventLog(String cardType) {
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        if (cardType.equalsIgnoreCase(&quot;DEBIT&quot;)) {</span>
+<span class="nc" id="L86">            return new EventLogParam(&quot;APP_CONFIRM_PAYBILL_DEBIT&quot;, &quot;5003&quot;, &quot;5141&quot;).getEventLogHeader();</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        } else if (cardType.equalsIgnoreCase(&quot;MPAYWALLET&quot;)) {</span>
+<span class="nc" id="L88">            return new EventLogParam(&quot;APP_CONFIRM_PAYBILL_MPAY&quot;, &quot;5003&quot;, &quot;5143&quot;).getEventLogHeader();</span>
+        } else {
+<span class="nc" id="L90">            return new EventLogParam(&quot;APP_CONFIRM_PAYBILL_CREDIT&quot;, &quot;5003&quot;, &quot;5142&quot;).getEventLogHeader();</span>
+        }
+    }
+
+    public Single&lt;CreditCardDropdownResult&gt; getCreditCardDropdown(String eventLogString) {
+<span class="fc" id="L95">        return PaymentApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L96">                .getRxApi(getPaymentApi())</span>
+<span class="fc" id="L97">                .getCreditCardDropdown(</span>
+                        eventLogString,
+<span class="fc" id="L99">                        Mobile.getInstance().getMobileNumber()</span>
+<span class="fc" id="L100">                ).compose(new SchedulersAndErrorHandling&lt;&gt;(CreditCardDropdownResult.class, SERVICE_NAME_GET_CREDIT_CARD_DROPDOWN))</span>
+<span class="fc" id="L101">                .compose(new ContinueWithNullOnCrash&lt;&gt;(CreditCardDropdownResult.class))</span>
+<span class="fc" id="L102">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_CREDIT_CARD_DROPDOWN));</span>
+    }
+
+
+    Single&lt;BillOpenSignalResult&gt; getBillOpenSignal() {
+<span class="fc" id="L107">        return PaymentApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L108">                .getRxApi(getPaymentApi())</span>
+<span class="fc" id="L109">                .getBillOpenSignal(</span>
+<span class="fc" id="L110">                        getEventLog(),</span>
+<span class="fc" id="L111">                        Mobile.getInstance().getMobileNumber()</span>
+<span class="fc" id="L112">                ).compose(new SchedulersAndErrorHandling&lt;&gt;(BillOpenSignalResult.class, SERVICE_NAME_GET_BILL_OPEN_SIGNAL))</span>
+<span class="fc" id="L113">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_BILL_OPEN_SIGNAL));</span>
+    }
+
+
+    Single&lt;InvoiceResult&gt; getInvoiceSingle(String eventLogString, String requestedMobileNumber) {
+<span class="fc" id="L118">        return PaymentApiService.newInstance(URL.getSSB())</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">                .getRxApi(getPaymentApi())</span>
+<span class="fc" id="L120">                .getInvoice(</span>
+<span class="fc" id="L121">                        eventLogString != null ? eventLogString : getEventLog(),</span>
+<span class="fc" id="L122">                        Mobile.getInstance().getMobileNumber(),</span>
+                        requestedMobileNumber
+<span class="fc" id="L124">                ).compose(new SchedulersAndErrorHandling&lt;&gt;(InvoiceResult.class, SERVICE_NAME_GET_INVOICE))</span>
+<span class="fc" id="L125">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_INVOICE));</span>
+    }
+
+
+    Single&lt;DiscountStatusResult&gt; getDiscountStatus(String requestedMobileNumber) {
+<span class="fc" id="L130">        return PaymentApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L131">                .getRxApi(getPaymentApi())</span>
+<span class="fc" id="L132">                .getDiscountStatus(</span>
+<span class="fc" id="L133">                        getEventLog(),</span>
+<span class="fc" id="L134">                        Mobile.getInstance().getMobileNumber(),</span>
+                        requestedMobileNumber
+<span class="fc" id="L136">                ).compose(new SchedulersAndErrorHandling&lt;&gt;(DiscountStatusResult.class, SERVICE_NAME_GET_DISCOUNT_STATUS))</span>
+<span class="fc" id="L137">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_DISCOUNT_STATUS));</span>
+    }
+
+    Single&lt;CheckBillStatusResult&gt; checkBillStatus(String requestedMobileNumber) {
+<span class="fc" id="L141">        return PaymentApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L142">                .getRxApi(getPaymentApi())</span>
+<span class="fc" id="L143">                .checkBillStatus(</span>
+<span class="fc" id="L144">                        getEventLog(),</span>
+<span class="fc" id="L145">                        Mobile.getInstance().getMobileNumber(),</span>
+                        requestedMobileNumber
+<span class="fc" id="L147">                ).compose(new SchedulersAndErrorHandling&lt;&gt;(CheckBillStatusResult.class, SERVICE_NAME_CHECK_BILL_STATUS))</span>
+<span class="fc" id="L148">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_CHECK_BILL_STATUS));</span>
+    }
+
+    /**
+     * Don't use this anymore. Use {@link #payAndTopUp(String, PayAndTopUpParam)} instead.
+     * @param eventLogParam
+     * @param paymentActionIPayParam
+     * @return
+     */
+    Single&lt;PaymentActionIPayResult&gt; paymentActionIpaySingle(String eventLogParam, PaymentActionIPayParam paymentActionIPayParam) {
+<span class="fc" id="L158">        return PaymentApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L159">                .getRxApi(getPaymentApi())</span>
+<span class="fc" id="L160">                .paymentActionIpay(</span>
+                        eventLogParam,
+<span class="fc" id="L162">                        Mobile.getInstance().getMobileNumber(),</span>
+                        paymentActionIPayParam
+<span class="fc" id="L164">                ).compose(new SchedulersAndErrorHandling&lt;&gt;(PaymentActionIPayResult.class, SERVICE_NAME_PAYMENT_ACTION_IPAY))</span>
+<span class="fc" id="L165">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_PAYMENT_ACTION_IPAY));</span>
+    }
+
+    Single&lt;PaymentActionIPayResult&gt; payAndTopUpSingle(String eventLogString, PayAndTopUpParam param) {
+<span class="nc" id="L169">        return PaymentApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L170">                .getRxApi(getPaymentApi())</span>
+<span class="nc" id="L171">                .payAndTopUp(</span>
+                        eventLogString,
+<span class="nc" id="L173">                        Mobile.getInstance().getMobileNumber(),</span>
+                        param
+<span class="nc" id="L175">                ).compose(new SchedulersAndErrorHandling&lt;&gt;(PaymentActionIPayResult.class, SERVICE_NAME_PAY_AND_TOPUP))</span>
+<span class="nc" id="L176">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_PAY_AND_TOPUP));</span>
+    }
+
+
+    Single&lt;PaymentActionIPayResult&gt; payAndTopUpToAnotherSingle(String eventLogString, PayAndTopUpParam param) {
+<span class="nc" id="L181">        return PaymentApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L182">                .getRxApi(getPaymentApi())</span>
+<span class="nc" id="L183">                .payAndTopUpToAnother(eventLogString,</span>
+<span class="nc" id="L184">                        Mobile.getInstance().getMobileNumber(),</span>
+                        param
+<span class="nc" id="L186">                ).compose(new SchedulersAndErrorHandling&lt;&gt;(PaymentActionIPayResult.class, SERVICE_NAME_PAY_AND_TOPUP_TO_ANOTHER))</span>
+<span class="nc" id="L187">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_PAY_AND_TOPUP_TO_ANOTHER));</span>
+    }
+
+    Single&lt;PaymentCustProfileResult&gt; paymentCustProfileSingle(String otherMobileNumber) {
+<span class="pc bpc" id="L191" title="2 of 4 branches missed.">        if (otherMobileNumber == null || otherMobileNumber.isEmpty()) {</span>
+<span class="fc" id="L192">            return Single.just(new PaymentCustProfileResult());</span>
+        }
+<span class="nc" id="L194">        return PaymentApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L195">                .getRxApi(getPaymentApi())</span>
+<span class="nc" id="L196">                .paymentCustProfile(</span>
+<span class="nc" id="L197">                        new EventLogParam(&quot;APP_GET_CUST_PROFILE&quot;, &quot;&quot;, &quot;999&quot;).getEventLogHeader(),</span>
+<span class="nc" id="L198">                        Mobile.getInstance().getMobileNumber(),</span>
+                        new PaymentCustProfileParam(otherMobileNumber)
+<span class="nc" id="L200">                ).compose(new SchedulersAndErrorHandling&lt;&gt;(PaymentCustProfileResult.class, SERVICE_NAME_PAYMENT_CUST_PROFILE))</span>
+<span class="nc" id="L201">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_PAYMENT_CUST_PROFILE));</span>
+    }
+
+    Single&lt;PaymentRemarkResult&gt; paymentRemark() {
+<span class="fc" id="L205">        return PaymentApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L206">                .getRxApi(getPaymentApi())</span>
+<span class="fc" id="L207">                .paymentRemark(</span>
+<span class="fc" id="L208">                        getEventLog(),</span>
+<span class="fc" id="L209">                        Mobile.getInstance().getMobileNumber()</span>
+                )
+<span class="fc" id="L211">                .compose(new SchedulersAndErrorHandling&lt;&gt;(PaymentRemarkResult.class, SERVICE_NAME_PAYMENT_REMARK))</span>
+<span class="fc" id="L212">                .compose(new ContinueWithNullOnCrash&lt;&gt;(PaymentRemarkResult.class))</span>
+<span class="fc" id="L213">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_PAYMENT_REMARK));</span>
+    }
+
+    Single&lt;ValidateMobileBResult&gt; validateMobileBSingle(String otherMobileNumber) {
+<span class="fc" id="L217">        ValidateMobileBParam validateMobileBParam = new ValidateMobileBParam(otherMobileNumber);</span>
+<span class="fc" id="L218">        return PaymentApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L219">                .getRxApi(getPaymentApi())</span>
+<span class="fc" id="L220">                .validateMobileB(</span>
+<span class="fc" id="L221">                        getEventLog(),</span>
+<span class="fc" id="L222">                        Mobile.getInstance().getMobileNumber(),</span>
+                        validateMobileBParam
+                )
+<span class="fc" id="L225">                .compose(new SchedulersAndErrorHandling&lt;&gt;(ValidateMobileBResult.class, SERVICE_NAME_VALIDATE_MOBILE_B))</span>
+<span class="fc" id="L226">                .flatMap(new MobileBCheck())</span>
+<span class="fc" id="L227">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_VALIDATE_MOBILE_B));</span>
+    }
+
+
+    protected Single&lt;BillingData&gt; callInitialPaymentServiceSingle(String creditCardEventLog, String otherMobileNumber) {
+<span class="fc" id="L232">        return Single.zip(</span>
+<span class="fc" id="L233">                getCreditCardDropdown(creditCardEventLog),</span>
+<span class="fc" id="L234">                getDiscountStatus(otherMobileNumber),</span>
+<span class="fc" id="L235">                getInvoiceSingle(null, otherMobileNumber),</span>
+<span class="fc" id="L236">                checkBillStatus(otherMobileNumber),</span>
+<span class="fc" id="L237">                paymentRemark(),</span>
+<span class="fc" id="L238">                getBillOpenSignal(),</span>
+<span class="fc" id="L239">                paymentCustProfileSingle(otherMobileNumber),</span>
+                BillingData::new);
+    }
+
+    public void callInitialPaymentService(String eventLogString, String otherMobileNumber) {
+<span class="nc" id="L244">        String[] serviceNameList = {</span>
+                SERVICE_NAME_GET_CREDIT_CARD_DROPDOWN,
+                SERVICE_NAME_GET_DISCOUNT_STATUS,
+                SERVICE_NAME_GET_INVOICE,
+                SERVICE_NAME_CHECK_BILL_STATUS,
+                SERVICE_NAME_PAYMENT_REMARK,
+                SERVICE_NAME_GET_BILL_OPEN_SIGNAL
+        };
+
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        if (otherMobileNumber != null) {</span>
+<span class="nc" id="L254">            List&lt;String&gt; arrayList = new ArrayList&lt;&gt;(Arrays.asList(serviceNameList));</span>
+<span class="nc" id="L255">            arrayList.add(SERVICE_NAME_PAYMENT_CUST_PROFILE);</span>
+<span class="nc" id="L256">            serviceNameList = arrayList.toArray(new String[arrayList.size()]);</span>
+        }
+
+<span class="nc" id="L259">        callServiceWithCache(BillingData.class, callInitialPaymentServiceSingle(eventLogString, otherMobileNumber))</span>
+<span class="nc" id="L260">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(serviceNameList));</span>
+<span class="nc" id="L261">    }</span>
+
+    /**
+     * Don't use this anymore. Use {@link #payAndTopUp(String, PayAndTopUpParam)} instead.
+     * @param eventLogParam
+     * @param paymentActionIPayParam
+     */
+    @Deprecated
+    public void callIPay(String eventLogParam, PaymentActionIPayParam paymentActionIPayParam) {
+<span class="nc" id="L270">        String[] serviceNameList = {</span>
+                SERVICE_NAME_PAYMENT_ACTION_IPAY
+        };
+<span class="nc" id="L273">        paymentActionIpaySingle(eventLogParam, paymentActionIPayParam)</span>
+<span class="nc" id="L274">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(serviceNameList));</span>
+<span class="nc" id="L275">    }</span>
+
+    public void validateMobileB(String mobileNumber) {
+<span class="nc" id="L278">        String[] serviceNameList = {</span>
+                SERVICE_NAME_VALIDATE_MOBILE_B
+        };
+<span class="nc" id="L281">        validateMobileBSingle(mobileNumber)</span>
+<span class="nc" id="L282">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(serviceNameList));</span>
+<span class="nc" id="L283">    }</span>
+
+    public void getInvoice(String eventLogString) {
+<span class="nc" id="L286">        String[] serviceNameList = {</span>
+                SERVICE_NAME_GET_INVOICE
+        };
+
+<span class="nc" id="L290">        getInvoiceSingle(eventLogString, null)</span>
+<span class="nc" id="L291">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(serviceNameList));</span>
+
+<span class="nc" id="L293">    }</span>
+
+    Single&lt;InvoicesAllBillResult&gt; getInvoicesAllBill() {
+<span class="nc" id="L296">        String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
+<span class="nc" id="L297">        return PaymentApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L298">                .getRxApi(getPaymentApi())</span>
+<span class="nc" id="L299">                .getInvoicesAllBill(</span>
+<span class="nc" id="L300">                        getEventLog(), mobileNumber)</span>
+<span class="nc" id="L301">                .compose(new SchedulersAndErrorHandling&lt;&gt;(InvoicesAllBillResult.class, SERVICE_NAME_GET_INVOICES_ALL_BILL))</span>
+<span class="nc" id="L302">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_GET_INVOICES_ALL_BILL));</span>
+    }
+
+    protected Single&lt;PayAllBillData&gt; callInitialPayAllBillServices(String eventLogString) {
+<span class="nc" id="L306">        return Single.zip(</span>
+<span class="nc" id="L307">                getCreditCardDropdown(eventLogString),</span>
+<span class="nc" id="L308">                getInvoicesAllBill(),</span>
+<span class="nc" id="L309">                paymentRemark(),</span>
+                PayAllBillData::new);
+    }
+
+    Single&lt;PaymentActionIPayResult&gt; paymentPayAllBillActionPayAndTopup(PaymentPayAllBillPayAndTopupParam paymentPayAllBillActionIPayParam) {
+<span class="nc" id="L314">        String mobileNumber = Mobile.getInstance().getMobileNumber();</span>
+<span class="nc" id="L315">        return PaymentApiService.newInstance(URL.getSSB())</span>
+<span class="nc" id="L316">                .getRxApi(getPaymentApi())</span>
+<span class="nc" id="L317">                .paymentActionPayAndTopup(</span>
+<span class="nc" id="L318">                        getPayALlBillEventLog(paymentPayAllBillActionIPayParam.getCardType()),</span>
+                        mobileNumber,
+                        paymentPayAllBillActionIPayParam
+<span class="nc" id="L321">                ).compose(new SchedulersAndErrorHandling&lt;&gt;(PaymentActionIPayResult.class, SERVICE_NAME_PAYMENT_PAY_AILL_BILL_ACTION_PAY_AND_TOPUP))</span>
+<span class="nc" id="L322">                .map(new SaveRealmResult&lt;&gt;(SERVICE_NAME_PAYMENT_PAY_AILL_BILL_ACTION_PAY_AND_TOPUP));</span>
+    }
+
+    public void callInitialPayAllBillSubscribe(String eventLogString) {
+<span class="nc" id="L326">        String[] serviceNameList = {</span>
+                SERVICE_NAME_GET_CREDIT_CARD_DROPDOWN,
+                SERVICE_NAME_GET_INVOICES_ALL_BILL,
+                SERVICE_NAME_PAYMENT_REMARK
+        };
+<span class="nc" id="L331">        callInitialPayAllBillServices(eventLogString)</span>
+<span class="nc" id="L332">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(serviceNameList));</span>
+<span class="nc" id="L333">    }</span>
+
+    public void callPaymentPayAllBillSubscribe(PaymentPayAllBillPayAndTopupParam paymentPayAllBillPayAndTopupParam) {
+<span class="nc" id="L336">        String[] serviceNameList = {</span>
+                SERVICE_NAME_PAYMENT_PAY_AILL_BILL_ACTION_PAY_AND_TOPUP
+        };
+<span class="nc" id="L339">        paymentPayAllBillActionPayAndTopup(paymentPayAllBillPayAndTopupParam)</span>
+<span class="nc" id="L340">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(serviceNameList));</span>
+<span class="nc" id="L341">    }</span>
+
+    public void payAndTopUp(String eventLogString, PayAndTopUpParam param) {
+<span class="nc" id="L344">        payAndTopUpSingle(eventLogString, param)</span>
+<span class="nc" id="L345">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_PAY_AND_TOPUP));</span>
+<span class="nc" id="L346">    }</span>
+
+    public void payAndTopUpToAnother(String eventLogString, PayAndTopUpParam param) {
+<span class="nc" id="L349">        payAndTopUpToAnotherSingle(eventLogString, param)</span>
+<span class="nc" id="L350">                .subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_NAME_PAY_AND_TOPUP_TO_ANOTHER));</span>
+<span class="nc" id="L351">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

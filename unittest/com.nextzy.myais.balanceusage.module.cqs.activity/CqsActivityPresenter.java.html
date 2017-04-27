@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CqsActivityPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.balanceusage.module.cqs.activity</a> &gt; <span class="el_source">CqsActivityPresenter.java</span></div><h1>CqsActivityPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.balanceusage.module.cqs.activity;
+
+import com.hwangjr.rxbus.RxBus;
+import com.nextzy.myais.balanceusage.helper.cqs.network.CqsManager;
+import com.nextzy.myais.common.mvp.NextzyActivityPresenter;
+
+/**
+ * Created by TheKhaeng on 9/20/2016.
+ */
+
+public class CqsActivityPresenter extends NextzyActivityPresenter&lt;CqsActivityContractor.View&gt; implements CqsActivityContractor.Presenter {
+
+    private final CqsManager mManager;
+
+    protected CqsActivityPresenter( CqsActivityContractor.View view ){
+<span class="nc" id="L16">        super( view );</span>
+<span class="nc" id="L17">        mManager = CqsManager.getInstance();</span>
+<span class="nc" id="L18">    }</span>
+
+    public static CqsActivityPresenter createPresenter( CqsActivityContractor.View view) {
+<span class="nc" id="L21">        return new CqsActivityPresenter(view);</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L26">        RxBus.get().register(this);</span>
+<span class="nc" id="L27">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L31">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L32">    }</span>
+
+    @Override
+    public void onViewStart(){
+        // for handle network error
+<span class="nc" id="L37">        super.onViewStart();</span>
+<span class="nc" id="L38">    }</span>
+
+    @Override
+    public void onViewStop(){
+<span class="nc" id="L42">        super.onViewStop();</span>
+<span class="nc" id="L43">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

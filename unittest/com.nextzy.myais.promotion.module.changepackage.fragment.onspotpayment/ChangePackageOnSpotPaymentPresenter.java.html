@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChangePackageOnSpotPaymentPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.promotion.module.changepackage.fragment.onspotpayment</a> &gt; <span class="el_source">ChangePackageOnSpotPaymentPresenter.java</span></div><h1>ChangePackageOnSpotPaymentPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.promotion.module.changepackage.fragment.onspotpayment;
+
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.eventlog.EventLogParam;
+import com.nextzy.myais.common.utility.remark.RemarkUtility;
+import com.nextzy.myais.promotion.helper.changepackage.network.ChangePackageManager;
+import com.nextzy.myais.promotion.helper.changepackage.request.ApplyPaymentBody;
+import com.nextzy.myais.promotion.helper.changepackage.response.ApplyPaymentRemarkResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.ApplyPaymentResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.CreditCardDropdownData;
+import com.nextzy.myais.promotion.helper.changepackage.response.CreditCardDropdownResult;
+import com.nextzy.myais.promotion.helper.changepackage.response.PaymentOptionResult;
+import com.nextzy.myais.promotion.module.changepackage.ChangePackageUtility;
+import com.nextzy.myais.promotion.module.changepackage.common.BaseChangePackagePresenter;
+import com.nextzy.myais.promotion.module.changepackage.constant.PaymentKey;
+import com.nextzy.myais.promotion.module.changepackage.model.BaseChangePackageItem;
+import com.nextzy.myais.promotion.module.changepackage.model.PaymentChannelItem;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Created by Akexorcist on 9/29/2016 AD.
+ */
+
+public class ChangePackageOnSpotPaymentPresenter extends BaseChangePackagePresenter&lt;ChangePackageOnSpotPaymentContractor.View&gt; implements ChangePackageOnSpotPaymentContractor.Presenter {
+    public static final String KEY_PAYMENT_REMARK = &quot;REMARK&quot;;
+
+    private String packageId;
+    private String fee;
+    private String cardType;
+    private String paymentRemark;
+    private ArrayList&lt;String&gt; specialNumberList;
+
+    public static ChangePackageOnSpotPaymentPresenter createPresenter(ChangePackageOnSpotPaymentContractor.View view) {
+<span class="nc" id="L39">        return new ChangePackageOnSpotPaymentPresenter(view);</span>
+    }
+
+    private ChangePackageOnSpotPaymentPresenter(ChangePackageOnSpotPaymentContractor.View view) {
+<span class="nc" id="L43">        super(view);</span>
+<span class="nc" id="L44">    }</span>
+
+    @Override
+    public void setPackageId(String packageId) {
+<span class="nc" id="L48">        this.packageId = packageId;</span>
+<span class="nc" id="L49">    }</span>
+
+    @Override
+    public String getPackageId() {
+<span class="nc" id="L53">        return packageId;</span>
+    }
+
+    @Override
+    public void setFee(String fee) {
+<span class="nc" id="L58">        this.fee = fee;</span>
+<span class="nc" id="L59">    }</span>
+
+    @Override
+    public String getFee() {
+<span class="nc" id="L63">        return fee;</span>
+    }
+
+    @Override
+    public void setCardType(String cardType) {
+<span class="nc" id="L68">        this.cardType = cardType;</span>
+<span class="nc" id="L69">    }</span>
+
+    @Override
+    public String getCardType() {
+<span class="nc" id="L73">        return cardType;</span>
+    }
+
+    @Override
+    public void setSpecialNumberList(ArrayList&lt;String&gt; specialNumberList) {
+<span class="nc" id="L78">        this.specialNumberList = specialNumberList;</span>
+<span class="nc" id="L79">    }</span>
+
+    @Override
+    public ArrayList&lt;String&gt; getSpecialNumberList() {
+<span class="nc" id="L83">        return specialNumberList;</span>
+    }
+
+    @Override
+    public void callPaymentMethod() {
+<span class="nc" id="L88">        getView().showLoading();</span>
+        // Apply package to another number doesn't available yet
+<span class="nc" id="L90">        boolean isPayToAnother = false;</span>
+<span class="nc" id="L91">        ChangePackageManager.getInstance().getPaymentOption(new EventLogParam(&quot;APP_VIEW_PAYBILL&quot;, &quot;5003&quot;, &quot;5034&quot;).getEventLogHeader(), isPayToAnother);</span>
+<span class="nc" id="L92">    }</span>
+
+    @Override
+    protected List&lt;BaseChangePackageItem&gt; createTitleItem() {
+<span class="nc bnc" id="L96" title="All 2 branches missed.">        if (Mobile.getInstance().isCorporate()) {</span>
+<span class="nc" id="L97">            return Collections.singletonList(createCorporateTitleItem());</span>
+        }
+<span class="nc" id="L99">        return super.createTitleItem();</span>
+    }
+
+    private BaseChangePackageItem createPaymentMethod(ArrayList&lt;String&gt; creditCardList) {
+<span class="nc" id="L103">        PaymentChannelItem paymentChannelItem = new PaymentChannelItem();</span>
+<span class="nc" id="L104">        paymentChannelItem.setCreditCardList(creditCardList);</span>
+<span class="nc" id="L105">        return paymentChannelItem;</span>
+    }
+
+    @Override
+    public void onNextStep() {
+<span class="nc bnc" id="L110" title="All 2 branches missed.">        if (getCardType() == null) {</span>
+<span class="nc" id="L111">            getView().showPaymentChannelUnselected();</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        } else if (PaymentKey.CARD_TYPE_CREDIT.equalsIgnoreCase(getCardType())) {</span>
+<span class="nc" id="L113">            getView().showCardTypeUnselected();</span>
+        } else {
+<span class="nc" id="L115">            ApplyPaymentBody body = new ApplyPaymentBody();</span>
+<span class="nc" id="L116">            body.setAmount(getFee());</span>
+<span class="nc" id="L117">            body.setCardType(getCardType());</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">            body.setInvoiceType(Mobile.getInstance().is2G() ? PaymentKey.INVOICE_TYPE_2G : PaymentKey.INVOICE_TYPE_3G);</span>
+<span class="nc" id="L119">            body.setPayChannel(PaymentKey.CHANNEL_ON_SPOT);</span>
+<span class="nc" id="L120">            body.setPayTo(Mobile.getInstance().getMobileNumber());</span>
+<span class="nc" id="L121">            ChangePackageManager.getInstance().applyPayment(getGroupCode(), body);</span>
+<span class="nc" id="L122">            getView().showLoading();</span>
+        }
+<span class="nc" id="L124">    }</span>
+
+    @Override
+    public void onViewStart() {
+<span class="nc" id="L128">        super.onViewStart();</span>
+<span class="nc" id="L129">        RxBus.get().register(this);</span>
+<span class="nc" id="L130">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L134">        super.onViewStop();</span>
+<span class="nc" id="L135">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L136">    }</span>
+
+    @Subscribe
+    public void onPaymentOptionResult(PaymentOptionResult paymentOptionResult) {
+<span class="nc" id="L140">        getView().hideLoading();</span>
+<span class="nc" id="L141">        setPaymentOptionResult(paymentOptionResult);</span>
+<span class="nc" id="L142">    }</span>
+
+    @Override
+    public void setPaymentOptionResult(PaymentOptionResult paymentOptionResult) {
+<span class="nc" id="L146">        setApplyPaymentRemarkResult(paymentOptionResult.getApplyPaymentRemarkResult());</span>
+<span class="nc" id="L147">        setCreditCardDropdownResult(paymentOptionResult.getCreditCardDropdownResult());</span>
+<span class="nc" id="L148">    }</span>
+
+    public void setApplyPaymentRemarkResult(ApplyPaymentRemarkResult result) {
+<span class="nc bnc" id="L151" title="All 4 branches missed.">        if (result != null &amp;&amp; result.hasDataList()) {</span>
+<span class="nc" id="L152">            setTermAndCondition(RemarkUtility.getInstance().sum(new String[]{KEY_PAYMENT_REMARK}, result.getDataList()));</span>
+        } else {
+<span class="nc" id="L154">            setTermAndCondition(null);</span>
+        }
+<span class="nc" id="L156">    }</span>
+
+    public void setCreditCardDropdownResult(CreditCardDropdownResult result) {
+<span class="nc bnc" id="L159" title="All 4 branches missed.">        if (result != null &amp;&amp; result.hasDataList()) {</span>
+<span class="nc" id="L160">            ArrayList&lt;String&gt; creditCardList = getCreditCardList(result.getDataList(), false);</span>
+<span class="nc" id="L161">            initPaymentMethod(creditCardList);</span>
+        }
+<span class="nc" id="L163">    }</span>
+
+    @Subscribe
+    public void onApplyPaymentResult(ApplyPaymentResult result) {
+<span class="nc" id="L167">        getView().hideLoading();</span>
+<span class="nc bnc" id="L168" title="All 6 branches missed.">        if (result != null &amp;&amp; result.hasData() &amp;&amp; result.getData().getPaymentPage() != null) {</span>
+<span class="nc" id="L169">            getView().hideConfirmPackageButton();</span>
+<span class="nc" id="L170">            getView().showPaymentWebView(result.getData().getPaymentPage());</span>
+        } else {
+<span class="nc" id="L172">            getView().showServiceUnavailableDialog();</span>
+        }
+<span class="nc" id="L174">    }</span>
+
+    // Create layout here with recycler view item
+    public void initPaymentMethod(ArrayList&lt;String&gt; creditCardList) {
+<span class="nc" id="L178">        List&lt;BaseChangePackageItem&gt; itemList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L179">        setBillingCycle(ChangePackageUtility.getInstance().getBillingCycleText(getView().getBillingCycleResult()));</span>
+<span class="nc" id="L180">        itemList.addAll(createTitleItem());</span>
+<span class="nc" id="L181">        itemList.add(createPaymentMethod(creditCardList));</span>
+<span class="nc" id="L182">        itemList.add(createButtonConfirmationItem());</span>
+<span class="nc" id="L183">        itemList.add(createTermAndConditionItem(getTermAndCondition()));</span>
+<span class="nc" id="L184">        itemList.add(createEmptyItem());</span>
+<span class="nc" id="L185">        getView().setItemList(itemList);</span>
+<span class="nc" id="L186">    }</span>
+
+    public ArrayList&lt;String&gt; getCreditCardList(List&lt;CreditCardDropdownData&gt; creditCardDropdownDataList, boolean shouldHideAmex) {
+<span class="nc" id="L189">        ArrayList&lt;String&gt; cardTypeDisplayList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">        for (CreditCardDropdownData creditCardDropdownData : creditCardDropdownDataList) {</span>
+<span class="nc bnc" id="L191" title="All 4 branches missed.">            if (shouldHideAmex &amp;&amp; &quot;AMEX&quot;.equalsIgnoreCase(creditCardDropdownData.getDropdownDisplay())) {</span>
+<span class="nc" id="L192">                continue;</span>
+            }
+<span class="nc bnc" id="L194" title="All 2 branches missed.">            if (creditCardDropdownData.getDropdownDisplay().contains(&quot;---&quot;)) {</span>
+<span class="nc" id="L195">                continue;</span>
+            }
+<span class="nc" id="L197">            cardTypeDisplayList.add(creditCardDropdownData.getDropdownDisplay());</span>
+<span class="nc" id="L198">        }</span>
+<span class="nc" id="L199">        return cardTypeDisplayList;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RoamingPackageDetailPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.promotion.module.roaming.fragment</a> &gt; <span class="el_source">RoamingPackageDetailPresenter.java</span></div><h1>RoamingPackageDetailPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.promotion.module.roaming.fragment;
+
+import com.hwangjr.rxbus.RxBus;
+import com.nextzy.myais.common.mvp.NextzyFragmentPresenter;
+import com.nextzy.myais.common.utility.NextzyLanguage;
+import com.nextzy.myais.promotion.helper.roaming.event.GotoRoamingPackageDateChoosingEvent;
+import com.nextzy.myais.promotion.helper.roaming.model.TableType;
+import com.nextzy.myais.promotion.helper.roaming.model.UpPackCDATA;
+import com.nextzy.myais.promotion.helper.roaming.model.UpSupportResult;
+import com.nextzy.myais.promotion.helper.roaming.model.UpSupportTable;
+import com.nextzy.myais.promotion.helper.roaming.util.UpSupportTableHelper;
+
+import java.util.Collections;
+import java.util.List;
+
+public class RoamingPackageDetailPresenter extends NextzyFragmentPresenter&lt;RoamingPackageDetailContractor.View&gt; implements RoamingPackageDetailContractor.Presenter {
+    private UpSupportResult mUpSupportResult;
+    private UpPackCDATA mUpPackCDATA;
+    private String checkListPage;
+    private UpSupportTableHelper upSupportTableHelper;
+    private List&lt;UpSupportTable&gt; upSupportTableList;
+
+    public RoamingPackageDetailPresenter(RoamingPackageDetailContractor.View view) {
+<span class="nc" id="L24">        super(view);</span>
+<span class="nc" id="L25">    }</span>
+
+    public static RoamingPackageDetailPresenter createPresenter(RoamingPackageDetailContractor.View view) {
+<span class="nc" id="L28">        return new RoamingPackageDetailPresenter(view);</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L33">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L37">    }</span>
+
+    @Override
+    public void onViewStart() {
+<span class="nc" id="L41">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L45">    }</span>
+
+    private TableType getTableType() {
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        if (mUpSupportResult == null) {</span>
+<span class="nc" id="L49">            return TableType.UNKNOWN;</span>
+        } else {
+<span class="nc bnc" id="L51" title="All 2 branches missed.">            return !checkListPage.equals(&quot;&quot;) ? upSupportTableHelper.getTableType() : TableType.UNKNOWN;</span>
+        }
+    }
+
+    public void setTable() {
+<span class="nc bnc" id="L56" title="All 6 branches missed.">        switch (getTableType()) {</span>
+            case ALL_ASIA:
+<span class="nc" id="L58">                getView().addAllAsiaHeader();</span>
+<span class="nc" id="L59">                break;</span>
+            case ALL_EUROPE:
+<span class="nc" id="L61">                getView().addAllEuropeHeader();</span>
+<span class="nc" id="L62">                break;</span>
+            case UNKNOWN:
+                //do nothing
+<span class="nc" id="L65">                break;</span>
+            case ONLY_COUNTRY_NAME:
+<span class="nc" id="L67">                getView().addCountryTable(upSupportTableHelper);</span>
+<span class="nc" id="L68">                break;</span>
+            case COUNTRY_NAME_WITH_NETWORK:
+<span class="nc bnc" id="L70" title="All 2 branches missed.">                if (NextzyLanguage.getInstance().isThai()) {</span>
+<span class="nc" id="L71">                    Collections.sort(upSupportTableList, (lhs, rhs) -&gt; lhs.getCountryTh().compareTo(rhs.getCountryTh()));</span>
+                }
+<span class="nc" id="L73">                getView().addCountryWithNetworkTable(upSupportTableList);</span>
+                break;
+        }
+<span class="nc" id="L76">    }</span>
+
+
+    @Override
+    public void initCDATAAndUpSupportResult() {
+<span class="nc" id="L81">        checkListPage = mUpPackCDATA.getCheckListPage();</span>
+<span class="nc" id="L82">        String is3GString = mUpPackCDATA.getIs3g();</span>
+<span class="nc bnc" id="L83" title="All 4 branches missed.">        if (!checkListPage.equalsIgnoreCase(&quot;&quot;) || mUpSupportResult != null) {</span>
+<span class="nc" id="L84">            upSupportTableHelper = mUpSupportResult.getUpSupportTableInfo(checkListPage, is3GString, getView().getCurrentLanguage());</span>
+<span class="nc" id="L85">            upSupportTableList = upSupportTableHelper.getUpSupportTableList();</span>
+        }
+<span class="nc" id="L87">        setHeader();</span>
+<span class="nc" id="L88">        setTable();</span>
+<span class="nc" id="L89">    }</span>
+
+    private void setHeader() {
+<span class="nc" id="L92">        boolean isThai = NextzyLanguage.getInstance().isThai();</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        getView().setPackageName(isThai ? mUpPackCDATA.getPackageTh() : mUpPackCDATA.getPackageEn());</span>
+<span class="nc" id="L94">        getView().setRate(mUpPackCDATA.getRate());</span>
+<span class="nc" id="L95">        getView().setAmount(mUpPackCDATA);</span>
+<span class="nc" id="L96">        getView().setValidity(mUpPackCDATA.getValidity());</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        getView().addNetworkCoverage(isThai ? mUpPackCDATA.getNetworkCoverageTh() : mUpPackCDATA.getNetworkCoverageEn());</span>
+<span class="nc" id="L98">    }</span>
+
+
+    @Override
+    public void setUpPackCDATA(UpPackCDATA upPackCDATA) {
+<span class="nc" id="L103">        mUpPackCDATA = upPackCDATA;</span>
+<span class="nc" id="L104">    }</span>
+
+    @Override
+    public void setUpSupportResult(UpSupportResult result) {
+<span class="nc" id="L108">        mUpSupportResult = result;</span>
+<span class="nc" id="L109">    }</span>
+
+    @Override
+    public void gotoPackageDateChoosing() {
+<span class="nc" id="L113">        RxBus.get().post(new GotoRoamingPackageDateChoosingEvent(mUpPackCDATA));</span>
+<span class="nc" id="L114">    }</span>
+
+    @Override
+    public UpPackCDATA getUpPackCDATA() {
+<span class="nc" id="L118">        return mUpPackCDATA;</span>
+    }
+
+    @Override
+    public UpSupportResult getUpSupportResult() {
+<span class="nc" id="L123">        return mUpSupportResult;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

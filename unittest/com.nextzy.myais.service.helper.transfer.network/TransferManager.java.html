@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransferManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.service.helper.transfer.network</a> &gt; <span class="el_source">TransferManager.java</span></div><h1>TransferManager.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.service.helper.transfer.network;
+
+
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.constant.URL;
+import com.nextzy.myais.common.database.model.SaveRealmResult;
+import com.nextzy.myais.common.eventlog.EventLogBlob;
+import com.nextzy.myais.common.network.subscriber.NextzySimpleSubscriber;
+import com.nextzy.myais.common.network.worker.GenericNetworkController;
+import com.nextzy.myais.common.network.worker.SchedulersAndErrorHandling;
+import com.nextzy.myais.service.helper.transfer.model.request.Blank;
+import com.nextzy.myais.service.helper.transfer.model.request.TransferBalanceValidityBody;
+import com.nextzy.myais.service.helper.transfer.model.response.TransferBalanceValidityResult;
+import com.nextzy.myais.service.helper.transfer.model.response.TransferDropdownResult;
+import com.nextzy.myais.service.helper.transfer.model.response.TransferRemarkResult;
+import com.nextzy.myais.service.helper.transfer.model.response.TransferValidateParameterResult;
+import com.nextzy.myais.service.helper.transfer.model.response.TransferValidityResult;
+import com.nextzy.myais.service.helper.transfer.operator.TransferBalanceValidityResultCheck;
+import com.nextzy.myais.service.helper.transfer.operator.TransferDropdownResultCheck;
+import com.nextzy.myais.service.helper.transfer.operator.TransferRemarkResultCheck;
+import com.nextzy.myais.service.helper.transfer.operator.TransferValidateParameterResultCheck;
+import com.nextzy.myais.service.helper.transfer.operator.TransferValidateResultCheck;
+
+import rx.Single;
+
+/**
+ * Created by kajornsak on 9/5/2016 AD.
+ */
+<span class="fc" id="L29">public class TransferManager extends GenericNetworkController {</span>
+    private static TransferManager instance;
+    public static final String SERVICE_GET_TRANSFER_VALIDATE_PARAMETER = &quot;get_transfer_validate_parameter&quot;;
+    public static final String SERVICE_GET_TRANSFER_DROPDOWN = &quot;get_transfer_dropdown&quot;;
+    public static final String SERVICE_GET_TRANSFER_REMARK = &quot;get_transfer_remark&quot;;
+    public static final String SERVICE_CHECK_TRANSFER_VALIDITY = &quot;check_transfer_validity&quot;;
+    
+
+    public static TransferManager getInstance() {
+<span class="nc bnc" id="L38" title="All 2 branches missed.">        if (instance == null) {</span>
+<span class="nc" id="L39">            instance = new TransferManager();</span>
+        }
+<span class="nc" id="L41">        return instance;</span>
+    }
+
+    TransferApi transferApi;
+
+    public TransferApi getTransferApi() {
+<span class="fc" id="L47">        return transferApi;</span>
+    }
+
+    public void setTransferApi(TransferApi transferApi) {
+<span class="fc" id="L51">        this.transferApi = transferApi;</span>
+<span class="fc" id="L52">    }</span>
+
+
+
+    protected Single&lt;TransferValidateParameterResult&gt; getTransferValidateParameterSingle(String key) {
+<span class="fc" id="L57">        return TransferApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L58">                .getRxApi(getTransferApi())</span>
+<span class="fc" id="L59">                .getTransferValidateParameter(</span>
+<span class="fc" id="L60">                        EventLogBlob.getInstance().getEventLog(SERVICE_GET_TRANSFER_DROPDOWN).getEventLogHeader(),</span>
+<span class="fc" id="L61">                        Mobile.getInstance().getMobileNumber(), key)</span>
+<span class="fc" id="L62">                .compose(new SchedulersAndErrorHandling&lt;&gt;(TransferValidateParameterResult.class, SERVICE_GET_TRANSFER_VALIDATE_PARAMETER))</span>
+<span class="fc" id="L63">                .flatMap(new TransferValidateParameterResultCheck())</span>
+<span class="fc" id="L64">                .map(new SaveRealmResult&lt;&gt;(SERVICE_GET_TRANSFER_VALIDATE_PARAMETER));</span>
+    }
+
+    public void getTransferValidateParameter(String key) {
+<span class="nc" id="L68">        getTransferValidateParameterSingle(key).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_GET_TRANSFER_VALIDATE_PARAMETER));</span>
+<span class="nc" id="L69">    }</span>
+
+
+    protected Single&lt;TransferDropdownResult&gt; getTransferDropdownSingle(String key) {
+<span class="fc" id="L73">        return TransferApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L74">                .getRxApi(getTransferApi())</span>
+<span class="fc" id="L75">                .getTransferDropdown(</span>
+<span class="fc" id="L76">                        EventLogBlob.getInstance().getEventLog(SERVICE_GET_TRANSFER_DROPDOWN).getEventLogHeader(),</span>
+<span class="fc" id="L77">                        Mobile.getInstance().getMobileNumber(), key)</span>
+<span class="fc" id="L78">                .compose(new SchedulersAndErrorHandling&lt;&gt;(TransferDropdownResult.class, SERVICE_GET_TRANSFER_DROPDOWN))</span>
+<span class="fc" id="L79">                .flatMap(new TransferDropdownResultCheck())</span>
+<span class="fc" id="L80">                .map(new SaveRealmResult&lt;&gt;(SERVICE_GET_TRANSFER_DROPDOWN));</span>
+    }
+
+
+    public void getTransferDropdown(String key) {
+<span class="nc" id="L85">        getTransferDropdownSingle(key).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_GET_TRANSFER_DROPDOWN));</span>
+<span class="nc" id="L86">    }</span>
+
+
+    protected Single&lt;TransferRemarkResult&gt; getTransferRemarkSingle() {
+<span class="fc" id="L90">        return TransferApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L91">                .getRxApi(getTransferApi())</span>
+<span class="fc" id="L92">                .getTransferRemark(</span>
+<span class="fc" id="L93">                        EventLogBlob.getInstance().getEventLog(SERVICE_GET_TRANSFER_DROPDOWN).getEventLogHeader(),</span>
+<span class="fc" id="L94">                        Mobile.getInstance().getMobileNumber())</span>
+<span class="fc" id="L95">                .compose(new SchedulersAndErrorHandling&lt;&gt;(TransferRemarkResult.class, SERVICE_GET_TRANSFER_REMARK))</span>
+<span class="fc" id="L96">                .flatMap(new TransferRemarkResultCheck())</span>
+<span class="fc" id="L97">                .map(new SaveRealmResult&lt;&gt;(SERVICE_GET_TRANSFER_REMARK));</span>
+    }
+
+    public void getTransferRemark() {
+<span class="nc" id="L101">        getTransferRemarkSingle().subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_GET_TRANSFER_REMARK));</span>
+<span class="nc" id="L102">    }</span>
+
+    protected Single&lt;TransferValidityResult&gt; checkTransferValiditySingle() {
+<span class="fc" id="L105">        Blank blank = new Blank();</span>
+
+<span class="fc" id="L107">        return TransferApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L108">                .getRxApi(getTransferApi())</span>
+<span class="fc" id="L109">                .checkTransferValidity(</span>
+<span class="fc" id="L110">                        EventLogBlob.getInstance().getEventLog(SERVICE_GET_TRANSFER_DROPDOWN).getEventLogHeader(),</span>
+<span class="fc" id="L111">                        Mobile.getInstance().getMobileNumber(), blank)</span>
+<span class="fc" id="L112">                .compose(new SchedulersAndErrorHandling&lt;&gt;(TransferValidityResult.class, SERVICE_CHECK_TRANSFER_VALIDITY))</span>
+<span class="fc" id="L113">                .flatMap(new TransferValidateResultCheck())</span>
+<span class="fc" id="L114">                .map(new SaveRealmResult&lt;&gt;(SERVICE_CHECK_TRANSFER_VALIDITY));</span>
+    }
+
+    public void checkTransferValidity() {
+<span class="nc" id="L118">        checkTransferValiditySingle().subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_CHECK_TRANSFER_VALIDITY));</span>
+<span class="nc" id="L119">    }</span>
+
+
+    protected Single&lt;TransferBalanceValidityResult&gt; transferBalanceValiditySingle(String eventLogString, String mobileNumber, String amount, String transferType) {
+<span class="fc" id="L123">        TransferBalanceValidityBody body = new TransferBalanceValidityBody()</span>
+<span class="fc" id="L124">                .setToMobileNumber(mobileNumber)</span>
+<span class="fc" id="L125">                .setAmount(amount)</span>
+<span class="fc" id="L126">                .setTransferType(transferType);</span>
+
+<span class="fc" id="L128">        return TransferApiService.newInstance(URL.getSSB())</span>
+<span class="fc" id="L129">                .getRxApi(getTransferApi())</span>
+<span class="fc" id="L130">                .transferBalanceValidity(</span>
+                        eventLogString,
+<span class="fc" id="L132">                        Mobile.getInstance().getMobileNumber(), body)</span>
+<span class="fc" id="L133">                .compose(new SchedulersAndErrorHandling&lt;&gt;(TransferBalanceValidityResult.class, SERVICE_CHECK_TRANSFER_VALIDITY))</span>
+<span class="fc" id="L134">                .flatMap(new TransferBalanceValidityResultCheck())</span>
+<span class="fc" id="L135">                .map(new SaveRealmResult&lt;&gt;(SERVICE_CHECK_TRANSFER_VALIDITY));</span>
+    }
+
+
+    public void transferBalanceValidity(String eventLogString, String mobileNumber, String amount, String transferType) {
+<span class="nc" id="L140">        transferBalanceValiditySingle(eventLogString, mobileNumber, amount, transferType).subscribe(new NextzySimpleSubscriber&lt;&gt;(SERVICE_CHECK_TRANSFER_VALIDITY));</span>
+<span class="nc" id="L141">    }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MyPackageInfoUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.promotion.helper.currentpackage.utility</a> &gt; <span class="el_source">MyPackageInfoUtility.java</span></div><h1>MyPackageInfoUtility.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.promotion.helper.currentpackage.utility;
+
+import android.content.Context;
+
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.constant.Contextor;
+import com.nextzy.myais.common.utility.NextzyUtility;
+import com.nextzy.myais.promotion.R;
+
+/**
+ * Created by trusttanapruk on 3/29/2017.
+ * This class is used specifically to {@link MyPackageInfoGenerator} only.
+ */
+
+class MyPackageInfoUtility {
+
+    private Context context;
+    private Mobile mobile;
+
+<span class="fc" id="L20">    MyPackageInfoUtility() {</span>
+<span class="fc" id="L21">        context = Contextor.getInstance().getContext();</span>
+<span class="fc" id="L22">        mobile = Mobile.getInstance();</span>
+<span class="fc" id="L23">    }</span>
+
+    /**
+     * This construtor is for a mock injection
+     *
+     * @param context
+     * @param mobile
+     */
+<span class="nc" id="L31">    MyPackageInfoUtility(Context context, Mobile mobile) {</span>
+<span class="nc" id="L32">        this.context = context;</span>
+<span class="nc" id="L33">        this.mobile = mobile;</span>
+<span class="nc" id="L34">    }</span>
+
+    String cleanText(String string) {
+<span class="fc" id="L37">        final String backSlashNRegEx = &quot;\\\\n&quot;;</span>
+<span class="fc" id="L38">        final String backSlashSlashN = &quot;\\n&quot;;</span>
+<span class="fc" id="L39">        final String backSlashN = &quot;\n&quot;;</span>
+<span class="fc" id="L40">        final String backSlashNbackSlashN = &quot;\n\n&quot;;</span>
+<span class="fc" id="L41">        final String brbr = &quot;&lt;br&gt;&lt;br&gt;&quot;;</span>
+<span class="fc" id="L42">        final String nonbreakingSpaceHtml = &quot;&amp;nbsp;&quot;;</span>
+//        final String hyphen = &quot;-&quot;;
+<span class="fc" id="L44">        final String emptySpace = &quot; &quot;;</span>
+//        final String blank = &quot;&quot;;
+
+        //somecase string is null
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        if (string == null) {</span>
+<span class="nc" id="L49">            return null;</span>
+        }
+
+//        string = string.replaceFirst(hyphen, blank);
+
+        //remove the one at the back
+<span class="fc" id="L55">        int last = string.lastIndexOf(backSlashSlashN);</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        if (last != -1) {</span>
+<span class="fc" id="L57">            string = string.substring(0, last);</span>
+        }
+
+        // the brbr syntax is newline newline
+<span class="fc" id="L61">        string = string.replaceAll(brbr, backSlashNbackSlashN);</span>
+
+<span class="fc" id="L63">        string = string.replaceAll(nonbreakingSpaceHtml, emptySpace);</span>
+
+        //make the \n at the middle of the sentence usable
+<span class="fc" id="L66">        string = string.replaceAll(backSlashNRegEx, backSlashN);</span>
+
+<span class="fc" id="L68">        return string.trim();</span>
+    }
+
+    int getDrawableIdTotalRemaining(String remainingTitle) {
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        return remainingTitle.contains(&quot;SWOP&quot;) ? R.drawable.my_ais_tab_promotion_ic_iswop : R.drawable.my_ais_tab_promotion_ic_mobile;</span>
+    }
+
+    boolean isRoamingPackage(String packageName) {
+<span class="pc bpc" id="L76" title="2 of 4 branches missed.">        return packageName != null &amp;&amp; (packageName.contains(&quot;Roaming&quot;) ||</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">                packageName.contains(&quot;โรมมิ่ง&quot;) ||</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">                packageName.contains(&quot;ข้ามแดน&quot;) ||</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">                packageName.equalsIgnoreCase(&quot;IR Package&quot;));</span>
+    }
+
+    boolean isEmpty(String string) {
+<span class="pc bpc" id="L83" title="3 of 8 branches missed.">        return string == null || string.isEmpty() || &quot;null&quot;.equals(string.toLowerCase()) || &quot;null - null&quot;.equals(string);</span>
+    }
+
+    String getRemainingText() {
+<span class="fc" id="L87">        return context.getString(R.string.current_package_remaining);</span>
+    }
+
+
+    boolean shouldShowTermCondition() {
+<span class="pc bpc" id="L92" title="1 of 6 branches missed.">        return mobile.isPostpaid() &amp;&amp; mobile.isBos() || mobile.isPrepaid();</span>
+    }
+
+    boolean isLastOne(int size, int current) {
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        return size - 1 == current;</span>
+    }
+
+    String getChangeMainButtonText() {
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        if (mobile.isPrepaid()) {</span>
+<span class="fc" id="L101">            return context.getString(R.string.current_package_btn_change_main_prepaid);</span>
+        } else {
+<span class="fc" id="L103">            return context.getString(R.string.current_package_btn_change_main_postpaid);</span>
+        }
+    }
+
+
+    private String getDate(String unformattedDateTime) {
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">        if (unformattedDateTime != null) {</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">            if (unformattedDateTime.length() &gt; 0) {</span>
+<span class="fc" id="L111">                String date = unformattedDateTime.substring(0, unformattedDateTime.lastIndexOf(&quot; &quot;));</span>
+<span class="fc" id="L112">                return NextzyUtility.getInstance().convertYearWithSlash(date);</span>
+            }
+        }
+<span class="fc" id="L115">        return unformattedDateTime;</span>
+    }
+
+    private String getTime(String unformattedDateTime) {
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">        if (unformattedDateTime != null) {</span>
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">            if (unformattedDateTime.length() &gt; 0)</span>
+<span class="fc" id="L121">                return unformattedDateTime.substring(unformattedDateTime.lastIndexOf(&quot; &quot;) + 1);</span>
+        }
+<span class="nc" id="L123">        return unformattedDateTime;</span>
+    }
+
+    String getFormattedDateTimeExpiry(String unformattedDateTime) {
+<span class="fc" id="L127">        String format = context.getString(R.string.current_package_date_cycle_expiry);</span>
+<span class="fc" id="L128">        String date = getDate(unformattedDateTime);</span>
+<span class="fc" id="L129">        String time = getTime(unformattedDateTime);</span>
+<span class="fc" id="L130">        return String.format(format, date, time);</span>
+    }
+
+    String getFormattedDateTimeRegistration(String unformattedDateTime) {
+<span class="fc" id="L134">        String format = context.getString(R.string.current_package_date_registration);</span>
+<span class="fc" id="L135">        String date = getDate(unformattedDateTime);</span>
+<span class="fc" id="L136">        String time = getTime(unformattedDateTime);</span>
+<span class="fc" id="L137">        return String.format(format, date, time);</span>
+    }
+
+    String getFormattedDateTimeBillingCycle(String unformattedDateTimeStart, String unformattedDateTimeExpiry) {
+<span class="fc" id="L141">        String format = context.getString(R.string.current_package_date_cycle_usage);</span>
+<span class="fc" id="L142">        String dateStart = getDate(unformattedDateTimeStart);</span>
+<span class="fc" id="L143">        String dateEnd = getDate(unformattedDateTimeExpiry);</span>
+<span class="fc" id="L144">        return String.format(format, dateStart, dateEnd);</span>
+    }
+
+    public String getMobileNumber() {
+<span class="fc" id="L148">        return mobile.getMobileNumber();</span>
+    }
+
+    public boolean isCorporate() {
+<span class="fc" id="L152">        return mobile.isCorporate();</span>
+    }
+
+    public boolean isPostpaid() {
+<span class="fc" id="L156">        return mobile.isPostpaid();</span>
+    }
+
+    public boolean isFibre() {
+<span class="fc" id="L160">        return mobile.isFibre();</span>
+    }
+
+    public boolean isPrepaid() {
+<span class="fc" id="L164">        return mobile.isPrepaid();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

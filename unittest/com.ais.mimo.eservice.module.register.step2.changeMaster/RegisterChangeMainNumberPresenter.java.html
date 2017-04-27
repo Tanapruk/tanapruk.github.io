@@ -85,7 +85,7 @@ public class RegisterChangeMainNumberPresenter extends RegisterBasePresenter&lt;
     //&lt;editor-fold desc=&quot;For view folding&quot;&gt;
     @Override
     public void validateVerifyIdentitySelectedNumber() {
-<span class="fc bfc" id="L88" title="All 2 branches covered.">        if (Check.isNotNull(TAG, getCurrentMobileNumber())) {</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">        if (Check.isNotNull(TAG, getSelectMobileNumber())) {</span>
 <span class="fc" id="L89">            getView().showLoadingNoFade();</span>
 <span class="fc" id="L90">            requestVerifyIdentityNumberSelected();</span>
 <span class="fc bfc" id="L91" title="All 2 branches covered.">        } else if (getView().havePostpaidList()) {</span>
@@ -99,7 +99,7 @@ public class RegisterChangeMainNumberPresenter extends RegisterBasePresenter&lt;
 
     @Override
     public void validateVerifyOtp(String otp) {
-<span class="fc bfc" id="L102" title="All 2 branches covered.">        if (Check.isNotNull(TAG, getCurrentMobileNumber())) {</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">        if (Check.isNotNull(TAG, getSelectMobileNumber())) {</span>
 <span class="fc" id="L103">            getView().showDefaultOtpEdt();</span>
 <span class="fc bfc" id="L104" title="All 2 branches covered.">            switch (validateUtil.validateOtp(otp)) {</span>
                 case INVALIDATE_OTP_FORMAT:
@@ -137,42 +137,43 @@ public class RegisterChangeMainNumberPresenter extends RegisterBasePresenter&lt;
     @Subscribe
     public void onReceiveVerifyOtp(RegisterVerifyOtpResult response) {
 <span class="fc bfc" id="L139" title="All 2 branches covered.">        if (response.isCanNextStep()) {</span>
-<span class="fc" id="L140">            getView().changeArgumentMasterNumber(getCurrentMobileNumber());</span>
-<span class="fc" id="L141">            requestGetMyNumber();</span>
+<span class="fc" id="L140">            getView().changeArgumentMasterNumber(getSelectMobileNumber());</span>
+<span class="fc" id="L141">            getView().putChangeMasterNumberToArgument(getSelectMobileNumber());</span>
+<span class="fc" id="L142">            requestGetMyNumber();</span>
         } else {
-<span class="fc" id="L143">            getView().showResponseException(response.getResultDescription());</span>
+<span class="fc" id="L144">            getView().showResponseException(response.getResultDescription());</span>
         }
-<span class="fc" id="L145">    }</span>
+<span class="fc" id="L146">    }</span>
 
     @Subscribe
     public void onReceiveMyNumber(RegisterMyNumberResult response) {
-<span class="fc bfc" id="L149" title="All 2 branches covered.">        if (response.isCanNextStep()) {</span>
-<span class="fc" id="L150">            getView().dismissLoadingNoFade();</span>
-<span class="fc" id="L151">            goToStep3Fragment();</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">        if (response.isCanNextStep()) {</span>
+<span class="fc" id="L151">            getView().dismissLoadingNoFade();</span>
+<span class="fc" id="L152">            goToStep3Fragment();</span>
         } else {
-<span class="fc" id="L153">            getView().showResponseException(response.getResultDescription());</span>
+<span class="fc" id="L154">            getView().showResponseException(response.getResultDescription());</span>
         }
-<span class="fc" id="L155">    }</span>
+<span class="fc" id="L156">    }</span>
 
     @Subscribe
     public void onReceiveSSBE309Exception(RegisterSSBE309Exception exception) {
-<span class="fc" id="L159">        getView().showResponseException(exception.getMessage());</span>
-<span class="fc" id="L160">    }</span>
+<span class="fc" id="L160">        getView().showResponseException(exception.getMessage());</span>
+<span class="fc" id="L161">    }</span>
 
     @Subscribe
     public void onReceiveIdentityResponseException(RegisterVerifyIdentityDataException exception) {
-<span class="fc" id="L164">        showResponseExceptionDismiss(exception.getMessage());</span>
-<span class="fc" id="L165">    }</span>
+<span class="fc" id="L165">        showResponseExceptionDismiss(exception.getMessage());</span>
+<span class="fc" id="L166">    }</span>
 
     @Subscribe
     public void onReceiveVerifyOtpException(RegisterVerifyOtpDataException exception) {
-<span class="fc" id="L169">        showResponseExceptionDismiss(exception.getMessage());</span>
-<span class="fc" id="L170">    }</span>
+<span class="fc" id="L170">        showResponseExceptionDismiss(exception.getMessage());</span>
+<span class="fc" id="L171">    }</span>
 
     @Subscribe
     public void onReceiveMyNumberException(RegisterMyNumberDataException exception) {
-<span class="fc" id="L174">        showResponseExceptionDismiss(exception.getMessage());</span>
-<span class="fc" id="L175">    }</span>
+<span class="fc" id="L175">        showResponseExceptionDismiss(exception.getMessage());</span>
+<span class="fc" id="L176">    }</span>
     //&lt;/editor-fold&gt;
 
     /********************/
@@ -180,63 +181,65 @@ public class RegisterChangeMainNumberPresenter extends RegisterBasePresenter&lt;
     /********************/
     //&lt;editor-fold desc=&quot;Private function folding&quot;&gt;
     private void requestVerifyOtp(String otp) {
-<span class="fc" id="L183">        getView().showLoadingNoFade();</span>
-<span class="fc" id="L184">        String refId = getRefIdNumberSelected();</span>
-<span class="fc" id="L185">        RegisterVerifyOtpBody body = new RegisterVerifyOtpBody(</span>
+<span class="fc" id="L184">        getView().showLoadingNoFade();</span>
+<span class="fc" id="L185">        String refId = getRefIdNumberSelected();</span>
+<span class="fc" id="L186">        RegisterVerifyOtpBody body = new RegisterVerifyOtpBody(</span>
                 refId,
                 otp);
 
         String number;
-<span class="fc bfc" id="L190" title="All 2 branches covered.">        if (isPrepaidForceChangeToFibre()) {</span>
-<span class="fc" id="L191">            number = Mobile.getInstance().getMobileNumber();</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">        if (isPrepaidForceChangeToFibre()) {</span>
+<span class="fc" id="L192">            number = Mobile.getInstance().getMobileNumber();</span>
         } else {
-<span class="fc" id="L193">            number = getCurrentMobileNumber();</span>
+<span class="fc" id="L194">            number = getView().getMobileNumberStringArgument();</span>
         }
-<span class="fc" id="L195">        manager.verifyOtpNumberSelected(</span>
+
+<span class="fc" id="L197">        manager.verifyOtpNumberSelected(</span>
                 number,
                 body
         );
-<span class="fc" id="L199">    }</span>
+<span class="fc" id="L201">    }</span>
 
     private void requestVerifyIdentityNumberSelected() {
-<span class="fc" id="L202">        RegisterVerifyIdentityBody body = new RegisterVerifyIdentityBody()</span>
-<span class="fc" id="L203">                .setNumber(getCurrentMobileNumber())</span>
-<span class="fc" id="L204">                .setCardId(getView().getArgumentsStringIdCard())</span>
-<span class="fc" id="L205">                .setEmail(getView().getArgumentsStringEmail())</span>
-<span class="fc" id="L206">                .setVerifyCaptchaFlag(FLAG_N)</span>
-<span class="fc" id="L207">                .setSendOtpFlag(FLAG_Y)</span>
-<span class="fc" id="L208">                .setReferenceId(null)</span>
-<span class="fc" id="L209">                .setCaptcha(null);</span>
+<span class="fc" id="L204">        RegisterVerifyIdentityBody body = new RegisterVerifyIdentityBody()</span>
+<span class="fc" id="L205">                .setNumber(getSelectMobileNumber())</span>
+<span class="fc" id="L206">                .setCardId(getView().getIdCardStringArgument())</span>
+<span class="fc" id="L207">                .setEmail(getView().getEmailStringArgument())</span>
+<span class="fc" id="L208">                .setVerifyCaptchaFlag(FLAG_N)</span>
+<span class="fc" id="L209">                .setSendOtpFlag(FLAG_Y)</span>
+<span class="fc" id="L210">                .setReferenceId(null)</span>
+<span class="fc" id="L211">                .setCaptcha(null);</span>
 
         String number;
-<span class="fc bfc" id="L212" title="All 2 branches covered.">        if (isPrepaidForceChangeToFibre()) {</span>
-<span class="fc" id="L213">            number = Mobile.getInstance().getMobileNumber();</span>
+<span class="pc bpc" id="L214" title="1 of 2 branches missed.">        if (isPrepaidForceChangeToFibre()) {</span>
+<span class="nc" id="L215">            number = Mobile.getInstance().getMobileNumber();</span>
         } else {
-<span class="fc" id="L215">            number = getCurrentMobileNumber();</span>
+<span class="fc" id="L217">            number = getView().getMobileNumberStringArgument();</span>
         }
 
-<span class="fc" id="L218">        manager.verifyIdentityForChangeMasterNumber(</span>
+<span class="fc" id="L220">        manager.verifyIdentityForChangeMasterNumber(</span>
                 number,
                 body);
-<span class="fc" id="L221">    }</span>
+<span class="fc" id="L223">    }</span>
 
     private boolean isPrepaidForceChangeToFibre() {
-<span class="pc bpc" id="L224" title="1 of 4 branches missed.">        return isLogin() &amp;&amp; isActivePrepaidNumber()</span>
-<span class="fc bfc" id="L225" title="All 2 branches covered.">                &amp;&amp; getView().isFibreGroupFromStep2();</span>
+<span class="fc bfc" id="L226" title="All 4 branches covered.">        return isLogin() &amp;&amp; masterIsPrepaid()</span>
+<span class="pc bpc" id="L227" title="1 of 2 branches missed.">                &amp;&amp; getView().isFibreGroupFromStep2();</span>
     }
 
     private void requestGetMyNumber() {
-<span class="fc" id="L229">        manager.getMyNumber(</span>
-<span class="fc" id="L230">                getView().getArgumentsStringMobileNumber());</span>
-<span class="fc" id="L231">    }</span>
+<span class="fc" id="L231">        manager.getMyNumber(</span>
+<span class="fc" id="L232">                getView().getMobileNumberStringArgument(),</span>
+                currentMobileNumber);
+<span class="fc" id="L234">    }</span>
 
     private String getRefIdNumberSelected() {
         RegisterVerifyIdentityResult identity
-<span class="fc" id="L235">                = NextzyDatabase.getInstance().findByName(SERVICE_VERIFY_IDENTITY_FOR_CHANGE_MASTER, RegisterVerifyIdentityResult.class);</span>
-<span class="fc bfc" id="L236" title="All 2 branches covered.">        if (identity != null) {</span>
-<span class="fc" id="L237">            return identity.getData().getReferenceId();</span>
+<span class="fc" id="L238">                = NextzyDatabase.getInstance().findByName(SERVICE_VERIFY_IDENTITY_FOR_CHANGE_MASTER, RegisterVerifyIdentityResult.class);</span>
+<span class="fc bfc" id="L239" title="All 2 branches covered.">        if (identity != null) {</span>
+<span class="fc" id="L240">            return identity.getData().getReferenceId();</span>
         }
-<span class="fc" id="L239">        return null;</span>
+<span class="fc" id="L242">        return null;</span>
     }
 
     //&lt;/editor-fold&gt;
@@ -248,11 +251,11 @@ public class RegisterChangeMainNumberPresenter extends RegisterBasePresenter&lt;
     //&lt;editor-fold desc=&quot;Getter Setter folding&quot;&gt;
     @Override
     public void setCurrentMobileNumber(String mobileNumber) {
-<span class="fc" id="L251">        currentMobileNumber = mobileNumber;</span>
-<span class="fc" id="L252">    }</span>
+<span class="fc" id="L254">        currentMobileNumber = mobileNumber;</span>
+<span class="fc" id="L255">    }</span>
 
-    public String getCurrentMobileNumber() {
-<span class="fc" id="L255">        return currentMobileNumber;</span>
+    public String getSelectMobileNumber() {
+<span class="fc" id="L258">        return currentMobileNumber;</span>
     }
 
     //&lt;/editor-fold&gt;

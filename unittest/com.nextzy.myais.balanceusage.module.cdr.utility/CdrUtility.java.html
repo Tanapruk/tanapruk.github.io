@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CdrUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.balanceusage.module.cdr.utility</a> &gt; <span class="el_source">CdrUtility.java</span></div><h1>CdrUtility.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.balanceusage.module.cdr.utility;
+
+import com.nextzy.myais.balanceusage.helper.cdr.network.response.CdrData;
+import com.nextzy.myais.balanceusage.helper.cdr.network.response.CdrResult;
+import com.nextzy.myais.balanceusage.module.cdr.adapter.model.BaseCdrItem;
+import com.nextzy.myais.balanceusage.module.cdr.adapter.model.CdrBlankItem;
+import com.nextzy.myais.balanceusage.module.cdr.adapter.model.CdrDetail1ColumnItem;
+import com.nextzy.myais.balanceusage.module.cdr.adapter.model.CdrDetail3ColumnItem;
+import com.nextzy.myais.balanceusage.module.cdr.adapter.model.CdrDetail4ColumnItem;
+import com.nextzy.myais.balanceusage.module.cdr.adapter.model.CdrDetail5ColumnItem;
+import com.nextzy.myais.balanceusage.module.cdr.adapter.model.CdrDetail6ColumnItem;
+import com.nextzy.myais.balanceusage.module.cdr.adapter.model.CdrEmptyItem;
+import com.nextzy.myais.balanceusage.module.cdr.adapter.model.CdrHeader3ColumnItem;
+import com.nextzy.myais.balanceusage.module.cdr.adapter.model.CdrHeader4ColumnItem;
+import com.nextzy.myais.balanceusage.module.cdr.adapter.model.CdrHeader5ColumnItem;
+import com.nextzy.myais.balanceusage.module.cdr.adapter.model.CdrHeader6ColumnItem;
+import com.nextzy.myais.balanceusage.module.cdr.adapter.model.CdrMobileNumberItem;
+import com.nextzy.myais.balanceusage.module.cdr.adapter.model.CdrProperties;
+import com.nextzy.myais.balanceusage.module.cdr.adapter.model.CdrSection1ColumnItem;
+import com.nextzy.myais.balanceusage.module.cdr.adapter.model.CdrSection3ColumnItem;
+import com.nextzy.myais.balanceusage.module.cdr.adapter.model.CdrTabItem;
+import com.nextzy.myais.balanceusage.module.cdr.adapter.model.CdrTermAndConditionItem;
+import com.nextzy.myais.balanceusage.module.cdr.adapter.model.CdrTitleItem;
+import com.nextzy.myais.common.config.mobile.Mobile;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * Created by Akexorcist on 9/25/2016 AD.
+ */
+
+<span class="nc" id="L37">public class CdrUtility {</span>
+    private static CdrUtility utility;
+
+    public static CdrUtility getInstance() {
+<span class="nc bnc" id="L41" title="All 2 branches missed.">        if (utility == null) {</span>
+<span class="nc" id="L42">            utility = new CdrUtility();</span>
+        }
+<span class="nc" id="L44">        return utility;</span>
+    }
+
+    public List&lt;BaseCdrItem&gt; createCdrPostpaidItemList(String mobileNumber, boolean isIswop, BaseCdrItem headerItem, List&lt;BaseCdrItem&gt; detailItemList) {
+<span class="nc" id="L48">        List&lt;BaseCdrItem&gt; cdrItemList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L49">        cdrItemList.add(getMobileNumberItem(mobileNumber));</span>
+<span class="nc" id="L50">        cdrItemList.add(createTabItem(isIswop));</span>
+<span class="nc" id="L51">        cdrItemList.add(headerItem);</span>
+<span class="nc" id="L52">        cdrItemList.addAll(detailItemList);</span>
+<span class="nc" id="L53">        cdrItemList.add(new CdrTermAndConditionItem());</span>
+<span class="nc" id="L54">        cdrItemList.add(new CdrBlankItem());</span>
+<span class="nc" id="L55">        return cdrItemList;</span>
+    }
+
+    public List&lt;BaseCdrItem&gt; createCdrPrepaidItemList(String mobileNumber, String title, int iconResId, BaseCdrItem headerItem, List&lt;BaseCdrItem&gt; bodyItemList) {
+<span class="nc" id="L59">        List&lt;BaseCdrItem&gt; cdrItemList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L60">        cdrItemList.add(getMobileNumberItem(mobileNumber));</span>
+<span class="nc" id="L61">        cdrItemList.add(getTitleItem(title, iconResId));</span>
+<span class="nc" id="L62">        cdrItemList.add(headerItem);</span>
+<span class="nc" id="L63">        cdrItemList.addAll(bodyItemList);</span>
+<span class="nc" id="L64">        cdrItemList.add(new CdrBlankItem());</span>
+<span class="nc" id="L65">        return cdrItemList;</span>
+    }
+
+    private CdrTabItem createTabItem(boolean isIswop) {
+<span class="nc" id="L69">        CdrTabItem tabItem = new CdrTabItem();</span>
+<span class="nc" id="L70">        tabItem.setIswopShowing(isIswop);</span>
+<span class="nc" id="L71">        return tabItem;</span>
+    }
+
+    private CdrMobileNumberItem getMobileNumberItem(String mobileNumber) {
+<span class="nc" id="L75">        return new CdrMobileNumberItem()</span>
+<span class="nc" id="L76">                .setMobileNumber(mobileNumber);</span>
+    }
+
+    private CdrTitleItem getTitleItem(String title, int iconResId) {
+<span class="nc" id="L80">        return new CdrTitleItem()</span>
+<span class="nc" id="L81">                .setTitle(title)</span>
+<span class="nc" id="L82">                .setIconResId(iconResId);</span>
+    }
+
+    public BaseCdrItem createHeaderItem(List&lt;CdrProperties&gt; headerList) {
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        if (headerList != null) {</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">            if (headerList.size() == 3) {</span>
+<span class="nc" id="L88">                return createHeader3ColumnList(headerList);</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">            } else if (headerList.size() == 4) {</span>
+<span class="nc" id="L90">                return createHeader4ColumnList(headerList);</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">            } else if (headerList.size() == 5) {</span>
+<span class="nc" id="L92">                return createHeader5ColumnList(headerList);</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">            } else if (headerList.size() == 6) {</span>
+<span class="nc" id="L94">                return createHeader6ColumnList(headerList);</span>
+            }
+        }
+<span class="nc" id="L97">        return null;</span>
+    }
+
+    private CdrHeader3ColumnItem createHeader3ColumnList(List&lt;CdrProperties&gt; headerList) {
+<span class="nc" id="L101">        CdrHeader3ColumnItem headerItem = new CdrHeader3ColumnItem();</span>
+<span class="nc" id="L102">        headerItem.setColumn1(headerList.get(0));</span>
+<span class="nc" id="L103">        headerItem.setColumn2(headerList.get(1));</span>
+<span class="nc" id="L104">        headerItem.setColumn3(headerList.get(2));</span>
+<span class="nc" id="L105">        return headerItem;</span>
+    }
+
+    private CdrHeader4ColumnItem createHeader4ColumnList(List&lt;CdrProperties&gt; headerList) {
+<span class="nc" id="L109">        CdrHeader4ColumnItem headerItem = new CdrHeader4ColumnItem();</span>
+<span class="nc" id="L110">        headerItem.setColumn1(headerList.get(0));</span>
+<span class="nc" id="L111">        headerItem.setColumn2(headerList.get(1));</span>
+<span class="nc" id="L112">        headerItem.setColumn3(headerList.get(2));</span>
+<span class="nc" id="L113">        headerItem.setColumn4(headerList.get(3));</span>
+<span class="nc" id="L114">        return headerItem;</span>
+    }
+
+    private CdrHeader5ColumnItem createHeader5ColumnList(List&lt;CdrProperties&gt; headerList) {
+<span class="nc" id="L118">        CdrHeader5ColumnItem headerItem = new CdrHeader5ColumnItem();</span>
+<span class="nc" id="L119">        headerItem.setColumn1(headerList.get(0));</span>
+<span class="nc" id="L120">        headerItem.setColumn2(headerList.get(1));</span>
+<span class="nc" id="L121">        headerItem.setColumn3(headerList.get(2));</span>
+<span class="nc" id="L122">        headerItem.setColumn4(headerList.get(3));</span>
+<span class="nc" id="L123">        headerItem.setColumn5(headerList.get(4));</span>
+<span class="nc" id="L124">        return headerItem;</span>
+    }
+
+    private CdrHeader6ColumnItem createHeader6ColumnList(List&lt;CdrProperties&gt; headerList) {
+<span class="nc" id="L128">        CdrHeader6ColumnItem headerItem = new CdrHeader6ColumnItem();</span>
+<span class="nc" id="L129">        headerItem.setColumn1(headerList.get(0));</span>
+<span class="nc" id="L130">        headerItem.setColumn2(headerList.get(1));</span>
+<span class="nc" id="L131">        headerItem.setColumn3(headerList.get(2));</span>
+<span class="nc" id="L132">        headerItem.setColumn4(headerList.get(3));</span>
+<span class="nc" id="L133">        headerItem.setColumn5(headerList.get(4));</span>
+<span class="nc" id="L134">        headerItem.setColumn6(headerList.get(5));</span>
+<span class="nc" id="L135">        return headerItem;</span>
+    }
+
+    public List&lt;CdrData.Detail&gt; getCdrDetailList(CdrResult result) {
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        if (result != null &amp;&amp;</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">                result.getData() != null &amp;&amp;</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">                result.getData().getUsageDetailGroupList() != null &amp;&amp;</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">                result.getData().getUsageDetailGroupList().size() &gt; 0) {</span>
+<span class="nc" id="L143">            return result.getData().getUsageDetailGroupList().get(0).getRowList();</span>
+        }
+<span class="nc" id="L145">        return null;</span>
+    }
+
+    public List&lt;BaseCdrItem&gt; getDetailItemList(List&lt;CdrData.Detail&gt; detailList, List&lt;CdrProperties&gt; sectionPropertyList, List&lt;CdrProperties&gt; detailPropertyList) {
+<span class="nc" id="L149">        List&lt;BaseCdrItem&gt; cdrItemList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L150" title="All 4 branches missed.">        if (detailList != null &amp;&amp; detailList.size() &gt; 0) {</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">            for (int index = 0; index &lt; detailList.size(); index++) {</span>
+<span class="nc" id="L152">                CdrData.Detail detail = detailList.get(index);</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">                if (detail != null) {</span>
+<span class="nc" id="L154">                    List&lt;CdrData.Column&gt; columnList = detail.getColumnList();</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">                    if (columnList != null) {</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">                        if (isSummaryRow(detail)) {</span>
+<span class="nc" id="L157">                            BaseCdrItem sectionItem = getSectionItem(columnList, sectionPropertyList);</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">                            if (sectionItem != null) {</span>
+<span class="nc" id="L159">                                cdrItemList.add(sectionItem);</span>
+                            }
+<span class="nc" id="L161">                        } else {</span>
+<span class="nc" id="L162">                            BaseCdrItem detailItem = getDetailItem(columnList, detailPropertyList);</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">                            if (detailItem != null) {</span>
+<span class="nc" id="L164">                                cdrItemList.add(detailItem);</span>
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+<span class="nc" id="L171">            cdrItemList.add(new CdrEmptyItem());</span>
+        }
+<span class="nc" id="L173">        return cdrItemList;</span>
+    }
+
+    private BaseCdrItem getDetailItem(List&lt;CdrData.Column&gt; columnList, List&lt;CdrProperties&gt; detailList) {
+<span class="nc bnc" id="L177" title="All 2 branches missed.">        if (columnList.size() == 1) {</span>
+<span class="nc" id="L178">            return createDetail1ColumnItem(columnList, detailList);</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">        } else if (columnList.size() == 3) {</span>
+<span class="nc" id="L180">            return createDetail3ColumnItem(columnList, detailList);</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">        } else if (columnList.size() == 4) {</span>
+<span class="nc" id="L182">            return createDetail4ColumnItem(columnList, detailList);</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">        } else if (columnList.size() == 5) {</span>
+<span class="nc" id="L184">            return createDetail5ColumnItem(columnList, detailList);</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        } else if (columnList.size() == 6) {</span>
+<span class="nc" id="L186">            return createDetail6ColumnItem(columnList, detailList);</span>
+        }
+<span class="nc" id="L188">        return null;</span>
+    }
+
+    private BaseCdrItem getSectionItem(List&lt;CdrData.Column&gt; columnList, List&lt;CdrProperties&gt; sectionPropertyList) {
+<span class="nc bnc" id="L192" title="All 2 branches missed.">        if (columnList.size() == 1) {</span>
+<span class="nc" id="L193">            return createSection1ColumnItem(columnList, sectionPropertyList);</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        } else if (columnList.size() == 3) {</span>
+<span class="nc" id="L195">            return createSection3ColumnItem(columnList, sectionPropertyList);</span>
+        }
+<span class="nc" id="L197">        return null;</span>
+    }
+
+    private CdrDetail1ColumnItem createDetail1ColumnItem(List&lt;CdrData.Column&gt; columnList, List&lt;CdrProperties&gt; detailList) {
+<span class="nc" id="L201">        CdrDetail1ColumnItem detailItem = new CdrDetail1ColumnItem();</span>
+<span class="nc" id="L202">        detailItem.setColumn1(createDetailCdrProperty(0, columnList, detailList));</span>
+<span class="nc" id="L203">        return detailItem;</span>
+    }
+
+    private CdrDetail3ColumnItem createDetail3ColumnItem(List&lt;CdrData.Column&gt; columnList, List&lt;CdrProperties&gt; detailList) {
+<span class="nc" id="L207">        CdrDetail3ColumnItem detailItem = new CdrDetail3ColumnItem();</span>
+<span class="nc" id="L208">        detailItem.setColumn1(createDetailCdrProperty(0, columnList, detailList));</span>
+<span class="nc" id="L209">        detailItem.setColumn2(createDetailCdrProperty(1, columnList, detailList));</span>
+<span class="nc" id="L210">        detailItem.setColumn3(createDetailCdrProperty(2, columnList, detailList));</span>
+<span class="nc" id="L211">        return detailItem;</span>
+    }
+
+    private CdrDetail4ColumnItem createDetail4ColumnItem(List&lt;CdrData.Column&gt; columnList, List&lt;CdrProperties&gt; detailList) {
+<span class="nc" id="L215">        CdrDetail4ColumnItem detailItem = new CdrDetail4ColumnItem();</span>
+<span class="nc" id="L216">        detailItem.setColumn1(createDetailCdrProperty(0, columnList, detailList));</span>
+<span class="nc" id="L217">        detailItem.setColumn2(createDetailCdrProperty(1, columnList, detailList));</span>
+<span class="nc" id="L218">        detailItem.setColumn3(createDetailCdrProperty(2, columnList, detailList));</span>
+<span class="nc" id="L219">        detailItem.setColumn4(createDetailCdrProperty(3, columnList, detailList));</span>
+<span class="nc" id="L220">        return detailItem;</span>
+    }
+
+    private CdrDetail5ColumnItem createDetail5ColumnItem(List&lt;CdrData.Column&gt; columnList, List&lt;CdrProperties&gt; detailList) {
+<span class="nc" id="L224">        CdrDetail5ColumnItem detailItem = new CdrDetail5ColumnItem();</span>
+<span class="nc" id="L225">        detailItem.setColumn1(createDetailCdrProperty(0, columnList, detailList));</span>
+<span class="nc" id="L226">        detailItem.setColumn2(createDetailCdrProperty(1, columnList, detailList));</span>
+<span class="nc" id="L227">        detailItem.setColumn3(createDetailCdrProperty(2, columnList, detailList));</span>
+<span class="nc" id="L228">        detailItem.setColumn4(createDetailCdrProperty(3, columnList, detailList));</span>
+<span class="nc" id="L229">        detailItem.setColumn5(createDetailCdrProperty(4, columnList, detailList));</span>
+<span class="nc" id="L230">        return detailItem;</span>
+    }
+
+    private CdrDetail6ColumnItem createDetail6ColumnItem(List&lt;CdrData.Column&gt; columnList, List&lt;CdrProperties&gt; detailList) {
+<span class="nc" id="L234">        CdrDetail6ColumnItem detailItem = new CdrDetail6ColumnItem();</span>
+<span class="nc" id="L235">        detailItem.setColumn1(createDetailCdrProperty(0, columnList, detailList));</span>
+<span class="nc" id="L236">        detailItem.setColumn2(createDetailCdrProperty(1, columnList, detailList));</span>
+<span class="nc" id="L237">        detailItem.setColumn3(createDetailCdrProperty(2, columnList, detailList));</span>
+<span class="nc" id="L238">        detailItem.setColumn4(createDetailCdrProperty(3, columnList, detailList));</span>
+<span class="nc" id="L239">        detailItem.setColumn5(createDetailCdrProperty(4, columnList, detailList));</span>
+<span class="nc" id="L240">        detailItem.setColumn6(createDetailCdrProperty(5, columnList, detailList));</span>
+<span class="nc" id="L241">        return detailItem;</span>
+    }
+
+    private CdrSection1ColumnItem createSection1ColumnItem(List&lt;CdrData.Column&gt; columnList, List&lt;CdrProperties&gt; sectionList) {
+<span class="nc" id="L245">        CdrSection1ColumnItem sectionItem = new CdrSection1ColumnItem();</span>
+<span class="nc" id="L246">        sectionItem.setColumn1(createDetailCdrProperty(0, columnList, sectionList));</span>
+<span class="nc" id="L247">        return sectionItem;</span>
+    }
+
+    private CdrSection3ColumnItem createSection3ColumnItem(List&lt;CdrData.Column&gt; columnList, List&lt;CdrProperties&gt; sectionList) {
+<span class="nc" id="L251">        CdrSection3ColumnItem sectionItem = new CdrSection3ColumnItem();</span>
+<span class="nc" id="L252">        sectionItem.setColumn1(createDetailCdrProperty(0, columnList, sectionList));</span>
+<span class="nc" id="L253">        sectionItem.setColumn2(createDetailCdrProperty(1, columnList, sectionList));</span>
+<span class="nc" id="L254">        sectionItem.setColumn3(createDetailCdrProperty(2, columnList, sectionList));</span>
+<span class="nc" id="L255">        return sectionItem;</span>
+    }
+
+    private boolean isSummaryRow(CdrData.Detail detail) {
+<span class="nc bnc" id="L259" title="All 4 branches missed.">        return detail.getRowProperty() != null &amp;&amp; detail.getRowProperty().isSummaryRow();</span>
+    }
+
+    private CdrProperties createDetailCdrProperty(int index, List&lt;CdrData.Column&gt; columnList, List&lt;CdrProperties&gt; detailList) {
+<span class="nc" id="L263">        String text = getColumnText(columnList, index);</span>
+        int weight;
+<span class="nc bnc" id="L265" title="All 2 branches missed.">        if (Mobile.getInstance().isCorporate()) {</span>
+<span class="nc bnc" id="L266" title="All 4 branches missed.">            weight = text != null &amp;&amp; !text.isEmpty() ? getColumnWeight(columnList, index) : 0;</span>
+        } else {
+<span class="nc bnc" id="L268" title="All 2 branches missed.">            weight = text != null ? getColumnWeight(columnList, index) : 0;</span>
+        }
+<span class="nc" id="L270">        int gravity = detailList.get(index).getGravity();</span>
+<span class="nc" id="L271">        return new CdrProperties(text, weight, gravity);</span>
+    }
+
+    private String getColumnText(List&lt;CdrData.Column&gt; columnList, int index) {
+<span class="nc bnc" id="L275" title="All 4 branches missed.">        if (columnList != null &amp;&amp; columnList.size() &gt; index) {</span>
+<span class="nc" id="L276">            return columnList.get(index).getText();</span>
+        }
+<span class="nc" id="L278">        return &quot;&quot;;</span>
+    }
+
+    private int getColumnWeight(List&lt;CdrData.Column&gt; columnList, int index) {
+<span class="nc bnc" id="L282" title="All 6 branches missed.">        if (columnList != null &amp;&amp; columnList.size() &gt; index &amp;&amp; columnList.get(index).getColumnProperty() != null) {</span>
+<span class="nc" id="L283">            return Integer.valueOf(columnList.get(index).getColumnProperty().getColumnSpan());</span>
+        }
+<span class="nc" id="L285">        return 0;</span>
+    }
+
+    public String getDateBefore3Days() {
+<span class="nc" id="L289">        GregorianCalendar date = new GregorianCalendar();</span>
+<span class="nc" id="L290">        date.add(GregorianCalendar.DAY_OF_MONTH, -3);</span>
+<span class="nc" id="L291">        SimpleDateFormat sdf = new SimpleDateFormat(&quot;dd/MM/yyyy&quot;, Locale.getDefault());</span>
+<span class="nc" id="L292">        return sdf.format(date.getTime());</span>
+    }
+
+    public String getCurrentDate() {
+<span class="nc" id="L296">        SimpleDateFormat sdf = new SimpleDateFormat(&quot;dd/MM/yyyy&quot;, Locale.getDefault());</span>
+<span class="nc" id="L297">        return sdf.format(new Date());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

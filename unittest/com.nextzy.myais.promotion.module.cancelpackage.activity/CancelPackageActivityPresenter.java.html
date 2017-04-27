@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CancelPackageActivityPresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.promotion.module.cancelpackage.activity</a> &gt; <span class="el_source">CancelPackageActivityPresenter.java</span></div><h1>CancelPackageActivityPresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.promotion.module.cancelpackage.activity;
+
+import com.hwangjr.rxbus.RxBus;
+import com.hwangjr.rxbus.annotation.Subscribe;
+import com.nextzy.myais.common.config.mobile.Mobile;
+import com.nextzy.myais.common.mvp.NextzyActivityPresenter;
+import com.nextzy.myais.common.utility.remark.RemarkUtility;
+import com.nextzy.myais.promotion.helper.cancelpackage.network.CancelPackageManager;
+import com.nextzy.myais.promotion.helper.cancelpackage.network.exception.BillingCycleException;
+import com.nextzy.myais.promotion.helper.cancelpackage.network.exception.CancelPackageRemarkException;
+import com.nextzy.myais.promotion.helper.cancelpackage.network.model.CancelRemarkResult;
+import com.nextzy.myais.promotion.module.cancelpackage.adapter.operator.CancelPackageConverter;
+import com.nextzy.myais.promotion.module.cancelpackage.event.GoToFragmentStep2Event;
+import com.nextzy.myais.promotion.module.cancelpackage.event.ShowBaseLayoutEvent;
+import com.nextzy.myais.promotion.module.cancelpackage.event.ShowCannotCancelPackagesEvent;
+import com.nextzy.myais.promotion.helper.cancelpackage.network.model.RemarkAndBillingCycleResult;
+
+import static com.nextzy.myais.promotion.module.cancelpackage.activity.CancelPackageActivity.KEY_CANCEL;
+
+/**
+ * Created by TheKhaeng on 9/20/2016.
+ */
+
+public class CancelPackageActivityPresenter extends NextzyActivityPresenter&lt;CancelActivityContractor.View&gt;
+        implements CancelActivityContractor.Presenter {
+
+    private final CancelPackageManager manager;
+    private final CancelPackageConverter converter;
+
+    private CancelPackageActivityPresenter(CancelActivityContractor.View view) {
+<span class="nc" id="L31">        super(view);</span>
+<span class="nc" id="L32">        manager = CancelPackageManager.getInstance();</span>
+<span class="nc" id="L33">        converter = new CancelPackageConverter();</span>
+<span class="nc" id="L34">    }</span>
+
+    public static CancelPackageActivityPresenter createPresenter(CancelActivityContractor.View view) {
+<span class="nc" id="L37">        return new CancelPackageActivityPresenter(view);</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L42">        RxBus.get().register(this);</span>
+<span class="nc" id="L43">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L47">        RxBus.get().unregister(this);</span>
+<span class="nc" id="L48">    }</span>
+
+    @Override
+    public void onViewStart() {
+        // for handle network error
+<span class="nc" id="L53">        super.onViewStart();</span>
+<span class="nc" id="L54">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L58">        super.onViewStop();</span>
+<span class="nc" id="L59">    }</span>
+
+
+
+    /*******************/
+    /** For view call **/
+    /*******************/
+    //&lt;editor-fold desc=&quot;For view folding&quot;&gt;
+    @Override
+    public void requestBillingCycleAndRemark() {
+<span class="nc" id="L69">        String mobileNum = Mobile.getInstance().getMobileNumber();</span>
+<span class="nc" id="L70">        manager.requestBillingCycleAndRemark(mobileNum);</span>
+<span class="nc" id="L71">    }</span>
+    //&lt;/editor-fold&gt;
+
+    @Subscribe
+    public void onReceiveCancelModel(RemarkAndBillingCycleResult result) {
+<span class="nc" id="L76">        getView().updateHeader(result.getBillingCycleResult());</span>
+<span class="nc" id="L77">        updateTermAndCondition(result.getCancelRemarkResult());</span>
+<span class="nc" id="L78">    }</span>
+
+    @Subscribe
+    public void onGoToFragmentStep2Event(GoToFragmentStep2Event event) {
+<span class="nc" id="L82">        getView().openFragmentStep2(event.getItem());</span>
+<span class="nc" id="L83">    }</span>
+
+    @Subscribe
+    public void onShowCannotCancelPackages(ShowCannotCancelPackagesEvent event) {
+<span class="nc" id="L87">        getView().showCannotCancelPackages();</span>
+<span class="nc" id="L88">    }</span>
+
+    @Subscribe
+    public void onShowBaseLayout(ShowBaseLayoutEvent event) {
+<span class="nc" id="L92">        getView().showBaseLayout();</span>
+<span class="nc" id="L93">    }</span>
+
+    /*******************/
+    /** Receive Error **/
+    /*******************/
+    //&lt;editor-fold desc=&quot;Receive Error folding&quot;&gt;
+    @Subscribe
+    public void onCancelPackageRemarkException(CancelPackageRemarkException error) {
+<span class="nc" id="L101">        getView().showNullCancelListPackageDialog();</span>
+<span class="nc" id="L102">    }</span>
+
+    @Subscribe
+    public void onBillingCycleException(BillingCycleException error) {
+<span class="nc" id="L106">        getView().showNullCancelListPackageDialog();</span>
+<span class="nc" id="L107">    }</span>
+    //&lt;/editor-fold&gt;
+
+    /********************/
+    /** Private method **/
+    /********************/
+    //&lt;editor-fold desc=&quot;Private function folding&quot;&gt;
+    private void updateTermAndCondition(CancelRemarkResult cancelRemarkResult) {
+<span class="nc" id="L115">        String remark = null;</span>
+<span class="nc bnc" id="L116" title="All 4 branches missed.">        if (cancelRemarkResult != null &amp;&amp; cancelRemarkResult.getDataList().size() != 0) {</span>
+<span class="nc" id="L117">            String[] keys = {KEY_CANCEL};</span>
+<span class="nc" id="L118">            remark = RemarkUtility.getInstance().sum(keys, cancelRemarkResult.getDataList());</span>
+        }
+<span class="nc" id="L120">        getView().updateTermAndCondition(remark);</span>
+<span class="nc" id="L121">    }</span>
+    //&lt;/editor-fold&gt;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

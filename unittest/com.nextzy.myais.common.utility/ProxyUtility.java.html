@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProxyUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.common.utility</a> &gt; <span class="el_source">ProxyUtility.java</span></div><h1>ProxyUtility.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.common.utility;
+
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Proxy;
+import android.os.Build;
+import android.os.Parcelable;
+import android.util.ArrayMap;
+import android.webkit.WebView;
+
+import com.nextzy.myais.common.BuildConfig;
+
+import org.apache.http.HttpHost;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
+
+<span class="nc" id="L25">public class ProxyUtility {</span>
+
+    private final static int DEFAULT_SOCKS_PORT = 9050;
+<span class="nc" id="L28">    private final static String TAG = ProxyUtility.class.getSimpleName();</span>
+
+    public static boolean setProxy(String appClass, Context ctx, WebView wView, String host, int port) throws Exception {
+
+<span class="nc" id="L32">        setSystemProperties(host, port);</span>
+
+<span class="nc" id="L34">        Authenticator.setDefault(</span>
+            new Authenticator() {
+                public PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(BuildConfig.PROXY_USER, BuildConfig.PROXY_PASS.toCharArray());
+                }
+            }
+        );
+
+<span class="nc" id="L42">        boolean worked = false;</span>
+
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        if (Build.VERSION.SDK_INT &lt; 13) {</span>
+<span class="nc" id="L45">            worked = setProxyUpToHC(wView, host, port);</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        } else if (Build.VERSION.SDK_INT &lt; 19) {</span>
+<span class="nc" id="L47">            worked = setWebkitProxyICS(ctx, host, port);</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        } else if (Build.VERSION.SDK_INT &lt; 20) {</span>
+<span class="nc" id="L49">            worked = setKitKatProxy(appClass, ctx, host, port);</span>
+
+<span class="nc bnc" id="L51" title="All 2 branches missed.">            if (!worked) //some kitkat's still use ICS browser component (like Cyanogen 11)</span>
+<span class="nc" id="L52">                worked = setWebkitProxyICS(ctx, host, port);</span>
+
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        } else if (Build.VERSION.SDK_INT &gt;= 21) {</span>
+<span class="nc" id="L55">            worked = setWebkitProxyLollipop(ctx, host, port);</span>
+
+        }
+
+<span class="nc" id="L59">        return worked;</span>
+    }
+
+    private static void setSystemProperties(String host, int port) {
+<span class="nc" id="L63">        System.setProperty(&quot;proxyHost&quot;, host);</span>
+<span class="nc" id="L64">        System.setProperty(&quot;proxyPort&quot;, Integer.toString(port));</span>
+
+<span class="nc" id="L66">        System.setProperty(&quot;http.proxyHost&quot;, host);</span>
+<span class="nc" id="L67">        System.setProperty(&quot;http.proxyPort&quot;, Integer.toString(port));</span>
+
+<span class="nc" id="L69">        System.setProperty(&quot;https.proxyHost&quot;, host);</span>
+<span class="nc" id="L70">        System.setProperty(&quot;https.proxyPort&quot;, Integer.toString(port));</span>
+
+<span class="nc" id="L72">        System.setProperty(&quot;http.proxyUser&quot;, BuildConfig.PROXY_USER);</span>
+<span class="nc" id="L73">        System.setProperty(&quot;http.proxyPassword&quot;, BuildConfig.PROXY_PASS);</span>
+
+<span class="nc" id="L75">        System.setProperty(&quot;https.proxyUser&quot;, BuildConfig.PROXY_USER);</span>
+<span class="nc" id="L76">        System.setProperty(&quot;https.proxyPassword&quot;, BuildConfig.PROXY_PASS);</span>
+
+<span class="nc" id="L78">        System.setProperty(&quot;socks.proxyHost&quot;, host);</span>
+<span class="nc" id="L79">        System.setProperty(&quot;socks.proxyPort&quot;, Integer.toString(DEFAULT_SOCKS_PORT));</span>
+
+<span class="nc" id="L81">        System.setProperty(&quot;socksProxyHost&quot;, host);</span>
+<span class="nc" id="L82">        System.setProperty(&quot;socksProxyPort&quot;, Integer.toString(DEFAULT_SOCKS_PORT));</span>
+<span class="nc" id="L83">    }</span>
+
+    private static void resetSystemProperties() {
+<span class="nc" id="L86">        System.setProperty(&quot;proxyHost&quot;, &quot;&quot;);</span>
+<span class="nc" id="L87">        System.setProperty(&quot;proxyPort&quot;, &quot;&quot;);</span>
+
+<span class="nc" id="L89">        System.setProperty(&quot;http.proxyHost&quot;, &quot;&quot;);</span>
+<span class="nc" id="L90">        System.setProperty(&quot;http.proxyPort&quot;, &quot;&quot;);</span>
+
+<span class="nc" id="L92">        System.setProperty(&quot;https.proxyHost&quot;, &quot;&quot;);</span>
+<span class="nc" id="L93">        System.setProperty(&quot;https.proxyPort&quot;, &quot;&quot;);</span>
+
+<span class="nc" id="L95">        System.setProperty(&quot;socks.proxyHost&quot;, &quot;&quot;);</span>
+<span class="nc" id="L96">        System.setProperty(&quot;socks.proxyPort&quot;, Integer.toString(DEFAULT_SOCKS_PORT));</span>
+
+<span class="nc" id="L98">        System.setProperty(&quot;socksProxyHost&quot;, &quot;&quot;);</span>
+<span class="nc" id="L99">        System.setProperty(&quot;socksProxyPort&quot;, Integer.toString(DEFAULT_SOCKS_PORT));</span>
+<span class="nc" id="L100">    }</span>
+
+    @SuppressWarnings(&quot;all&quot;)
+    private static boolean setProxyUpToHC(WebView webview, String host, int port) {
+<span class="nc" id="L104">        NLog.d(TAG, &quot;Setting proxy with &lt;= 3.2 API.&quot;);</span>
+
+<span class="nc" id="L106">        HttpHost proxyServer = new HttpHost(host, port);</span>
+        // Getting network
+<span class="nc" id="L108">        Class networkClass = null;</span>
+<span class="nc" id="L109">        Object network = null;</span>
+        try {
+<span class="nc" id="L111">            networkClass = Class.forName(&quot;android.webkit.Network&quot;);</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">            if (networkClass == null) {</span>
+<span class="nc" id="L113">                NLog.e(TAG, &quot;failed to get class for android.webkit.Network&quot;);</span>
+<span class="nc" id="L114">                return false;</span>
+            }
+<span class="nc" id="L116">            Method getInstanceMethod = networkClass.getMethod(&quot;getInstance&quot;, Context.class);</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">            if (getInstanceMethod == null) {</span>
+<span class="nc" id="L118">                NLog.e(TAG, &quot;failed to get getInstance method&quot;);</span>
+            }
+<span class="nc" id="L120">            network = getInstanceMethod.invoke(networkClass, new Object[]{webview.getContext()});</span>
+<span class="nc" id="L121">        } catch (Exception ex) {</span>
+<span class="nc" id="L122">            NLog.e(TAG, &quot;error getting network: &quot; + ex);</span>
+<span class="nc" id="L123">            return false;</span>
+<span class="nc" id="L124">        }</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        if (network == null) {</span>
+<span class="nc" id="L126">            NLog.e(TAG, &quot;error getting network: network is null&quot;);</span>
+<span class="nc" id="L127">            return false;</span>
+        }
+<span class="nc" id="L129">        Object requestQueue = null;</span>
+        try {
+<span class="nc" id="L131">            Field requestQueueField = networkClass</span>
+<span class="nc" id="L132">                    .getDeclaredField(&quot;mRequestQueue&quot;);</span>
+<span class="nc" id="L133">            requestQueue = getFieldValueSafely(requestQueueField, network);</span>
+<span class="nc" id="L134">        } catch (Exception ex) {</span>
+<span class="nc" id="L135">            NLog.e(TAG, &quot;error getting field value&quot;);</span>
+<span class="nc" id="L136">            return false;</span>
+<span class="nc" id="L137">        }</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">        if (requestQueue == null) {</span>
+<span class="nc" id="L139">            NLog.e(TAG, &quot;Request queue is null&quot;);</span>
+<span class="nc" id="L140">            return false;</span>
+        }
+<span class="nc" id="L142">        Field proxyHostField = null;</span>
+        try {
+<span class="nc" id="L144">            Class requestQueueClass = Class.forName(&quot;android.net.http.RequestQueue&quot;);</span>
+<span class="nc" id="L145">            proxyHostField = requestQueueClass</span>
+<span class="nc" id="L146">                    .getDeclaredField(&quot;mProxyHost&quot;);</span>
+<span class="nc" id="L147">        } catch (Exception ex) {</span>
+<span class="nc" id="L148">            NLog.e(TAG, &quot;error getting proxy host field&quot;);</span>
+<span class="nc" id="L149">            return false;</span>
+<span class="nc" id="L150">        }</span>
+
+<span class="nc" id="L152">        boolean temp = proxyHostField.isAccessible();</span>
+        try {
+<span class="nc" id="L154">            proxyHostField.setAccessible(true);</span>
+<span class="nc" id="L155">            proxyHostField.set(requestQueue, proxyServer);</span>
+<span class="nc" id="L156">        } catch (Exception ex) {</span>
+<span class="nc" id="L157">            NLog.e(TAG, &quot;error setting proxy host&quot;);</span>
+        } finally {
+<span class="nc" id="L159">            proxyHostField.setAccessible(temp);</span>
+<span class="nc" id="L160">        }</span>
+
+<span class="nc" id="L162">        NLog.d(TAG, &quot;Setting proxy with &lt;= 3.2 API successful!&quot;);</span>
+<span class="nc" id="L163">        return true;</span>
+    }
+
+    private static Object getFieldValueSafely(Field field, Object classInstance) throws IllegalArgumentException, IllegalAccessException {
+<span class="nc" id="L167">        boolean oldAccessibleValue = field.isAccessible();</span>
+<span class="nc" id="L168">        field.setAccessible(true);</span>
+<span class="nc" id="L169">        Object result = field.get(classInstance);</span>
+<span class="nc" id="L170">        field.setAccessible(oldAccessibleValue);</span>
+<span class="nc" id="L171">        return result;</span>
+    }
+
+    private static boolean setWebkitProxyICS(Context ctx, String host, int port) {
+        try {
+<span class="nc" id="L176">            Class webViewCoreClass = Class.forName(&quot;android.webkit.WebViewCore&quot;);</span>
+
+<span class="nc" id="L178">            Class proxyPropertiesClass = Class.forName(&quot;android.net.ProxyProperties&quot;);</span>
+<span class="nc bnc" id="L179" title="All 4 branches missed.">            if (webViewCoreClass != null &amp;&amp; proxyPropertiesClass != null) {</span>
+<span class="nc" id="L180">                Method m = webViewCoreClass.getDeclaredMethod(&quot;sendStaticMessage&quot;, Integer.TYPE,</span>
+                        Object.class);
+<span class="nc" id="L182">                Constructor c = proxyPropertiesClass.getConstructor(String.class, Integer.TYPE,</span>
+                        String.class);
+
+<span class="nc bnc" id="L185" title="All 4 branches missed.">                if (m != null &amp;&amp; c != null) {</span>
+<span class="nc" id="L186">                    m.setAccessible(true);</span>
+<span class="nc" id="L187">                    c.setAccessible(true);</span>
+<span class="nc" id="L188">                    Object properties = c.newInstance(host, port, null);</span>
+
+<span class="nc" id="L190">                    m.invoke(null, 193, properties);</span>
+<span class="nc" id="L191">                    return true;</span>
+                }
+            }
+<span class="nc" id="L194">        } catch (Exception e) {</span>
+<span class="nc" id="L195">            NLog.e(TAG,</span>
+                    &quot;Exception setting proxy through android.net.ProxyProperties: &quot;
+<span class="nc" id="L197">                            + e.toString());</span>
+<span class="nc" id="L198">        } catch (Error e) {</span>
+<span class="nc" id="L199">            NLog.e(TAG,</span>
+                    &quot;Exception setting proxy through android.webkit.Network: &quot;
+<span class="nc" id="L201">                            + e.toString());</span>
+<span class="nc" id="L202">        }</span>
+
+<span class="nc" id="L204">        return false;</span>
+
+    }
+
+    @TargetApi(19)
+    public static boolean resetKitKatProxy(String appClass, Context appContext) {
+
+<span class="nc" id="L211">        return setKitKatProxy(appClass, appContext, null, 0);</span>
+    }
+
+    @TargetApi(19)
+    private static boolean setKitKatProxy(String appClass, Context appContext, String host, int port) {
+<span class="nc bnc" id="L216" title="All 2 branches missed.">        if (host != null) {</span>
+<span class="nc" id="L217">            System.setProperty(&quot;http.proxyHost&quot;, host);</span>
+<span class="nc" id="L218">            System.setProperty(&quot;http.proxyPort&quot;, Integer.toString(port));</span>
+<span class="nc" id="L219">            System.setProperty(&quot;https.proxyHost&quot;, host);</span>
+<span class="nc" id="L220">            System.setProperty(&quot;https.proxyPort&quot;, Integer.toString(port));</span>
+        }
+
+        try {
+<span class="nc" id="L224">            Class applicationCls = Class.forName(appClass);</span>
+<span class="nc" id="L225">            Field loadedApkField = applicationCls.getField(&quot;mLoadedApk&quot;);</span>
+<span class="nc" id="L226">            loadedApkField.setAccessible(true);</span>
+<span class="nc" id="L227">            Object loadedApk = loadedApkField.get(appContext);</span>
+<span class="nc" id="L228">            Class loadedApkCls = Class.forName(&quot;android.app.LoadedApk&quot;);</span>
+<span class="nc" id="L229">            Field receiversField = loadedApkCls.getDeclaredField(&quot;mReceivers&quot;);</span>
+<span class="nc" id="L230">            receiversField.setAccessible(true);</span>
+<span class="nc" id="L231">            ArrayMap receivers = (ArrayMap) receiversField.get(loadedApk);</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">            for (Object receiverMap : receivers.values()) {</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">                for (Object rec : ((ArrayMap) receiverMap).keySet()) {</span>
+<span class="nc" id="L234">                    Class clazz = rec.getClass();</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">                    if (clazz.getName().contains(&quot;ProxyChangeListener&quot;)) {</span>
+<span class="nc" id="L236">                        Method onReceiveMethod = clazz.getDeclaredMethod(&quot;onReceive&quot;, Context.class, Intent.class);</span>
+<span class="nc" id="L237">                        Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);</span>
+
+<span class="nc bnc" id="L239" title="All 2 branches missed.">                        if (host != null) {</span>
+                            /*********** optional, may be need in future *************/
+<span class="nc" id="L241">                            final String CLASS_NAME = &quot;android.net.ProxyProperties&quot;;</span>
+<span class="nc" id="L242">                            Class cls = Class.forName(CLASS_NAME);</span>
+<span class="nc" id="L243">                            Constructor constructor = cls.getConstructor(String.class, Integer.TYPE, String.class);</span>
+<span class="nc" id="L244">                            constructor.setAccessible(true);</span>
+<span class="nc" id="L245">                            Object proxyProperties = constructor.newInstance(host, port, null);</span>
+<span class="nc" id="L246">                            intent.putExtra(&quot;proxy&quot;, (Parcelable) proxyProperties);</span>
+                            /*********** optional, may be need in future *************/
+                        }
+
+<span class="nc" id="L250">                        onReceiveMethod.invoke(rec, appContext, intent);</span>
+                    }
+<span class="nc" id="L252">                }</span>
+<span class="nc" id="L253">            }</span>
+<span class="nc" id="L254">            return true;</span>
+<span class="nc" id="L255">        } catch (ClassNotFoundException e) {</span>
+<span class="nc" id="L256">            StringWriter sw = new StringWriter();</span>
+<span class="nc" id="L257">            e.printStackTrace(new PrintWriter(sw));</span>
+<span class="nc" id="L258">            String exceptionAsString = sw.toString();</span>
+<span class="nc" id="L259">            NLog.v(TAG, e.getMessage());</span>
+<span class="nc" id="L260">            NLog.v(TAG, exceptionAsString);</span>
+<span class="nc" id="L261">        } catch (NoSuchFieldException e) {</span>
+<span class="nc" id="L262">            StringWriter sw = new StringWriter();</span>
+<span class="nc" id="L263">            e.printStackTrace(new PrintWriter(sw));</span>
+<span class="nc" id="L264">            String exceptionAsString = sw.toString();</span>
+<span class="nc" id="L265">            NLog.v(TAG, e.getMessage());</span>
+<span class="nc" id="L266">            NLog.v(TAG, exceptionAsString);</span>
+<span class="nc" id="L267">        } catch (IllegalAccessException e) {</span>
+<span class="nc" id="L268">            StringWriter sw = new StringWriter();</span>
+<span class="nc" id="L269">            e.printStackTrace(new PrintWriter(sw));</span>
+<span class="nc" id="L270">            String exceptionAsString = sw.toString();</span>
+<span class="nc" id="L271">            NLog.v(TAG, e.getMessage());</span>
+<span class="nc" id="L272">            NLog.v(TAG, exceptionAsString);</span>
+<span class="nc" id="L273">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L274">            StringWriter sw = new StringWriter();</span>
+<span class="nc" id="L275">            e.printStackTrace(new PrintWriter(sw));</span>
+<span class="nc" id="L276">            String exceptionAsString = sw.toString();</span>
+<span class="nc" id="L277">            NLog.v(TAG, e.getMessage());</span>
+<span class="nc" id="L278">            NLog.v(TAG, exceptionAsString);</span>
+<span class="nc" id="L279">        } catch (NoSuchMethodException e) {</span>
+<span class="nc" id="L280">            StringWriter sw = new StringWriter();</span>
+<span class="nc" id="L281">            e.printStackTrace(new PrintWriter(sw));</span>
+<span class="nc" id="L282">            String exceptionAsString = sw.toString();</span>
+<span class="nc" id="L283">            NLog.v(TAG, e.getMessage());</span>
+<span class="nc" id="L284">            NLog.v(TAG, exceptionAsString);</span>
+<span class="nc" id="L285">        } catch (InvocationTargetException e) {</span>
+<span class="nc" id="L286">            StringWriter sw = new StringWriter();</span>
+<span class="nc" id="L287">            e.printStackTrace(new PrintWriter(sw));</span>
+<span class="nc" id="L288">            String exceptionAsString = sw.toString();</span>
+<span class="nc" id="L289">            NLog.v(TAG, e.getMessage());</span>
+<span class="nc" id="L290">            NLog.v(TAG, exceptionAsString);</span>
+<span class="nc" id="L291">        } catch (InstantiationException e) {</span>
+<span class="nc" id="L292">            StringWriter sw = new StringWriter();</span>
+<span class="nc" id="L293">            e.printStackTrace(new PrintWriter(sw));</span>
+<span class="nc" id="L294">            String exceptionAsString = sw.toString();</span>
+<span class="nc" id="L295">            NLog.v(TAG, e.getMessage());</span>
+<span class="nc" id="L296">            NLog.v(TAG, exceptionAsString);</span>
+<span class="nc" id="L297">        }</span>
+<span class="nc" id="L298">        return false;</span>
+    }
+
+    @TargetApi(21)
+    @SuppressWarnings(&quot;rawtypes&quot;)
+    private static boolean setWebkitProxyLollipop(Context appContext, String host, int port) {
+<span class="nc" id="L304">        System.setProperty(&quot;http.proxyHost&quot;, host);</span>
+<span class="nc" id="L305">        System.setProperty(&quot;http.proxyPort&quot;, Integer.toString(port));</span>
+<span class="nc" id="L306">        System.setProperty(&quot;https.proxyHost&quot;, host);</span>
+<span class="nc" id="L307">        System.setProperty(&quot;https.proxyPort&quot;, Integer.toString(port));</span>
+        try {
+<span class="nc" id="L309">            Class applicationClass = Class.forName(&quot;android.app.Application&quot;);</span>
+<span class="nc" id="L310">            Field mLoadedApkField = applicationClass.getDeclaredField(&quot;mLoadedApk&quot;);</span>
+<span class="nc" id="L311">            mLoadedApkField.setAccessible(true);</span>
+<span class="nc" id="L312">            Object mLoadedApk = mLoadedApkField.get(appContext);</span>
+<span class="nc" id="L313">            Class loadedApkClass = Class.forName(&quot;android.app.LoadedApk&quot;);</span>
+<span class="nc" id="L314">            Field mReceiversField = loadedApkClass.getDeclaredField(&quot;mReceivers&quot;);</span>
+<span class="nc" id="L315">            mReceiversField.setAccessible(true);</span>
+<span class="nc" id="L316">            ArrayMap receivers = (ArrayMap) mReceiversField.get(mLoadedApk);</span>
+<span class="nc bnc" id="L317" title="All 2 branches missed.">            for (Object receiverMap : receivers.values()) {</span>
+<span class="nc bnc" id="L318" title="All 2 branches missed.">                for (Object receiver : ((ArrayMap) receiverMap).keySet()) {</span>
+<span class="nc" id="L319">                    Class clazz = receiver.getClass();</span>
+<span class="nc bnc" id="L320" title="All 2 branches missed.">                    if (clazz.getName().contains(&quot;ProxyChangeListener&quot;)) {</span>
+<span class="nc" id="L321">                        Method onReceiveMethod = clazz.getDeclaredMethod(&quot;onReceive&quot;, Context.class, Intent.class);</span>
+<span class="nc" id="L322">                        Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);</span>
+<span class="nc" id="L323">                        onReceiveMethod.invoke(receiver, appContext, intent);</span>
+                    }
+<span class="nc" id="L325">                }</span>
+<span class="nc" id="L326">            }</span>
+<span class="nc" id="L327">            return true;</span>
+<span class="nc" id="L328">        } catch (ClassNotFoundException e) {</span>
+<span class="nc" id="L329">            NLog.d(TAG, &quot;Exception setting proxy on Lollipop through ProxyChangeListener: &quot; + e.toString());</span>
+<span class="nc" id="L330">        } catch (NoSuchFieldException e) {</span>
+<span class="nc" id="L331">            NLog.d(TAG, &quot;Exception setting proxy on Lollipop through ProxyChangeListener: &quot; + e.toString());</span>
+<span class="nc" id="L332">        } catch (IllegalAccessException e) {</span>
+<span class="nc" id="L333">            NLog.d(TAG, &quot;Exception setting proxy on Lollipop through ProxyChangeListener: &quot; + e.toString());</span>
+<span class="nc" id="L334">        } catch (NoSuchMethodException e) {</span>
+<span class="nc" id="L335">            NLog.d(TAG, &quot;Exception setting proxy on Lollipop through ProxyChangeListener: &quot; + e.toString());</span>
+<span class="nc" id="L336">        } catch (InvocationTargetException e) {</span>
+<span class="nc" id="L337">            NLog.d(TAG, &quot;Exception setting proxy on Lollipop through ProxyChangeListener: &quot; + e.toString());</span>
+<span class="nc" id="L338">        }</span>
+<span class="nc" id="L339">        return false;</span>
+    }
+
+    public static void resetProxy(String appClass, Context ctx) throws Exception {
+<span class="nc" id="L343">        resetSystemProperties();</span>
+
+<span class="nc bnc" id="L345" title="All 2 branches missed.">        if (Build.VERSION.SDK_INT &lt; 14) {</span>
+<span class="nc" id="L346">            resetProxyForGingerBread(ctx);</span>
+<span class="nc bnc" id="L347" title="All 2 branches missed.">        } else if (Build.VERSION.SDK_INT &lt; 19) {</span>
+<span class="nc" id="L348">            resetProxyForICS();</span>
+        } else {
+<span class="nc" id="L350">            resetKitKatProxy(appClass, ctx);</span>
+        }
+<span class="nc" id="L352">    }</span>
+
+    private static void resetProxyForICS() throws Exception {
+        try {
+<span class="nc" id="L356">            Class webViewCoreClass = Class.forName(&quot;android.webkit.WebViewCore&quot;);</span>
+<span class="nc" id="L357">            Class proxyPropertiesClass = Class.forName(&quot;android.net.ProxyProperties&quot;);</span>
+<span class="nc bnc" id="L358" title="All 4 branches missed.">            if (webViewCoreClass != null &amp;&amp; proxyPropertiesClass != null) {</span>
+<span class="nc" id="L359">                Method m = webViewCoreClass.getDeclaredMethod(&quot;sendStaticMessage&quot;, Integer.TYPE,</span>
+                        Object.class);
+
+<span class="nc bnc" id="L362" title="All 2 branches missed.">                if (m != null) {</span>
+<span class="nc" id="L363">                    m.setAccessible(true);</span>
+
+<span class="nc" id="L365">                    m.invoke(null, 193, null);</span>
+                }
+            }
+<span class="nc" id="L368">        } catch (Exception e) {</span>
+<span class="nc" id="L369">            NLog.e(TAG,</span>
+                    &quot;Exception setting WebKit proxy through android.net.ProxyProperties: &quot;
+<span class="nc" id="L371">                            + e.toString());</span>
+<span class="nc" id="L372">            throw e;</span>
+<span class="nc" id="L373">        } catch (Error e) {</span>
+<span class="nc" id="L374">            NLog.e(TAG,</span>
+                    &quot;Exception setting WebKit proxy through android.webkit.Network: &quot;
+<span class="nc" id="L376">                            + e.toString());</span>
+<span class="nc" id="L377">            throw e;</span>
+<span class="nc" id="L378">        }</span>
+<span class="nc" id="L379">    }</span>
+
+    private static void resetProxyForGingerBread(Context ctx) throws Exception {
+<span class="nc" id="L382">        Object requestQueueObject = getRequestQueue(ctx);</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">        if (requestQueueObject != null) {</span>
+<span class="nc" id="L384">            setDeclaredField(requestQueueObject, &quot;mProxyHost&quot;, null);</span>
+        }
+<span class="nc" id="L386">    }</span>
+
+    public static Object getRequestQueue(Context ctx) throws Exception {
+<span class="nc" id="L389">        Object ret = null;</span>
+<span class="nc" id="L390">        Class networkClass = Class.forName(&quot;android.webkit.Network&quot;);</span>
+<span class="nc bnc" id="L391" title="All 2 branches missed.">        if (networkClass != null) {</span>
+<span class="nc" id="L392">            Object networkObj = invokeMethod(networkClass, &quot;getInstance&quot;, new Object[]{</span>
+                    ctx
+            }, Context.class);
+<span class="nc bnc" id="L395" title="All 2 branches missed.">            if (networkObj != null) {</span>
+<span class="nc" id="L396">                ret = getDeclaredField(networkObj, &quot;mRequestQueue&quot;);</span>
+            }
+        }
+<span class="nc" id="L399">        return ret;</span>
+    }
+
+    private static Object getDeclaredField(Object obj, String name)
+            throws SecurityException, NoSuchFieldException,
+            IllegalArgumentException, IllegalAccessException {
+<span class="nc" id="L405">        Field f = obj.getClass().getDeclaredField(name);</span>
+<span class="nc" id="L406">        f.setAccessible(true);</span>
+<span class="nc" id="L407">        Object out = f.get(obj);</span>
+<span class="nc" id="L408">        return out;</span>
+    }
+
+    private static void setDeclaredField(Object obj, String name, Object value)
+            throws SecurityException, NoSuchFieldException,
+            IllegalArgumentException, IllegalAccessException {
+<span class="nc" id="L414">        Field f = obj.getClass().getDeclaredField(name);</span>
+<span class="nc" id="L415">        f.setAccessible(true);</span>
+<span class="nc" id="L416">        f.set(obj, value);</span>
+<span class="nc" id="L417">    }</span>
+
+    private static Object invokeMethod(Object object, String methodName, Object[] params,
+                                       Class... types) throws Exception {
+<span class="nc" id="L421">        Object out = null;</span>
+<span class="nc bnc" id="L422" title="All 2 branches missed.">        Class c = object instanceof Class ? (Class) object : object.getClass();</span>
+<span class="nc bnc" id="L423" title="All 2 branches missed.">        if (types != null) {</span>
+<span class="nc" id="L424">            Method method = c.getMethod(methodName, types);</span>
+<span class="nc" id="L425">            out = method.invoke(object, params);</span>
+<span class="nc" id="L426">        } else {</span>
+<span class="nc" id="L427">            Method method = c.getMethod(methodName);</span>
+<span class="nc" id="L428">            out = method.invoke(object);</span>
+        }
+<span class="nc" id="L430">        return out;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RoamingPackageDatePresenter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">com.nextzy.myais.promotion.module.roaming.fragment</a> &gt; <span class="el_source">RoamingPackageDatePresenter.java</span></div><h1>RoamingPackageDatePresenter.java</h1><pre class="source lang-java linenums">package com.nextzy.myais.promotion.module.roaming.fragment;
+
+import com.hwangjr.rxbus.RxBus;
+import com.nextzy.myais.common.mvp.NextzyPresenter;
+import com.nextzy.myais.promotion.helper.roaming.event.GotoRoamingPackageConfirmEvent;
+import com.nextzy.myais.promotion.helper.roaming.model.UpPackCDATA;
+import com.nextzy.myais.promotion.helper.roaming.util.TimeZoneManager;
+
+import java.lang.Override;
+import java.util.Calendar;
+
+public class RoamingPackageDatePresenter extends NextzyPresenter&lt;RoamingPackageDateContractor.View&gt; implements RoamingPackageDateContractor.Presenter {
+    private UpPackCDATA mUPpackCDATA;
+
+    public RoamingPackageDatePresenter(RoamingPackageDateContractor.View view) {
+<span class="nc" id="L16">        super(view);</span>
+<span class="nc" id="L17">    }</span>
+
+    public static RoamingPackageDatePresenter createPresenter(RoamingPackageDateContractor.View view) {
+<span class="nc" id="L20">        return new RoamingPackageDatePresenter(view);</span>
+    }
+
+    @Override
+    public void onViewCreate() {
+<span class="nc" id="L25">    }</span>
+
+    @Override
+    public void onViewDestroy() {
+<span class="nc" id="L29">    }</span>
+
+    @Override
+    public void onViewStart() {
+<span class="nc" id="L33">    }</span>
+
+    @Override
+    public void onViewStop() {
+<span class="nc" id="L37">    }</span>
+
+    @Override
+    public Calendar getCurrentThaiCalendar() {
+<span class="nc" id="L41">        return TimeZoneManager.convertLocalToThai(Calendar.getInstance(), getView().getTimeZoneOffset());</span>
+    }
+
+
+    public Calendar getForeignAdjustedDateTime(Calendar calendarChosenByUser) {
+<span class="nc" id="L46">        return TimeZoneManager.convertForeignToLocal(calendarChosenByUser, getView().getTimeZoneOffset(), false);</span>
+    }
+
+    @Override
+    public void setUpPackCDATA(UpPackCDATA uPpackCDATA) {
+<span class="nc" id="L51">        mUPpackCDATA = uPpackCDATA;</span>
+<span class="nc" id="L52">    }</span>
+
+    public Calendar getThaiAdjustedDateTime(Calendar calendarChosenByUser) {
+<span class="nc" id="L55">        return TimeZoneManager.convertForeignToThai(calendarChosenByUser, getView().getTimeZoneOffset());</span>
+    }
+
+
+    public boolean chosenIsLessThanLowerBound(Calendar calendarChosenByUser) {
+<span class="nc" id="L60">        Calendar calendar = getThaiAdjustedDateTime(calendarChosenByUser);</span>
+<span class="nc" id="L61">        calendar.add(Calendar.SECOND, 1);</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        return calendar.compareTo(getCurrentThaiCalendar()) &lt; 0;</span>
+    }
+
+    public boolean chosenIsMoreThanTheUpperBound(Calendar calendarChosenByUser) {
+<span class="nc" id="L66">        Calendar calendar = getCurrentThaiCalendar();</span>
+<span class="nc" id="L67">        calendar.add(Calendar.DAY_OF_MONTH, 30);</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        return getThaiAdjustedDateTime(calendarChosenByUser).compareTo(calendar) &gt; 0;</span>
+    }
+
+
+    @Override
+    public UpPackCDATA getUpPackCDATA() {
+<span class="nc" id="L74">        return mUPpackCDATA;</span>
+    }
+
+    @Override
+    public void gotoPackageConfirmation(String startDateTime, String endDateTime, String dt, UpPackCDATA upPackCDATA) {
+<span class="nc" id="L79">        RxBus.get().post(new GotoRoamingPackageConfirmEvent(startDateTime, endDateTime, dt, upPackCDATA));</span>
+<span class="nc" id="L80">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>
